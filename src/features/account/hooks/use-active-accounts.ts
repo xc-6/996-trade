@@ -1,7 +1,7 @@
 import { LOCAL_STORAGE_ACCOUNT_KEY } from "@/lib/const";
 import { useGetAccounts } from "./use-get-accounts";
 import { useLocalStorageState } from "ahooks";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { Account } from "@/features/account/schema";
 import { z } from "zod";
 

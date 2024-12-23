@@ -11,6 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   SidebarMenu,
   SidebarMenuButton,
@@ -28,8 +29,13 @@ type Account = ExtractArrayType<ResponseType["data"]>;
 export function AccontSwitcher() {
   const { isMobile } = useSidebar();
   const { onOpen } = useModal();
-  const { allAccounts, activeIds, selectAccount, removeAccount } =
-    useActiveAccounts();
+  const {
+    allAccounts,
+    activeIds,
+    activeAccounts,
+    selectAccount,
+    removeAccount,
+  } = useActiveAccounts();
   const activeIdSet = useMemo(() => new Set(activeIds), [activeIds]);
 
   const accoutsMenu = useMemo(() => {
@@ -78,6 +84,12 @@ export function AccontSwitcher() {
     );
   };
 
+  const firstAccount = useMemo(() => {
+    const arr = activeAccounts ?? [];
+    arr.sort((a, b) => a.name.localeCompare(b.name));
+    return arr?.[0] ?? {};
+  }, [activeAccounts]);
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -87,14 +99,25 @@ export function AccontSwitcher() {
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                {/* <activeTeam.logo className="size-4" /> */}
+              <div className="flex aspect-square size-8 items-center justify-center rounded-lg">
+                <Avatar className="h-8 w-8 rounded-lg">
+                  <AvatarFallback className="rounded-lg bg-primary/10 text-sidebar-secondary-foreground">
+                    {firstAccount?.name?.[0]?.toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">
-                  {/* {activeTeam.name} */}
+                  {firstAccount?.name}
                 </span>
-                {/* <span className="truncate text-xs">{activeTeam.plan}</span> */}
+                <span className="truncate text-xs">
+                  {firstAccount?.currency}
+                  {(activeAccounts?.length ?? 0) > 1 && (
+                    <span className="ml-2 text-xs text-muted-foreground opacity-60">
+                      +{(activeAccounts?.length ?? 0) - 1} accounts
+                    </span>
+                  )}
+                </span>
               </div>
               <ChevronsUpDown className="ml-auto" />
             </SidebarMenuButton>
