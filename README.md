@@ -1,6 +1,6 @@
-# Trade_Recrords_App_FE
+# Trade Recrds App
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+List the buy records and sell records for stock, fund, bond etc. Supported market: US,SZ,SH,HK
 
 
 ### Resource
