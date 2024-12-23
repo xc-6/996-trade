@@ -2,8 +2,10 @@ import { useQuery } from "@tanstack/react-query";
 import { InferResponseType } from "hono";
 import { client } from "@/lib/hono";
 
-
-export type ResponseType = InferResponseType<typeof client.api.accounts["$get"], 200>;
+export type ResponseType = InferResponseType<
+  (typeof client.api.accounts)["$get"],
+  200
+>;
 
 export const useGetAccounts = () => {
   const query = useQuery({

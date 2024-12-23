@@ -13,7 +13,7 @@ export const Modals = () => {
       <>
         <CreateAccountModal />
         <CreateBuyRecordModal />
-        <CreateSellRecordModal/>
+        <CreateSellRecordModal />
       </>
     )
   );

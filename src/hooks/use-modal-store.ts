@@ -3,7 +3,10 @@ import { BuyRecord, SellRecord } from "@/lib/types";
 import { z } from "zod";
 import { create } from "zustand";
 
-export type ModalType = "createAccount" | "createBuyRecord" | "createSellRecord";
+export type ModalType =
+  | "createAccount"
+  | "createBuyRecord"
+  | "createSellRecord";
 
 interface ModalData {
   account?: z.infer<typeof Account>;
@@ -25,5 +28,5 @@ export const useModal = create<ModalStore>((set) => ({
   data: {},
   isOpen: false,
   onOpen: (type, data = {}) => set({ isOpen: true, type, data }),
-  onClose: () => set({ type: null, isOpen: false })
+  onClose: () => set({ type: null, isOpen: false }),
 }));

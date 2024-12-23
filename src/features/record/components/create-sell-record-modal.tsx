@@ -50,7 +50,7 @@ export const CreateSellRecordModal = () => {
     const s =
       buyRecord?.sellRecords?.reduce(
         (acc, cur) => acc + Number(cur.sellAmount),
-        0
+        0,
       ) ?? 0;
     if (buyRecord) {
       return Number(buyRecord?.buyAmount) - s;
@@ -69,7 +69,7 @@ export const CreateSellRecordModal = () => {
             const n = Number(v);
             return !isNaN(n) && v?.length > 0 && n <= maxAmount;
           },
-          { message: "Invalid number" }
+          { message: "Invalid number" },
         ),
     });
   }, [maxAmount]);
@@ -116,8 +116,8 @@ export const CreateSellRecordModal = () => {
       {
         onSuccess: () => {
           handleClose();
-        }
-      }
+        },
+      },
     );
   };
 
@@ -196,7 +196,7 @@ export const CreateSellRecordModal = () => {
                               variant={"outline"}
                               className={cn(
                                 "w-full justify-start text-left font-normal",
-                                !field.value && "text-muted-foreground"
+                                !field.value && "text-muted-foreground",
                               )}
                             >
                               <CalendarIcon className="mr-2 h-4 w-4" />

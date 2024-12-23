@@ -5,14 +5,19 @@ import { StockInfo } from "@/lib/types";
 
 export const useStocks = () => {
   const timer = useRef<any>(null);
-  const { stocksCodes, stocksState, setStocksCodes, setStocksState, refreshTime } =
-    useStocksState();
+  const {
+    stocksCodes,
+    stocksState,
+    setStocksCodes,
+    setStocksState,
+    refreshTime,
+  } = useStocksState();
   const { data, refetch, isLoading } = useGetStocks(stocksCodes ?? []);
 
   useEffect(() => {
     if (data) {
       const map = new Map(
-        data?.map((obj: StockInfo) => [obj.code, obj]) ?? []
+        data?.map((obj: StockInfo) => [obj.code, obj]) ?? [],
       ) as Map<string, StockInfo>;
       setStocksState(map);
 

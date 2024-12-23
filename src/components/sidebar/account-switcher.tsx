@@ -11,10 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Avatar,
-  AvatarFallback,
-} from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   SidebarMenu,
   SidebarMenuButton,
@@ -43,7 +40,7 @@ export function AccontSwitcher() {
 
   const accoutsMenu = useMemo(() => {
     const currencys = Array.from(
-      new Set(allAccounts?.map((account) => account.currency))
+      new Set(allAccounts?.map((account) => account.currency)),
     ).sort();
 
     return currencys.map((currency) => {
@@ -76,7 +73,7 @@ export function AccontSwitcher() {
             <Check
               className={cn(
                 "visible",
-                activeIdSet.has(account._id) ? "opacity-100" : "opacity-0"
+                activeIdSet.has(account._id) ? "opacity-100" : "opacity-0",
               )}
             />
             {account.name}
@@ -103,9 +100,11 @@ export function AccontSwitcher() {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <div className="flex aspect-square size-8 items-center justify-center rounded-lg">
-              <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarFallback className="rounded-lg bg-primary/10 text-sidebar-secondary-foreground">{firstAccount?.name?.[0]?.toUpperCase()}</AvatarFallback>
-              </Avatar>
+                <Avatar className="h-8 w-8 rounded-lg">
+                  <AvatarFallback className="rounded-lg bg-primary/10 text-sidebar-secondary-foreground">
+                    {firstAccount?.name?.[0]?.toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">
@@ -115,7 +114,7 @@ export function AccontSwitcher() {
                   {firstAccount?.currency}
                   {(activeAccounts?.length ?? 0) > 1 && (
                     <span className="ml-2 text-xs text-muted-foreground opacity-60">
-                       +{(activeAccounts?.length ?? 0) - 1} accounts
+                      +{(activeAccounts?.length ?? 0) - 1} accounts
                     </span>
                   )}
                 </span>
