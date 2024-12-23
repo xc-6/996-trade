@@ -43,14 +43,14 @@ import {
 } from "@/components/ui/popover";
 import { useEffect, useMemo } from "react";
 import { EXCHANGE } from "@/lib/const";
-import { ResponseType } from "@/features/account/hooks/use-get-accounts"
+import { ResponseType } from "@/features/account/hooks/use-get-accounts";
 import { ExtractArrayType } from "@/lib/types";
 import { useActiveAccounts } from "@/features/account/hooks/use-active-accounts";
 import { useCreateBuyRecord } from "../hooks/use-create-buy-record";
 import { BuyRecord } from "../schema";
 
-type Account = ExtractArrayType<ResponseType["data"]>
-const formSchema = BuyRecord
+type Account = ExtractArrayType<ResponseType["data"]>;
+const formSchema = BuyRecord;
 
 export const CreateBuyRecordModal = () => {
   const { isOpen, onClose, type, data } = useModal();
@@ -63,17 +63,17 @@ export const CreateBuyRecordModal = () => {
 
   const accoutsMenu = useMemo(() => {
     const currencys = Array.from(
-      new Set(allAccounts?.map((account) => account.currency))
+      new Set(allAccounts?.map((account) => account.currency)),
     ).sort();
 
     return currencys.map((currency) => {
       return {
         label: currency,
-        items: allAccounts?.filter((account) => account.currency === currency)??[],
+        items:
+          allAccounts?.filter((account) => account.currency === currency) ?? [],
       };
     });
   }, [allAccounts]);
-
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -93,7 +93,7 @@ export const CreateBuyRecordModal = () => {
         buyRecord.stockCode.slice(0, 2),
         buyRecord.stockCode.slice(2),
       ];
-      form.setValue("exchange", exchange as typeof EXCHANGE[number]);
+      form.setValue("exchange", exchange as (typeof EXCHANGE)[number]);
       form.setValue("stockCode", stockCode);
       form.setValue("buyPrice", String(buyRecord.buyPrice));
       form.setValue("buyAmount", String(buyRecord.buyAmount));
@@ -108,24 +108,26 @@ export const CreateBuyRecordModal = () => {
   const isLoading = form.formState.isSubmitting;
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    const stockCode = values['exchange'] + values['stockCode']
-    const buyPrice = Number(values['buyPrice'])
-    const buyAmount = Number(values['buyAmount'])
-    const buyDate = values['buyDate'].toISOString()
+    const stockCode = values["exchange"] + values["stockCode"];
+    const buyPrice = Number(values["buyPrice"]);
+    const buyAmount = Number(values["buyAmount"]);
+    const buyDate = values["buyDate"].toISOString();
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { exchange, ...res } = values
-    mutation.mutate({
-      ...res,
-      buyPrice,
-      buyAmount,
-      stockCode,
-      buyDate
-    },
-  {
-    onSuccess: () => {
-      handleClose()
-    }
-  })
+    const { exchange, ...res } = values;
+    mutation.mutate(
+      {
+        ...res,
+        buyPrice,
+        buyAmount,
+        stockCode,
+        buyDate,
+      },
+      {
+        onSuccess: () => {
+          handleClose();
+        },
+      },
+    );
   };
 
   const handleClose = () => {
@@ -270,7 +272,7 @@ export const CreateBuyRecordModal = () => {
                               variant={"outline"}
                               className={cn(
                                 "w-full justify-start text-left font-normal",
-                                !field.value && "text-muted-foreground"
+                                !field.value && "text-muted-foreground",
                               )}
                             >
                               <CalendarIcon className="mr-2 h-4 w-4" />

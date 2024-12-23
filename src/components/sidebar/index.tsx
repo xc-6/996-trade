@@ -1,8 +1,5 @@
 "use client";
-import {
-  Frame,
-  SquareTerminal,
-} from "lucide-react";
+import { Frame, SquareTerminal } from "lucide-react";
 
 import { NavMain } from "./nav-main";
 import { NavSub } from "./nav-sub";
@@ -32,21 +29,20 @@ const data = {
         {
           title: "Record History",
           url: "/record",
-        }
+        },
       ],
-    }
+    },
   ],
   navSub: [
     {
       name: "Add Records",
       url: "#",
-      icon: Frame
+      icon: Frame,
     },
   ],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -57,7 +53,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavSub items={data.navSub} />
       </SidebarContent>
       <SidebarFooter>
-         <NavUser />
+        <NavUser />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

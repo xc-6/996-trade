@@ -5,7 +5,7 @@ import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { JWT } from "next-auth/jwt";
-import { MongoDBAdapter } from "@auth/mongodb-adapter"
+import { MongoDBAdapter } from "@auth/mongodb-adapter";
 import { type DefaultSession, CredentialsSignin } from "next-auth";
 
 import { client, dbName } from "@/db/mongo";
@@ -14,23 +14,23 @@ import { NextAuthConfig } from "next-auth";
 
 declare module "next-auth/jwt" {
   interface JWT {
-    id: string
+    id: string;
   }
 }
 
 declare module "next-auth" {
   interface Session {
     token: {
-      id: string
-    }
+      id: string;
+    };
     user: {
-      id: string
-    } & DefaultSession["user"]
+      id: string;
+    } & DefaultSession["user"];
   }
 }
 
 class InvalidLoginError extends CredentialsSignin {
-  code = "Please use the original sign-up method"
+  code = "Please use the original sign-up method";
 }
 
 const CredentialsSchema = z.object({
@@ -38,16 +38,15 @@ const CredentialsSchema = z.object({
   password: z.string(),
 });
 
-
-export default { 
+export default {
   adapter: MongoDBAdapter(client, {
     collections: {
-      Users: 'auth_users',
-      Accounts: 'auth_accounts',
-      Sessions: 'auth_sessions',
-      VerificationTokens: 'auth_verification_tokens'
+      Users: "auth_users",
+      Accounts: "auth_accounts",
+      Sessions: "auth_sessions",
+      VerificationTokens: "auth_verification_tokens",
     },
-    databaseName: dbName
+    databaseName: dbName,
   }),
   providers: [
     Credentials({
@@ -65,8 +64,8 @@ export default {
         const { email, password } = validatedFields.data;
 
         const user = await users.findOne({
-            email
-          });
+          email,
+        });
 
         if (!user) {
           return null;
@@ -75,10 +74,7 @@ export default {
           throw new InvalidLoginError();
         }
 
-        const passwordsMatch = await bcrypt.compare(
-          password,
-          user.password,
-        );
+        const passwordsMatch = await bcrypt.compare(password, user.password);
 
         if (!passwordsMatch) {
           return null;
@@ -86,25 +82,28 @@ export default {
 
         return user;
       },
-    }), 
-    GitHub, Google],
+    }),
+    GitHub,
+    Google,
+  ],
   pages: {
     signIn: "/sign-in",
-    error: "/sign-in"
+    error: "/sign-in",
   },
   session: {
     strategy: "jwt",
   },
   callbacks: {
     jwt({ token, user }) {
-      if (user) { // User is available during sign-in
-        token.id = user.id as string
+      if (user) {
+        // User is available during sign-in
+        token.id = user.id as string;
       }
-      return token
+      return token;
     },
     session({ session, token }) {
-      session.user.id = token.id
-      return session
+      session.user.id = token.id;
+      return session;
     },
   },
-} satisfies NextAuthConfig
+} satisfies NextAuthConfig;

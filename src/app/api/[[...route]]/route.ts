@@ -21,11 +21,10 @@ app.use("*", initAuthConfig(getAuthConfig));
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const routes = app
-.route("/users", users)
-.route("/accounts", accounts)
-.route("/records", records)
-.route("/stocks", stocks);
-
+  .route("/users", users)
+  .route("/accounts", accounts)
+  .route("/records", records)
+  .route("/stocks", stocks);
 
 export const GET = handle(app);
 export const POST = handle(app);

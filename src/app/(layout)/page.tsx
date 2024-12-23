@@ -1,19 +1,19 @@
-"use client"
+"use client";
 
-import { useGetAccounts } from "@/features/account/hooks/use-get-accounts"
+import { useGetAccounts } from "@/features/account/hooks/use-get-accounts";
 import { useModal } from "@/hooks/use-modal-store";
 import { Loader } from "lucide-react";
 import { useEffect } from "react";
 export default function Page() {
   const { onOpen } = useModal();
-  const { data, isLoading} = useGetAccounts()
+  const { data, isLoading } = useGetAccounts();
 
-  useEffect(()=>{
-    if (isLoading) return 
+  useEffect(() => {
+    if (isLoading) return;
     if (!data?.length) {
-      onOpen("createAccount")
+      onOpen("createAccount");
     }
-  }, [isLoading, data, onOpen])
+  }, [isLoading, data, onOpen]);
 
   if (isLoading) {
     return (
@@ -22,4 +22,4 @@ export default function Page() {
       </div>
     );
   }
-};
+}

@@ -23,7 +23,7 @@ import { cn } from "@/lib/utils";
 export const BuyRecordTable = () => {
   const [ConfirmDialog, confirm] = useConfirm(
     "Are you sure?",
-    "You are about to delete this record."
+    "You are about to delete this record.",
   );
   const { setBuyRecord } = useBuyRecordState();
   const { setStocksCodes, stocksState } = useStocks();
@@ -84,7 +84,9 @@ export const BuyRecordTable = () => {
             }}
           >
             <TableCell className="font-medium">
-              <Badge variant="outline" className="mr-2">{record.stockCode.slice(0, 2)}</Badge>
+              <Badge variant="outline" className="mr-2">
+                {record.stockCode.slice(0, 2)}
+              </Badge>
               {record.stockCode.slice(2)}
             </TableCell>
             <TableCell className="font-medium">
@@ -95,7 +97,7 @@ export const BuyRecordTable = () => {
                 record.buyPrice <=
                   (stocksState?.get(record.stockCode)?.now ?? record.buyPrice)
                   ? "text-red-500 font-bold"
-                  : "text-green-500"
+                  : "text-green-500",
               )}
             >
               {record.buyPrice <=
@@ -108,16 +110,19 @@ export const BuyRecordTable = () => {
               <span className="text-sm">
                 (
                 {(
-                  ((stocksState?.get(record.stockCode)?.now ?? record.buyPrice) -
+                  (((stocksState?.get(record.stockCode)?.now ??
+                    record.buyPrice) -
                     record.buyPrice) /
-                  record.buyPrice *
+                    record.buyPrice) *
                   100
                 ).toFixed(2)}
                 %)
               </span>
             </TableCell>
             <TableCell>
-              {stocksState?.get(record.stockCode)?.high} | {stocksState?.get(record.stockCode)?.low} | {stocksState?.get(record.stockCode)?.yesterday}
+              {stocksState?.get(record.stockCode)?.high} |{" "}
+              {stocksState?.get(record.stockCode)?.low} |{" "}
+              {stocksState?.get(record.stockCode)?.yesterday}
             </TableCell>
             <TableCell>{record.buyAmount}</TableCell>
             <TableCell>{mapping[record.accountId]?.name}</TableCell>

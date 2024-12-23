@@ -21,25 +21,27 @@ import { useModal } from "@/hooks/use-modal-store";
 import { cn } from "@/lib/utils";
 import { useActiveAccounts } from "@/features/account/hooks/use-active-accounts";
 import { ExtractArrayType } from "@/lib/types";
-import { ResponseType } from "@/features/account/hooks/use-get-accounts"
+import { ResponseType } from "@/features/account/hooks/use-get-accounts";
 
-type Account = ExtractArrayType<ResponseType["data"]>
+type Account = ExtractArrayType<ResponseType["data"]>;
 
 export function AccontSwitcher() {
   const { isMobile } = useSidebar();
   const { onOpen } = useModal();
-  const { allAccounts, activeIds, selectAccount, removeAccount } = useActiveAccounts();
+  const { allAccounts, activeIds, selectAccount, removeAccount } =
+    useActiveAccounts();
   const activeIdSet = useMemo(() => new Set(activeIds), [activeIds]);
 
   const accoutsMenu = useMemo(() => {
     const currencys = Array.from(
-      new Set(allAccounts?.map((account) => account.currency))
+      new Set(allAccounts?.map((account) => account.currency)),
     ).sort();
 
     return currencys.map((currency) => {
       return {
         label: currency,
-        items: allAccounts?.filter((account) => account.currency === currency)??[],
+        items:
+          allAccounts?.filter((account) => account.currency === currency) ?? [],
       };
     });
   }, [allAccounts]);
@@ -47,9 +49,9 @@ export function AccontSwitcher() {
   const switchAccount = (e: MouseEvent, account: Account) => {
     e.preventDefault();
     if (activeIdSet.has(account._id)) {
-      removeAccount(account._id)
+      removeAccount(account._id);
     } else {
-      selectAccount(account._id)
+      selectAccount(account._id);
     }
   };
 
@@ -65,9 +67,7 @@ export function AccontSwitcher() {
             <Check
               className={cn(
                 "visible",
-                activeIdSet.has(account._id)
-                  ? "opacity-100"
-                  : "opacity-0"
+                activeIdSet.has(account._id) ? "opacity-100" : "opacity-0",
               )}
             />
             {account.name}

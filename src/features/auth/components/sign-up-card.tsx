@@ -28,40 +28,38 @@ export const SignUpCard = () => {
   const [password, setPassword] = useState("");
   const [errMsg, setErrMsg] = useState("");
 
-
   const onProviderSignUp = (provider: "github" | "google") => {
     signIn(provider, { callbackUrl: "/" });
   };
 
-  const onCredentialSignUp = (
-    e: React.FormEvent<HTMLFormElement>
-  ) => {
+  const onCredentialSignUp = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
-    mutation.mutate({
-      name,
-      email,
-      password
-    }, {
-      onSuccess: () => {
-        signIn("credentials", {
-          email,
-          password,
-          callbackUrl: "/",
-        });
+
+    mutation.mutate(
+      {
+        name,
+        email,
+        password,
       },
-      onError: (error) => {
-        setErrMsg(error.message??"Something went wrong");
-      }
-    })
+      {
+        onSuccess: () => {
+          signIn("credentials", {
+            email,
+            password,
+            callbackUrl: "/",
+          });
+        },
+        onError: (error) => {
+          setErrMsg(error.message ?? "Something went wrong");
+        },
+      },
+    );
   };
 
   return (
     <Card className="w-full h-full p-8">
       <CardHeader className="px-0 pt-0">
-        <CardTitle>
-          Create an account
-        </CardTitle>
+        <CardTitle>Create an account</CardTitle>
         <CardDescription>
           Use your email or another service to continue
         </CardDescription>
@@ -100,10 +98,10 @@ export const SignUpCard = () => {
             minLength={3}
             maxLength={20}
           />
-          <Button 
-            disabled={mutation.isPending} 
-            type="submit" 
-            className="w-full" 
+          <Button
+            disabled={mutation.isPending}
+            type="submit"
+            className="w-full"
             size="lg"
           >
             Continue
@@ -133,7 +131,10 @@ export const SignUpCard = () => {
           </Button>
         </div>
         <p className="text-xs text-muted-foreground">
-          Already have an account? <Link href="/sign-in"><span className="text-sky-700 hover:underline">Sign in</span></Link>
+          Already have an account?{" "}
+          <Link href="/sign-in">
+            <span className="text-sky-700 hover:underline">Sign in</span>
+          </Link>
         </p>
       </CardContent>
     </Card>

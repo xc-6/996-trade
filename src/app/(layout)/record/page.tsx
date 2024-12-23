@@ -21,7 +21,7 @@ export default function Record() {
       autoSaveId="ca-workspace-layout"
     >
       <ResizablePanel defaultSize={100} minSize={50}>
-        <BuyRecordTable/>
+        <BuyRecordTable />
       </ResizablePanel>
       {showPanel && (
         <>
@@ -34,8 +34,14 @@ export default function Record() {
             <Button onClick={onClose}>
               <X />
             </Button>
-            <Button onClick={() => onOpen("createSellRecord", { buyRecordId: recordId })}>Add Sell Record</Button>
-            <SellRecordTable/>
+            <Button
+              onClick={() =>
+                onOpen("createSellRecord", { buyRecordId: recordId })
+              }
+            >
+              Add Sell Record
+            </Button>
+            <SellRecordTable />
           </ResizablePanel>
         </>
       )}

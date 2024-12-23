@@ -3,18 +3,19 @@ import { InferRequestType, InferResponseType } from "hono";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { client } from "@/lib/hono";
 
-export type ResponseType = InferResponseType<typeof client.api.records["$post"], 200>;
-export type RequestType = InferRequestType<typeof client.api.records["$post"]>["json"];
+export type ResponseType = InferResponseType<
+  (typeof client.api.records)["$post"],
+  200
+>;
+export type RequestType = InferRequestType<
+  (typeof client.api.records)["$post"]
+>["json"];
 
 export const useCreateBuyRecord = () => {
   const queryClient = useQueryClient();
-  const mutation = useMutation<
-    ResponseType,
-    Error,
-    RequestType
-  >({
+  const mutation = useMutation<ResponseType, Error, RequestType>({
     mutationFn: async (json) => {
-      const response = await client.api.records.$post({json});
+      const response = await client.api.records.$post({ json });
 
       if (!response.ok) {
         throw new Error("Something went wrong");

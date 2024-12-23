@@ -14,8 +14,7 @@ export type RequestType = InferRequestType<
 export const useCreateSellRecord = () => {
   const queryClient = useQueryClient();
   const mutation = useMutation<ResponseType, Error, RequestType>({
-
-    mutationFn: async ({param, json}) => {
+    mutationFn: async ({ param, json }) => {
       const response = await client.api.records[":buyRecordId"]["sell"].$post({
         param,
         json,

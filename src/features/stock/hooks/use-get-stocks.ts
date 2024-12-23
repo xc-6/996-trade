@@ -2,8 +2,10 @@ import { useQuery } from "@tanstack/react-query";
 import { InferResponseType } from "hono";
 import { client } from "@/lib/hono";
 
-
-export type ResponseType = InferResponseType<typeof client.api.stocks["$get"], 200>;
+export type ResponseType = InferResponseType<
+  (typeof client.api.stocks)["$get"],
+  200
+>;
 
 export const useGetStocks = (stocks: Array<string>) => {
   const query = useQuery({
@@ -12,8 +14,8 @@ export const useGetStocks = (stocks: Array<string>) => {
     queryFn: async () => {
       const response = await client.api.stocks.$get({
         query: {
-          input: stocks.join(',')
-        }
+          input: stocks.join(","),
+        },
       });
 
       if (!response.ok) {

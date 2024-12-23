@@ -13,6 +13,6 @@ export const usePanel = () => {
   return {
     recordId,
     onSelect,
-    onClose
+    onClose,
   };
 };

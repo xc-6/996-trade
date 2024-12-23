@@ -17,7 +17,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage
+  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -27,7 +27,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue
+  SelectValue,
 } from "@/components/ui/select";
 import { useEffect } from "react";
 import { CURRENCY } from "@/lib/const";
@@ -36,21 +36,19 @@ import { Account } from "../schema";
 
 const formSchema = Account;
 
-
 export const CreateAccountModal = () => {
   const { isOpen, onClose, type, data } = useModal();
   const mutation = useCreateAccount();
 
-
   const isModalOpen = isOpen && type === "createAccount";
   const { account } = data;
- 
+
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      currency: CURRENCY[0]
-    }
+      currency: CURRENCY[0],
+    },
   });
 
   useEffect(() => {
@@ -64,24 +62,29 @@ export const CreateAccountModal = () => {
   const isLoading = form.formState.isSubmitting;
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-      mutation.mutate({
+    mutation.mutate(
+      {
         ...values,
       },
       {
         onSuccess: () => {
-          handleClose()
+          handleClose();
         },
-      });
-  }
+      },
+    );
+  };
 
   const handleClose = () => {
     form.reset();
     onClose();
-  }
+  };
 
   return (
     <Dialog open={isModalOpen} onOpenChange={handleClose} aria-modal>
-      <DialogContent className="bg-white text-black p-0 overflow-hidden" aria-modal>
+      <DialogContent
+        className="bg-white text-black p-0 overflow-hidden"
+        aria-modal
+      >
         <DialogHeader className="pt-8 px-6">
           <DialogTitle className="text-2xl text-center font-bold">
             Create Account
@@ -95,9 +98,7 @@ export const CreateAccountModal = () => {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel
-                      className="uppercase text-xs font-bold text-zinc-500 dark:text-secondary/70"
-                    >
+                    <FormLabel className="uppercase text-xs font-bold text-zinc-500 dark:text-secondary/70">
                       Account Name
                     </FormLabel>
                     <FormControl>
@@ -124,9 +125,7 @@ export const CreateAccountModal = () => {
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger
-                          className="bg-zinc-300/50 border-0 focus:ring-0 text-black ring-offset-0 focus:ring-offset-0 capitalize outline-none"
-                        >
+                        <SelectTrigger className="bg-zinc-300/50 border-0 focus:ring-0 text-black ring-offset-0 focus:ring-offset-0 capitalize outline-none">
                           <SelectValue placeholder="Select a channel type" />
                         </SelectTrigger>
                       </FormControl>
@@ -148,13 +147,11 @@ export const CreateAccountModal = () => {
               />
             </div>
             <DialogFooter className="bg-gray-100 px-6 py-4">
-              <Button disabled={isLoading}>
-                Create
-              </Button>
+              <Button disabled={isLoading}>Create</Button>
             </DialogFooter>
           </form>
         </Form>
       </DialogContent>
     </Dialog>
-  )
-}
+  );
+};
