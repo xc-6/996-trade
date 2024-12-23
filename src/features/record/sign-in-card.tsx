@@ -84,14 +84,6 @@ export const SignInCard = () => {
             Continue
           </Button>
         </form>
-        <Button
-          className="w-full my-0"
-          size="lg"
-          variant="ghost"
-          onClick={() => router.push("/editor")}
-        >
-          No login required. Quick start (Local Project)
-        </Button>
         <Separator />
         <div className="flex flex-col gap-y-2.5">
           <Button
