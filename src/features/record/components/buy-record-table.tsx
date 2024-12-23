@@ -65,8 +65,8 @@ export const BuyRecordTable = () => {
         <TableRow>
           <TableHead className="w-[120px]">Code</TableHead>
           <TableHead className="w-[20%]">Name</TableHead>
-          <TableHead>Current Price | Buy Price</TableHead>
-          <TableHead>High | Low</TableHead>
+          <TableHead>Current Price | Buy Price | P&L</TableHead>
+          <TableHead>High | Low | Yest</TableHead>
           <TableHead>Buy Amount</TableHead>
           <TableHead>Account</TableHead>
           <TableHead>Buy Date</TableHead>
@@ -104,10 +104,20 @@ export const BuyRecordTable = () => {
               ) : (
                 <MoveDown size={16} className="inline" />
               )}
-              {stocksState?.get(record.stockCode)?.now} | {record.buyPrice}
+              {stocksState?.get(record.stockCode)?.now} | {record.buyPrice}{" "}
+              <span className="text-sm">
+                (
+                {(
+                  ((stocksState?.get(record.stockCode)?.now ?? record.buyPrice) -
+                    record.buyPrice) /
+                  record.buyPrice *
+                  100
+                ).toFixed(2)}
+                %)
+              </span>
             </TableCell>
             <TableCell>
-              {stocksState?.get(record.stockCode)?.high} | {stocksState?.get(record.stockCode)?.low}
+              {stocksState?.get(record.stockCode)?.high} | {stocksState?.get(record.stockCode)?.low} | {stocksState?.get(record.stockCode)?.yesterday}
             </TableCell>
             <TableCell>{record.buyAmount}</TableCell>
             <TableCell>{mapping[record.accountId]?.name}</TableCell>
