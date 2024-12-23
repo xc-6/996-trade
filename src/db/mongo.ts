@@ -3,7 +3,6 @@ import mongoose from "mongoose";
  
 const MONGODB_URI = process.env.MONGODB_URI;
 export const dbName= process.env.MONGO_DB_NAME
-export const client = mongoose.connection.getClient();
 
 export const db = async () => {
   // I like to throw an error if the app doesn't get the right env variables
@@ -23,3 +22,7 @@ export const db = async () => {
     console.log(error);
   }
 };
+
+db();
+
+export const client = mongoose.connection.getClient();
