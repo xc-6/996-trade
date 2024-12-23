@@ -3,6 +3,7 @@ import {
     TableBody,
     TableCaption,
     TableCell,
+    // TableFooter,
     TableHead,
     TableHeader,
     TableRow,
@@ -11,6 +12,7 @@ import {
   import { useBuyRecordState } from "../store/use-buy-record-store";
 import { Badge } from "@/components/ui/badge";
 import { useStocksState } from "@/features/stock/store/use-stocks-store";
+import { cn } from "@/lib/utils";
 
   export const SellRecordTable = () => {
     const { buyRecord } = useBuyRecordState()
@@ -24,22 +26,54 @@ import { useStocksState } from "@/features/stock/store/use-stocks-store";
             <TableHead>Name</TableHead>
             <TableHead>Sell Price</TableHead>
             <TableHead>Sell Amount</TableHead>
+            <TableHead>Sell Total</TableHead>
+            <TableHead>P&L</TableHead>
+            <TableHead>APY</TableHead>
             <TableHead>Sell Date</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {buyRecord?.sellRecords?.map((record) => (
-            <TableRow key={record._id}>
-              <TableCell className="font-medium">
-                <Badge variant="outline" className="mr-2">{buyRecord.stockCode.slice(0, 2)}</Badge>
-                {buyRecord.stockCode.slice(2)}
-              </TableCell>
-              <TableCell className="font-medium">{stocksState?.get(buyRecord.stockCode)?.name}</TableCell>
-              <TableCell>{record.sellPrice}</TableCell>
-              <TableCell>{record.sellAmount}</TableCell>
-              <TableCell>{ format(new Date(record.sellDate), "PPP")}</TableCell>
-            </TableRow>
-          ))}
+          {buyRecord?.sellRecords?.map((record) => {
+            const profitLoss = ((Number(record.sellPrice) - Number(buyRecord.buyPrice)) * Number(record.sellAmount));
+            const initialInvestment = Number(buyRecord.buyPrice) * Number(record.sellAmount);
+            const holdingDays = Math.ceil((new Date(record.sellDate).getTime() - new Date(buyRecord.buyDate).getTime()) / (1000 * 60 * 60 * 24));
+            const profitRatio = profitLoss / initialInvestment;
+            const apy = (Math.pow(1 + profitRatio, 365 / holdingDays) - 1) * 100;
+
+            return (
+              <TableRow key={record._id}>
+                <TableCell className="font-medium">
+                  <Badge variant="outline" className="mr-2">{buyRecord.stockCode.slice(0, 2)}</Badge>
+                  {buyRecord.stockCode.slice(2)}
+                </TableCell>
+                <TableCell className="font-medium">{stocksState?.get(buyRecord.stockCode)?.name}</TableCell>
+                <TableCell>{record.sellPrice}</TableCell>
+                <TableCell>{record.sellAmount}</TableCell>
+                <TableCell>{(Number(record.sellPrice) * Number(record.sellAmount)).toFixed(2)}</TableCell>
+                <TableCell
+                  className={cn(
+                    profitLoss > 0
+                      ? "text-red-500 font-bold"
+                      : "text-green-500"
+                  )}
+                >
+                  {profitLoss.toFixed(2)}
+                </TableCell>
+
+                <TableCell
+                  className={cn(
+                    profitLoss > 0
+                      ? "text-red-500 font-bold"
+                      : "text-green-500"
+                  )}
+                >
+                  {`${apy.toFixed(2)}%`}
+                </TableCell>
+
+                <TableCell>{format(new Date(record.sellDate), "PPP")}</TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
         {/* <TableFooter>
           <TableRow>
@@ -50,4 +84,3 @@ import { useStocksState } from "@/features/stock/store/use-stocks-store";
       </Table>
     );
   };
-  
