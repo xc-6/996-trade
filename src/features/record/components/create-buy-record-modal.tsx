@@ -1,0 +1,335 @@
+"use client";
+
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+
+import { cn } from "@/lib/utils";
+import { Calendar } from "@/components/ui/calendar";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useModal } from "@/hooks/use-modal-store";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { useEffect, useMemo } from "react";
+import { EXCHANGE } from "@/lib/const";
+import { ResponseType } from "@/features/account/hooks/use-get-accounts"
+import { ExtractArrayType } from "@/lib/types";
+import { useActiveAccounts } from "@/features/account/hooks/use-active-accounts";
+import { useCreateBuyRecord } from "../hooks/use-create-buy-record";
+import { BuyRecord } from "../schema";
+
+type Account = ExtractArrayType<ResponseType["data"]>
+const formSchema = BuyRecord
+
+export const CreateBuyRecordModal = () => {
+  const { isOpen, onClose, type, data } = useModal();
+  const mutation = useCreateBuyRecord();
+
+  const isModalOpen = isOpen && type === "createBuyRecord";
+  const { buyRecord } = data;
+
+  const { allAccounts } = useActiveAccounts();
+
+  const accoutsMenu = useMemo(() => {
+    const currencys = Array.from(
+      new Set(allAccounts?.map((account) => account.currency))
+    ).sort();
+
+    return currencys.map((currency) => {
+      return {
+        label: currency,
+        items: allAccounts?.filter((account) => account.currency === currency)??[],
+      };
+    });
+  }, [allAccounts]);
+
+
+  const form = useForm({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      exchange: EXCHANGE[0],
+      stockCode: "",
+      buyPrice: "",
+      buyAmount: "",
+      buyDate: new Date(),
+      accountId: "",
+    },
+  });
+
+  useEffect(() => {
+    if (buyRecord) {
+      const [exchange, stockCode] = [
+        buyRecord.stockCode.slice(0, 2),
+        buyRecord.stockCode.slice(2),
+      ];
+      form.setValue("exchange", exchange as typeof EXCHANGE[number]);
+      form.setValue("stockCode", stockCode);
+      form.setValue("buyPrice", String(buyRecord.buyPrice));
+      form.setValue("buyAmount", String(buyRecord.buyAmount));
+    } else {
+      form.setValue("exchange", EXCHANGE[0]);
+      form.setValue("stockCode", "");
+      form.setValue("buyPrice", "");
+      form.setValue("buyAmount", "");
+    }
+  }, [buyRecord, form]);
+
+  const isLoading = form.formState.isSubmitting;
+
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    const stockCode = values['exchange'] + values['stockCode']
+    const buyPrice = Number(values['buyPrice'])
+    const buyAmount = Number(values['buyAmount'])
+    const buyDate = values['buyDate'].toISOString()
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { exchange, ...res } = values
+    mutation.mutate({
+      ...res,
+      buyPrice,
+      buyAmount,
+      stockCode,
+      buyDate
+    },
+  {
+    onSuccess: () => {
+      handleClose()
+    }
+  })
+  };
+
+  const handleClose = () => {
+    form.reset();
+    onClose();
+  };
+
+  const renderSelectItem = (menu: (typeof accoutsMenu)[number]) => {
+    return (
+      <SelectGroup key={menu.label}>
+        <SelectLabel>{menu.label}</SelectLabel>
+        {menu.items.map((account: Account) => (
+          <SelectItem key={account._id} value={account._id}>
+            {account.name}
+          </SelectItem>
+        ))}
+      </SelectGroup>
+    );
+  };
+
+  return (
+    <Dialog open={isModalOpen} onOpenChange={handleClose} aria-modal>
+      <DialogContent
+        className="bg-white text-black p-0 overflow-hidden"
+        aria-modal
+      >
+        <DialogHeader className="pt-8 px-6">
+          <DialogTitle className="text-2xl text-center font-bold">
+            Create Buy Record
+          </DialogTitle>
+        </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <div className="space-y-8 px-6">
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="exchange"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="uppercase text-xs font-bold text-zinc-500 dark:text-secondary/70">
+                        Exchange
+                      </FormLabel>
+                      <Select
+                        disabled={isLoading}
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="bg-zinc-300/50 border-0 focus:ring-0 text-black ring-offset-0 focus:ring-offset-0 capitalize outline-none">
+                            <SelectValue placeholder="Select a exchange" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {EXCHANGE.map((type) => (
+                            <SelectItem
+                              key={type}
+                              value={type}
+                              className="capitalize"
+                            >
+                              {type}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="stockCode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="uppercase text-xs font-bold text-zinc-500 dark:text-secondary/70">
+                        Stock Code
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          disabled={isLoading}
+                          className="bg-zinc-300/50 border-0 focus-visible:ring-0 text-black focus-visible:ring-offset-0"
+                          placeholder="Enter Stock Code"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="buyPrice"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="uppercase text-xs font-bold text-zinc-500 dark:text-secondary/70">
+                        Buy Price
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          disabled={isLoading}
+                          className="bg-zinc-300/50 border-0 focus-visible:ring-0 text-black focus-visible:ring-offset-0"
+                          placeholder="Enter Buy Price"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="buyAmount"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="uppercase text-xs font-bold text-zinc-500 dark:text-secondary/70">
+                        Buy Amount
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          disabled={isLoading}
+                          className="bg-zinc-300/50 border-0 focus-visible:ring-0 text-black focus-visible:ring-offset-0"
+                          placeholder="Enter Buy Amount"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="buyDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="uppercase text-xs font-bold text-zinc-500 dark:text-secondary/70">
+                        Buy Date
+                      </FormLabel>
+                      <FormControl>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "w-full justify-start text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {field.value ? (
+                                format(field.value, "PPP")
+                              ) : (
+                                <span>Pick a date</span>
+                              )}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0">
+                            <Calendar
+                              initialFocus
+                              mode="single"
+                              selected={field.value}
+                              onSelect={field.onChange}
+                              {...field}
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="accountId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="uppercase text-xs font-bold text-zinc-500 dark:text-secondary/70">
+                        Account
+                      </FormLabel>
+                      <Select
+                        disabled={isLoading}
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="bg-zinc-300/50 border-0 focus:ring-0 text-black ring-offset-0 focus:ring-offset-0 capitalize outline-none">
+                            <SelectValue placeholder="Select a account" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {accoutsMenu?.map((item) => renderSelectItem(item))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+            <DialogFooter className="bg-gray-100 px-6 py-4">
+              <Button disabled={isLoading}>Create</Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+};
