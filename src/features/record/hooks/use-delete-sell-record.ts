@@ -30,10 +30,8 @@ export const useDeleteSellRecord = () => {
 
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["buyRecords"] });
-      // reloading the window to reflect the changes
-      window.location.reload();
+    onSuccess: (_, { buyRecordId }) => {
+      queryClient.invalidateQueries({ queryKey: ["buyRecords", buyRecordId] });
     },
     onError: () => {
       toast.error("Failed to delete record");

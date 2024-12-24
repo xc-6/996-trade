@@ -14,7 +14,6 @@ import { Loader } from "lucide-react";
 import { useActiveAccounts } from "@/features/account/hooks/use-active-accounts";
 import { format } from "date-fns";
 import { usePanel } from "../hooks/use-panel";
-import { useBuyRecordState } from "../store/use-buy-record-store";
 import { useEffect } from "react";
 import { Trash2, MoveDown, MoveUp } from "lucide-react";
 import { useConfirm } from "@/hooks/use-confirm";
@@ -25,7 +24,6 @@ export const BuyRecordTable = () => {
     "Are you sure?",
     "You are about to delete this record.",
   );
-  const { setBuyRecord } = useBuyRecordState();
   const { setStocksCodes, stocksState } = useStocks();
   const { onSelect } = usePanel();
   const { activeIds, mapping } = useActiveAccounts();
@@ -80,7 +78,6 @@ export const BuyRecordTable = () => {
             className="group"
             key={record._id}
             onClick={() => {
-              setBuyRecord(record);
               onSelect(record._id);
             }}
           >

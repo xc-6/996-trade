@@ -9,13 +9,16 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { format } from "date-fns";
-import { Trash2 } from "lucide-react";
-import { useBuyRecordState } from "../store/use-buy-record-store";
+import { Loader, Trash2 } from "lucide-react";
 import { useDeleteSellRecord } from "../hooks/use-delete-sell-record";
 import { useConfirm } from "@/hooks/use-confirm";
 import { Badge } from "@/components/ui/badge";
 import { useStocksState } from "@/features/stock/store/use-stocks-store";
 import { cn } from "@/lib/utils";
+import { usePanel } from "../hooks/use-panel";
+import { useGetBuyRecord } from "../hooks/use-get-buy-record";
+import { useEffect } from "react";
+import { useBuyRecordState } from "../store/use-buy-record-store";
 
 export const SellRecordTable = () => {
   const [ConfirmDialog, confirm] = useConfirm(
@@ -23,7 +26,21 @@ export const SellRecordTable = () => {
     "You are about to delete this record.",
   );
 
+  const { recordId } = usePanel();
+  const { setBuyRecord } = useBuyRecordState();
+  const {
+    data: buyRecord,
+    isLoading,
+    isSuccess,
+  } = useGetBuyRecord(recordId ?? "");
+
   const removeMutation = useDeleteSellRecord();
+
+  useEffect(() => {
+    if (isSuccess) {
+      setBuyRecord(buyRecord);
+    }
+  }, [isSuccess, buyRecord, setBuyRecord]);
 
   const onDelete = async (e: React.MouseEvent, sellRecordId: string) => {
     e.stopPropagation();
@@ -37,8 +54,16 @@ export const SellRecordTable = () => {
     }
   };
 
-  const { buyRecord } = useBuyRecordState();
   const { stocksState } = useStocksState();
+
+  if (isLoading) {
+    return (
+      <div className="h-full flex-1 flex items-center justify-center flex-col gap-2">
+        <Loader className="size-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
   return (
     <Table className="m-4">
       <ConfirmDialog />

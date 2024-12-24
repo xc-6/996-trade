@@ -53,6 +53,35 @@ const app = new Hono()
       return c.json({ data: data ?? [] }, 200);
     },
   )
+  .get(
+    "/:id",
+    verifyAuth(),
+    zValidator("param", z.object({ id: z.string() })),
+    async (c) => {
+      const auth = c.get("authUser");
+      const { id } = c.req.valid("param");
+
+      if (!auth.token?.id) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      await db();
+
+      const user = await users.findOne({ _id: auth.token.id });
+
+      if (!user) {
+        return c.json({ error: "Something went wrong" }, 400);
+      }
+
+      const buyRecord = await buyRecords.findById(id);
+
+      if (!buyRecord) {
+        return c.json({ message: "Buy record not found" }, 404);
+      }
+
+      return c.json({ data: buyRecord }, 200);
+    },
+  )
   .post(
     "/",
     verifyAuth(),
@@ -160,7 +189,7 @@ const app = new Hono()
 
       await buyRecord.save();
 
-      return c.json({ message: "Sell record deleted successfully" });
+      return c.json({ message: "Sell record deleted successfully" }, 200);
     },
   )
   .delete(
@@ -189,7 +218,7 @@ const app = new Hono()
         return c.json({ error: "Not found" }, 404);
       }
 
-      return c.json({ data: { id } });
+      return c.json({ data: { id } }, 200);
     },
   );
 export default app;

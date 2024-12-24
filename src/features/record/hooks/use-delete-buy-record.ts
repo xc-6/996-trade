@@ -27,10 +27,10 @@ export const useDeleteBuyRecord = () => {
 
       return await response.json();
     },
-    onSuccess: ({ data }) => {
+    onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ["buyRecords"] });
       queryClient.invalidateQueries({
-        queryKey: ["buyRecords", { id: data.id }],
+        queryKey: ["buyRecords", id],
       });
     },
     onError: () => {
