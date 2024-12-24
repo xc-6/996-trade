@@ -85,6 +85,7 @@ const app = new Hono()
         buyPrice,
         buyAmount,
         accountId,
+        unsoldAmount: buyAmount,
       });
 
       return c.json(data, 200);
@@ -127,10 +128,38 @@ const app = new Hono()
       });
 
       await buyRecord.updateOne({
+        unsoldAmount: buyRecord.unsoldAmount - sellAmount,
         sellRecords: [...(buyRecord?.sellRecords ?? []), sellRecord],
       });
 
       return c.json({ data: sellRecord }, 200);
+    },
+  )
+  .delete(
+    "/:buyRecordId/sell/:sellRecordId",
+    verifyAuth(),
+    zValidator(
+      "param",
+      z.object({
+        buyRecordId: z.string(),
+        sellRecordId: z.string(),
+      }),
+    ),
+    async (c) => {
+      const { buyRecordId, sellRecordId } = c.req.valid("param");
+
+      const buyRecord = await buyRecords.findById(buyRecordId);
+      if (!buyRecord) {
+        return c.json({ message: "Buy record not found" }, 404);
+      }
+
+      buyRecord.sellRecords = buyRecord.sellRecords.filter(
+        (record: any) => record._id?.toString() !== sellRecordId,
+      );
+
+      await buyRecord.save();
+
+      return c.json({ message: "Sell record deleted successfully" });
     },
   )
   .delete(

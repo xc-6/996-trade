@@ -68,6 +68,7 @@ export const BuyRecordTable = () => {
           <TableHead>Current Price | Buy Price | P&L</TableHead>
           <TableHead>High | Low | Yest</TableHead>
           <TableHead>Buy Amount</TableHead>
+          <TableHead>Unsold Amount</TableHead>
           <TableHead>Account</TableHead>
           <TableHead>Buy Date</TableHead>
           <TableHead>Action</TableHead>
@@ -125,6 +126,7 @@ export const BuyRecordTable = () => {
               {stocksState?.get(record.stockCode)?.yesterday}
             </TableCell>
             <TableCell>{record.buyAmount}</TableCell>
+            <TableCell>{record.unsoldAmount}</TableCell>
             <TableCell>{mapping[record.accountId]?.name}</TableCell>
             <TableCell>{format(new Date(record.buyDate), "PPP")}</TableCell>
             <TableCell>
