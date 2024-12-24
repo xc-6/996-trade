@@ -41,9 +41,10 @@ const app = new Hono()
 
       const accounts = accountIds?.split(",");
 
-      const records = await buyRecords.find({
-        accountId: { $in: accounts ?? user.accounts },
-      });
+      const records = await buyRecords.find(
+        { accountId: { $in: accounts ?? user.accounts } },
+        { sellRecords: 0 },
+      );
 
       const data = records as unknown as Array<
         z.infer<typeof zBuyRecord> & { _id: string }
