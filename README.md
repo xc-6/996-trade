@@ -1,15 +1,6 @@
-# Trade Recrds App
+# Trade-Insight
 
-List the buy records and sell records for stock, fund, bond etc. Supported market: US,SZ,SH,HK
-
-
-### Resource
-+ [NextAuth.js Authentication With MongoDB](https://www.mongodb.com/developer/languages/typescript/nextauthjs-authentication-mongodb/)
-+ [Next-Auth + Mongoose Access to User/Session Models](https://github.com/nextauthjs/next-auth/issues/1175)
-+ [Zod to Mongoose schema converter](https://www.npmjs.com/package/@zodyac/zod-mongoose)
-+ [Zod Doc](https://zod.dev/)
-+ [Cloudflare Worker Next.js](https://developers.cloudflare.com/workers/frameworks/framework-guides/nextjs/)
-+ [OpenNext for Cloudflare](https://www.npmjs.com/package/@opennextjs/cloudflare)
+Track trades, monitor performance, and analyze profit and loss, for stock, fund, bond etc. Supported market: US,SZ,SH,HK
 
 ## Getting Started
 
@@ -37,6 +28,14 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
 npm run format
 ```
 
+### Resource
+
++ [NextAuth.js Authentication With MongoDB](https://www.mongodb.com/developer/languages/typescript/nextauthjs-authentication-mongodb/)
++ [Next-Auth + Mongoose Access to User/Session Models](https://github.com/nextauthjs/next-auth/issues/1175)
++ [Zod to Mongoose schema converter](https://www.npmjs.com/package/@zodyac/zod-mongoose)
++ [Zod Doc](https://zod.dev/)
++ [Cloudflare Worker Next.js](https://developers.cloudflare.com/workers/frameworks/framework-guides/nextjs/)
++ [OpenNext for Cloudflare](https://www.npmjs.com/package/@opennextjs/cloudflare)
 
 ## Learn More
 
