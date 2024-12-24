@@ -9,16 +9,39 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { format } from "date-fns";
+import { Trash2 } from "lucide-react";
 import { useBuyRecordState } from "../store/use-buy-record-store";
+import { useDeleteSellRecord } from "../hooks/use-delete-sell-record";
+import { useConfirm } from "@/hooks/use-confirm";
 import { Badge } from "@/components/ui/badge";
 import { useStocksState } from "@/features/stock/store/use-stocks-store";
 import { cn } from "@/lib/utils";
 
 export const SellRecordTable = () => {
+  const [ConfirmDialog, confirm] = useConfirm(
+    "Are you sure?",
+    "You are about to delete this record.",
+  );
+
+  const removeMutation = useDeleteSellRecord();
+
+  const onDelete = async (e: React.MouseEvent, sellRecordId: string) => {
+    e.stopPropagation();
+    const ok = await confirm();
+
+    if (ok && buyRecord?._id) {
+      removeMutation.mutate({
+        buyRecordId: buyRecord._id,
+        sellRecordId,
+      });
+    }
+  };
+
   const { buyRecord } = useBuyRecordState();
   const { stocksState } = useStocksState();
   return (
     <Table className="m-4">
+      <ConfirmDialog />
       <TableCaption>A list of your recent transactions.</TableCaption>
       <TableHeader>
         <TableRow>
@@ -30,6 +53,7 @@ export const SellRecordTable = () => {
           <TableHead>P&L</TableHead>
           <TableHead>APY</TableHead>
           <TableHead>Sell Date</TableHead>
+          <TableHead>Action</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -48,7 +72,7 @@ export const SellRecordTable = () => {
           const apy = (Math.pow(1 + profitRatio, 365 / holdingDays) - 1) * 100;
 
           return (
-            <TableRow key={record._id}>
+            <TableRow className="group" key={record._id}>
               <TableCell className="font-medium">
                 <Badge variant="outline" className="mr-2">
                   {buyRecord.stockCode.slice(0, 2)}
@@ -82,6 +106,13 @@ export const SellRecordTable = () => {
               </TableCell>
 
               <TableCell>{format(new Date(record.sellDate), "PPP")}</TableCell>
+              <TableCell>
+                <Trash2
+                  size={16}
+                  className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"
+                  onClick={(e) => onDelete(e, record._id)}
+                />
+              </TableCell>
             </TableRow>
           );
         })}
