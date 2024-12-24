@@ -16,7 +16,6 @@ export const db = async () => {
       await mongoose.connect(MONGODB_URI, {
         dbName,
       });
-      console.log("Connected to DB");
     }
   } catch (error) {
     console.log(error);

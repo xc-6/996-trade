@@ -23,6 +23,7 @@ export interface BuyRecord {
   buyAmount: string | number;
   buyDate: string;
   sellRecords: Array<SellRecord>;
+  unsoldAmount: string | number;
 }
 
 export interface StockInfo {
