@@ -148,7 +148,28 @@ const app = new Hono()
       });
 
       if (!buyRecord) {
-        return c.json({ error: "Something went wrong" }, 400);
+        return c.json({ error: "Buy record not found" }, 400);
+      }
+
+      // Calculate total sold amount from previous sell records
+      const totalSoldAmount = (buyRecord.sellRecords ?? []).reduce(
+        (sum, record) => sum + Number(record.sellAmount),
+        0,
+      );
+
+      // Calculate remaining amount available to sell
+      const remainingAmount = Number(buyRecord.buyAmount) - totalSoldAmount;
+
+      // Validate if new sell amount exceeds remaining amount
+      if (Number(sellAmount) > remainingAmount) {
+        return c.json(
+          {
+            error: "Sell amount exceeds available amount",
+            remainingAmount,
+            requestedAmount: sellAmount,
+          },
+          400,
+        );
       }
 
       const sellRecord = new sellRecords({
@@ -158,7 +179,7 @@ const app = new Hono()
       });
 
       await buyRecord.updateOne({
-        unsoldAmount: buyRecord.unsoldAmount - sellAmount,
+        unsoldAmount: remainingAmount - Number(sellAmount),
         sellRecords: [...(buyRecord?.sellRecords ?? []), sellRecord],
       });
 
@@ -183,9 +204,23 @@ const app = new Hono()
         return c.json({ message: "Buy record not found" }, 404);
       }
 
+      // Find the sell record that's being deleted
+      const sellRecordToDelete = buyRecord.sellRecords.find(
+        (record: any) => record._id?.toString() === sellRecordId,
+      );
+
+      if (!sellRecordToDelete) {
+        return c.json({ message: "Sell record not found" }, 404);
+      }
+
+      // Remove the sell record from the array
       buyRecord.sellRecords = buyRecord.sellRecords.filter(
         (record: any) => record._id?.toString() !== sellRecordId,
       );
+
+      // Add back the sold amount to unsoldAmount
+      buyRecord.unsoldAmount =
+        Number(buyRecord.unsoldAmount) + Number(sellRecordToDelete.sellAmount);
 
       await buyRecord.save();
 

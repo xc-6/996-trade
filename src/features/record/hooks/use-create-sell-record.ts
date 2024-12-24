@@ -28,10 +28,12 @@ export const useCreateSellRecord = () => {
 
       return data;
     },
-    onSuccess: (_, variables) => {
+    onSuccess: (_, { param }) => {
       toast.success("SellRecord created");
       queryClient.invalidateQueries({ queryKey: ["buyRecords"] });
-      // queryClient.invalidateQueries({ queryKey: ["buyRecords", variables.param.buyRecordId] });
+      queryClient.invalidateQueries({
+        queryKey: ["buyRecords", param.buyRecordId],
+      });
     },
     onError: () => {
       toast.error("SellRecord create Error!");

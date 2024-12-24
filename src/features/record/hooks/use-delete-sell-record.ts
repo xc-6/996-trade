@@ -31,6 +31,7 @@ export const useDeleteSellRecord = () => {
       return response.json();
     },
     onSuccess: (_, { buyRecordId }) => {
+      queryClient.invalidateQueries({ queryKey: ["buyRecords"] });
       queryClient.invalidateQueries({ queryKey: ["buyRecords", buyRecordId] });
     },
     onError: () => {

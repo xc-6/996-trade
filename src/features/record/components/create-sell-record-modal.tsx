@@ -47,15 +47,7 @@ export const CreateSellRecordModal = () => {
   const { sellRecord } = data;
 
   const maxAmount = useMemo(() => {
-    const s =
-      buyRecord?.sellRecords?.reduce(
-        (acc, cur) => acc + Number(cur.sellAmount),
-        0,
-      ) ?? 0;
-    if (buyRecord) {
-      return Number(buyRecord?.buyAmount) - s;
-    }
-    return 0;
+    return buyRecord?.unsoldAmount ?? buyRecord?.buyAmount;
   }, [buyRecord]);
 
   const formSchema = useMemo(() => {
@@ -67,7 +59,7 @@ export const CreateSellRecordModal = () => {
         .refine(
           (v) => {
             const n = Number(v);
-            return !isNaN(n) && v?.length > 0 && n <= maxAmount;
+            return !isNaN(n) && v?.length > 0 && n <= Number(maxAmount);
           },
           { message: "Invalid number" },
         ),
