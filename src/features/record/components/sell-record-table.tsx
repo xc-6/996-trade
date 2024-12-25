@@ -83,18 +83,8 @@ export const SellRecordTable = () => {
       </TableHeader>
       <TableBody>
         {buyRecord?.sellRecords?.map((record) => {
-          const profitLoss =
-            (Number(record.sellPrice) - Number(buyRecord.buyPrice)) *
-            Number(record.sellAmount);
-          const initialInvestment =
-            Number(buyRecord.buyPrice) * Number(record.sellAmount);
-          const holdingDays = Math.ceil(
-            (new Date(record.sellDate).getTime() -
-              new Date(buyRecord.buyDate).getTime()) /
-              (1000 * 60 * 60 * 24),
-          );
-          const profitRatio = profitLoss / initialInvestment;
-          const apy = (Math.pow(1 + profitRatio, 365 / holdingDays) - 1) * 100;
+          const profitLoss = Number(record.profitLoss);
+          const apy = Number(record.apy);
 
           return (
             <TableRow className="group" key={record._id}>
@@ -119,7 +109,7 @@ export const SellRecordTable = () => {
                   profitLoss > 0 ? "text-red-500 font-bold" : "text-green-500",
                 )}
               >
-                {profitLoss.toFixed(2)}
+                {profitLoss}
               </TableCell>
 
               <TableCell
@@ -127,7 +117,7 @@ export const SellRecordTable = () => {
                   profitLoss > 0 ? "text-red-500 font-bold" : "text-green-500",
                 )}
               >
-                {`${apy.toFixed(2)}%`}
+                {`${apy}%`}
               </TableCell>
 
               <TableCell>{format(new Date(record.sellDate), "PPP")}</TableCell>

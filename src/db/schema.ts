@@ -24,6 +24,8 @@ export const zUser = z.object({
 export const zSellRecord = z.object({
   sellPrice: z.number(),
   sellAmount: z.number(),
+  profitLoss: z.number().default(0),
+  apy: z.number().default(0),
   sellDate: z.date(),
 });
 

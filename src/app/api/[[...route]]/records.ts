@@ -152,13 +152,13 @@ const app = new Hono()
       }
 
       // Calculate total sold amount from previous sell records
-      const totalSoldAmount = (buyRecord.sellRecords ?? []).reduce(
+      const preSoldAmount = (buyRecord.sellRecords ?? []).reduce(
         (sum, record) => sum + Number(record.sellAmount),
         0,
       );
 
       // Calculate remaining amount available to sell
-      const remainingAmount = Number(buyRecord.buyAmount) - totalSoldAmount;
+      const remainingAmount = Number(buyRecord.buyAmount) - preSoldAmount;
 
       // Validate if new sell amount exceeds remaining amount
       if (Number(sellAmount) > remainingAmount) {
@@ -172,10 +172,27 @@ const app = new Hono()
         );
       }
 
+      // Calculate the profit and loss, APY
+      const soldDate = new Date(sellDate);
+      const profitLoss = Number(
+        ((sellPrice - buyRecord.buyPrice) * sellAmount).toFixed(3),
+      );
+      const holdingDays = Math.ceil(
+        (soldDate.getTime() - new Date(buyRecord.buyDate).getTime()) /
+          (1000 * 60 * 60 * 24),
+      );
+      const profitRatio = profitLoss / (buyRecord.buyPrice * sellAmount);
+      const apy = (
+        (Math.pow(1 + profitRatio, 365 / holdingDays) - 1) *
+        100
+      ).toFixed(2);
+
       const sellRecord = new sellRecords({
-        sellDate: new Date(sellDate),
-        sellAmount,
-        sellPrice,
+        sellDate: sellDate,
+        sellAmount: sellAmount,
+        sellPrice: sellPrice,
+        profitLoss: profitLoss,
+        apy: apy,
       });
 
       await buyRecord.updateOne({
@@ -291,6 +308,7 @@ const app = new Hono()
               totalUnsoldAmount: 0,
               totalCost: 0,
               avgCost: 0,
+              totalPL: 0,
             };
           }
 
@@ -310,6 +328,13 @@ const app = new Hono()
                 )
               : 0;
 
+          // Calculate total Profit and Loss
+          const totalPL = record.sellRecords.reduce(
+            (sum, sellRecord) => sum + Number(sellRecord.profitLoss),
+            0,
+          );
+          acc[stockCode].totalPL += totalPL;
+
           return acc;
         },
         {} as Record<
@@ -319,6 +344,7 @@ const app = new Hono()
             totalUnsoldAmount: number;
             totalCost: number;
             avgCost: number;
+            totalPL: number;
           }
         >,
       );
