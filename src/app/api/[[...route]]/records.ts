@@ -255,5 +255,75 @@ const app = new Hono()
 
       return c.json({ data: { id } }, 200);
     },
+  )
+  .get(
+    "/stocks/summary",
+    verifyAuth(),
+    zValidator(
+      "query",
+      z.object({
+        accountIds: z.string(),
+      }),
+    ),
+    async (c) => {
+      const auth = c.get("authUser");
+
+      if (!auth.token?.id) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      await db();
+
+      const { accountIds } = c.req.valid("query");
+      const accounts = accountIds.split(",");
+
+      // Fetch records for the specified accounts
+      const records = await buyRecords.find({ accountId: { $in: accounts } });
+
+      // Group and calculate totals by stock code
+      const groupedRecords = records.reduce(
+        (acc, record) => {
+          const stockCode = record.stockCode;
+
+          if (!acc[stockCode]) {
+            acc[stockCode] = {
+              totalBuyAmount: 0,
+              totalUnsoldAmount: 0,
+              totalCost: 0,
+              avgCost: 0,
+            };
+          }
+
+          // Update totals
+          acc[stockCode].totalBuyAmount += Number(record.buyAmount);
+          acc[stockCode].totalUnsoldAmount += Number(record.unsoldAmount);
+          acc[stockCode].totalCost +=
+            Number(record.buyPrice) * Number(record.unsoldAmount);
+
+          // Calculate average cost with 3 decimal places
+          acc[stockCode].avgCost =
+            acc[stockCode].totalUnsoldAmount > 0
+              ? Number(
+                  (
+                    acc[stockCode].totalCost / acc[stockCode].totalUnsoldAmount
+                  ).toFixed(3),
+                )
+              : 0;
+
+          return acc;
+        },
+        {} as Record<
+          string,
+          {
+            totalBuyAmount: number;
+            totalUnsoldAmount: number;
+            totalCost: number;
+            avgCost: number;
+          }
+        >,
+      );
+
+      return c.json({ data: groupedRecords }, 200);
+    },
   );
 export default app;
