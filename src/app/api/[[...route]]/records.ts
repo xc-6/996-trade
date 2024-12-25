@@ -351,5 +351,36 @@ const app = new Hono()
 
       return c.json({ data: groupedRecords }, 200);
     },
+  )
+  .get(
+    "/stocks/:stockCode",
+    verifyAuth(),
+    zValidator("param", z.object({ stockCode: z.string() })),
+    zValidator(
+      "query",
+      z.object({
+        accountIds: z.string(),
+      }),
+    ),
+    async (c) => {
+      const auth = c.get("authUser");
+      const { stockCode } = c.req.valid("param");
+      const { accountIds } = c.req.valid("query");
+
+      if (!auth.token?.id) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      await db();
+
+      const accounts = accountIds.split(",");
+
+      const records = await buyRecords.find({
+        accountId: { $in: accounts },
+        stockCode: stockCode,
+      });
+
+      return c.json({ records }, 200);
+    },
   );
 export default app;
