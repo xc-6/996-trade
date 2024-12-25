@@ -4,7 +4,7 @@ import { zodSchema, extendZod, zId } from "@zodyac/zod-mongoose";
 
 extendZod(z);
 
-export const zCurrency = z.enum(["RMB", "USD"]);
+export const zCurrency = z.enum(["CNY", "USD", "HKD"]);
 
 export const zAccount = z.object({
   name: z.string(),

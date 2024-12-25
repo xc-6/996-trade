@@ -1,5 +1,5 @@
-export type Currency = "USD" | "RMB";
-export type Exchange = "SH" | "SZ" | "HK" | "US";
+export type Currency = "USD" | "CNY" | "HKD";
+export type Exchange = "SH" | "SZ" | "US" | "HK";
 
 // export interface Account {
 //     account_id: string;

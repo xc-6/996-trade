@@ -42,7 +42,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useEffect, useMemo } from "react";
-import { EXCHANGE } from "@/lib/const";
+import { CURRENCY, EXCHANGE } from "@/lib/const";
 import { ResponseType } from "@/features/account/hooks/use-get-accounts";
 import { ExtractArrayType } from "@/lib/types";
 import { useActiveAccounts } from "@/features/account/hooks/use-active-accounts";
@@ -61,10 +61,8 @@ export const CreateBuyRecordModal = () => {
 
   const { allAccounts } = useActiveAccounts();
 
-  const accoutsMenu = useMemo(() => {
-    const currencys = Array.from(
-      new Set(allAccounts?.map((account) => account.currency)),
-    ).sort();
+  const accountsMenu = useMemo(() => {
+    const currencys = CURRENCY;
 
     return currencys.map((currency) => {
       return {
@@ -135,7 +133,7 @@ export const CreateBuyRecordModal = () => {
     onClose();
   };
 
-  const renderSelectItem = (menu: (typeof accoutsMenu)[number]) => {
+  const renderSelectItem = (menu: (typeof accountsMenu)[number]) => {
     return (
       <SelectGroup key={menu.label}>
         <SelectLabel>{menu.label}</SelectLabel>
@@ -317,7 +315,7 @@ export const CreateBuyRecordModal = () => {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {accoutsMenu?.map((item) => renderSelectItem(item))}
+                          {accountsMenu?.map((item) => renderSelectItem(item))}
                         </SelectContent>
                       </Select>
                       <FormMessage />
