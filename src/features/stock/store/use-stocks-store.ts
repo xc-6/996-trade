@@ -3,7 +3,7 @@ import { StockInfo } from "@/lib/types";
 
 type BuyRecordState = {
   stocksCodes?: string[];
-  stocksState?: Map<string, StockInfo>;
+  stocksState: Map<string, StockInfo>;
   setStocksCodes: (data: string[]) => void;
   setStocksState: (data: Map<string, StockInfo>) => void;
   refreshTime: number;

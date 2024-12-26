@@ -30,27 +30,13 @@ export function AccontSwitcher() {
   const { isMobile } = useSidebar();
   const { onOpen } = useModal();
   const {
-    allAccounts,
     activeIds,
     activeAccounts,
     selectAccount,
     removeAccount,
+    accountsMenu,
   } = useActiveAccounts();
   const activeIdSet = useMemo(() => new Set(activeIds), [activeIds]);
-
-  const accoutsMenu = useMemo(() => {
-    const currencys = Array.from(
-      new Set(allAccounts?.map((account) => account.currency)),
-    ).sort();
-
-    return currencys.map((currency) => {
-      return {
-        label: currency,
-        items:
-          allAccounts?.filter((account) => account.currency === currency) ?? [],
-      };
-    });
-  }, [allAccounts]);
 
   const switchAccount = (e: MouseEvent, account: Account) => {
     e.preventDefault();
@@ -61,7 +47,7 @@ export function AccontSwitcher() {
     }
   };
 
-  const renderMenuItem = (menu: (typeof accoutsMenu)[number]) => {
+  const renderMenuItem = (menu: (typeof accountsMenu)[number]) => {
     return (
       <Fragment key={menu.label}>
         <DropdownMenuLabel>{menu.label}</DropdownMenuLabel>
@@ -132,7 +118,7 @@ export function AccontSwitcher() {
               Accounts
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            {accoutsMenu?.map((item) => renderMenuItem(item))}
+            {accountsMenu?.map((item) => renderMenuItem(item))}
             <DropdownMenuItem className="gap-2 p-2">
               <div className="flex size-6 items-center justify-center rounded-md border bg-background">
                 <Plus className="size-4" />

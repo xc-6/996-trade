@@ -36,6 +36,22 @@ export const useActiveAccounts = () => {
     );
   }, [data, isLoading]);
 
+  const accountsMenu = useMemo(() => {
+    if (isLoading) {
+      return [];
+    }
+    const currencys = Array.from(
+      new Set(data?.map((account) => account.currency)),
+    ).sort();
+
+    return currencys.map((currency) => {
+      return {
+        label: currency,
+        items: data?.filter((account) => account.currency === currency) ?? [],
+      };
+    });
+  }, [data, isLoading]);
+
   const selectAccount = useCallback(
     (id: string) => {
       const s = new Set(selected);
@@ -62,5 +78,6 @@ export const useActiveAccounts = () => {
     selectAccount,
     removeAccount,
     mapping,
+    accountsMenu,
   };
 };

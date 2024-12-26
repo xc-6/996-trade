@@ -10,8 +10,10 @@ import { X } from "lucide-react";
 import { usePanel } from "@/features/record/hooks/use-panel";
 import { Button } from "@/components/ui/button";
 import { useModal } from "@/hooks/use-modal-store";
+import { useRefreshStocks } from "@/features/stock/hooks/use-refresh-stocks";
 
 export default function Record() {
+  useRefreshStocks();
   const { onOpen } = useModal();
   const { recordId, onClose } = usePanel();
   const showPanel = !!recordId;

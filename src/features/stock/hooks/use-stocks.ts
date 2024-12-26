@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useStocksState } from "../store/use-stocks-store";
 import { useGetStocks } from "./use-get-stocks";
 import { StockInfo } from "@/lib/types";
@@ -39,6 +39,12 @@ export const useStocks = () => {
     }
   }, [refetch, stocksCodes]);
 
+  const clearTimer = useCallback(() => {
+    if (timer.current) {
+      clearTimeout(timer.current);
+    }
+  }, []);
+
   return {
     stocksCodes,
     stocksState,
@@ -46,5 +52,6 @@ export const useStocks = () => {
     setStocksState,
     refetch,
     isLoading,
+    clearTimer,
   };
 };

@@ -1,5 +1,5 @@
-import { JSX, useState } from "react";
-
+import { JSX, ReactPortal, useState } from "react";
+import { useClient } from "@/lib/hooks";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -9,11 +9,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { createPortal } from "react-dom";
 
 export const useConfirm = (
   title: string,
   message: string,
-): [() => JSX.Element, () => Promise<unknown>] => {
+): [() => ReactPortal | null, () => Promise<unknown>] => {
+  const onlyClient = useClient();
   const [promise, setPromise] = useState<{
     resolve: (value: boolean) => void;
   } | null>(null);
@@ -37,22 +39,25 @@ export const useConfirm = (
     handleClose();
   };
 
-  const ConfirmationDialog = () => (
-    <Dialog open={promise !== null} onOpenChange={handleCancel}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{message}</DialogDescription>
-        </DialogHeader>
-        <DialogFooter className="pt-2">
-          <Button onClick={handleCancel} variant="outline">
-            Cancel
-          </Button>
-          <Button onClick={handleConfirm}>Confirm</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
+  const ConfirmationDialog = onlyClient
+    ? createPortal(
+        <Dialog open={promise !== null} onOpenChange={handleCancel}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{title}</DialogTitle>
+              <DialogDescription>{message}</DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="pt-2">
+              <Button onClick={handleCancel} variant="outline">
+                Cancel
+              </Button>
+              <Button onClick={handleConfirm}>Confirm</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>,
+        document.getElementById("portal") as HTMLElement,
+      )
+    : null;
 
-  return [ConfirmationDialog, confirm];
+  return [() => ConfirmationDialog, confirm];
 };

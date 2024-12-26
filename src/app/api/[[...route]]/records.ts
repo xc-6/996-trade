@@ -20,6 +20,7 @@ const app = new Hono()
       "query",
       z.object({
         accountIds: z.string().optional(),
+        stockCode: z.string().optional(),
       }),
     ),
     async (c) => {
@@ -37,12 +38,15 @@ const app = new Hono()
         return c.json({ error: "Something went wrong" }, 400);
       }
 
-      const { accountIds } = c.req.valid("query");
+      const { accountIds, stockCode } = c.req.valid("query");
 
       const accounts = accountIds?.split(",");
 
       const records = await buyRecords.find(
-        { accountId: { $in: accounts ?? user.accounts } },
+        {
+          accountId: { $in: accounts ?? user.accounts },
+          stockCode: stockCode ? { $in: [stockCode] } : { $exists: true },
+        },
         { sellRecords: 0 },
       );
 
@@ -353,37 +357,6 @@ const app = new Hono()
     },
   )
   .get(
-    "/stock_records/:stockCode",
-    verifyAuth(),
-    zValidator("param", z.object({ stockCode: z.string() })),
-    zValidator(
-      "query",
-      z.object({
-        accountIds: z.string(),
-      }),
-    ),
-    async (c) => {
-      const auth = c.get("authUser");
-      const { stockCode } = c.req.valid("param");
-      const { accountIds } = c.req.valid("query");
-
-      if (!auth.token?.id) {
-        return c.json({ error: "Unauthorized" }, 401);
-      }
-
-      await db();
-
-      const accounts = accountIds.split(",");
-
-      const records = await buyRecords.find({
-        accountId: { $in: accounts },
-        stockCode: stockCode,
-      });
-
-      return c.json({ records }, 200);
-    },
-  )
-  .get(
     "/stock_codes",
     verifyAuth(),
     zValidator(
@@ -410,7 +383,7 @@ const app = new Hono()
       // Extract unique stock codes
       const stockCodes = new Set(records.map((record) => record.stockCode));
 
-      return c.json({ stockCodes: Array.from(stockCodes) }, 200);
+      return c.json({ data: Array.from(stockCodes) }, 200);
     },
   );
 export default app;

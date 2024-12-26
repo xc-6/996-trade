@@ -59,19 +59,7 @@ export const CreateBuyRecordModal = () => {
   const isModalOpen = isOpen && type === "createBuyRecord";
   const { buyRecord } = data;
 
-  const { allAccounts } = useActiveAccounts();
-
-  const accountsMenu = useMemo(() => {
-    const currencys = CURRENCY;
-
-    return currencys.map((currency) => {
-      return {
-        label: currency,
-        items:
-          allAccounts?.filter((account) => account.currency === currency) ?? [],
-      };
-    });
-  }, [allAccounts]);
+  const { accountsMenu } = useActiveAccounts();
 
   const form = useForm({
     resolver: zodResolver(formSchema),

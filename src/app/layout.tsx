@@ -36,6 +36,7 @@ export default async function RootLayout({
             <Toaster />
             <Modals />
             {children}
+            <div id="portal"></div>
           </Providers>
         </body>
       </html>
