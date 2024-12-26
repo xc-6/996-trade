@@ -14,7 +14,7 @@ import { z } from "zod";
 
 const app = new Hono()
   .get(
-    "/",
+    "/buy_records",
     verifyAuth(),
     zValidator(
       "query",
@@ -54,7 +54,7 @@ const app = new Hono()
     },
   )
   .get(
-    "/:id",
+    "/buy_record/:id",
     verifyAuth(),
     zValidator("param", z.object({ id: z.string() })),
     async (c) => {
@@ -83,7 +83,7 @@ const app = new Hono()
     },
   )
   .post(
-    "/",
+    "/buy_record",
     verifyAuth(),
     zValidator(
       "json",
@@ -122,7 +122,7 @@ const app = new Hono()
     },
   )
   .post(
-    "/:buyRecordId/sell",
+    "/buy_record/:buyRecordId/sell",
     verifyAuth(),
     zValidator("param", z.object({ buyRecordId: z.string() })),
     zValidator("json", zSellRecord.extend({ sellDate: z.string() })),
@@ -204,7 +204,7 @@ const app = new Hono()
     },
   )
   .delete(
-    "/:buyRecordId/sell/:sellRecordId",
+    "/buy_record/:buyRecordId/sell/:sellRecordId",
     verifyAuth(),
     zValidator(
       "param",
@@ -245,7 +245,7 @@ const app = new Hono()
     },
   )
   .delete(
-    "/:id",
+    "/buy_record/:id",
     verifyAuth(),
     zValidator("param", z.object({ id: z.string() })),
     async (c) => {
@@ -274,7 +274,7 @@ const app = new Hono()
     },
   )
   .get(
-    "/stocks/summary",
+    "/stock_groups",
     verifyAuth(),
     zValidator(
       "query",
@@ -353,7 +353,7 @@ const app = new Hono()
     },
   )
   .get(
-    "/stocks/:stockCode",
+    "/stock_records/:stockCode",
     verifyAuth(),
     zValidator("param", z.object({ stockCode: z.string() })),
     zValidator(
@@ -381,6 +381,36 @@ const app = new Hono()
       });
 
       return c.json({ records }, 200);
+    },
+  )
+  .get(
+    "/stock_codes",
+    verifyAuth(),
+    zValidator(
+      "query",
+      z.object({
+        accountIds: z.string(),
+      }),
+    ),
+    async (c) => {
+      const auth = c.get("authUser");
+
+      if (!auth.token?.id) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      await db();
+
+      const { accountIds } = c.req.valid("query");
+      const accounts = accountIds.split(",");
+
+      // Fetch records for the specified accounts
+      const records = await buyRecords.find({ accountId: { $in: accounts } });
+
+      // Extract unique stock codes
+      const stockCodes = new Set(records.map((record) => record.stockCode));
+
+      return c.json({ stockCodes: Array.from(stockCodes) }, 200);
     },
   );
 export default app;

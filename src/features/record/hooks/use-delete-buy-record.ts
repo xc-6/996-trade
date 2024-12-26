@@ -5,11 +5,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { client } from "@/lib/hono";
 
 type ResponseType = InferResponseType<
-  (typeof client.api.records)[":id"]["$delete"],
+  (typeof client.api.records)["buy_record"][":id"]["$delete"],
   200
 >;
 type RequestType = InferRequestType<
-  (typeof client.api.records)[":id"]["$delete"]
+  (typeof client.api.records)["buy_record"][":id"]["$delete"]
 >["param"];
 
 export const useDeleteBuyRecord = () => {
@@ -17,7 +17,7 @@ export const useDeleteBuyRecord = () => {
 
   const mutation = useMutation<ResponseType, Error, RequestType>({
     mutationFn: async (param) => {
-      const response = await client.api.records[":id"].$delete({
+      const response = await client.api.records.buy_record[":id"].$delete({
         param,
       });
 

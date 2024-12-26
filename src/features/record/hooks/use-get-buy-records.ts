@@ -3,7 +3,7 @@ import { InferResponseType } from "hono";
 import { client } from "@/lib/hono";
 
 export type ResponseType = InferResponseType<
-  (typeof client.api.records)["$get"],
+  (typeof client.api.records)["buy_records"]["$get"],
   200
 >;
 
@@ -11,7 +11,7 @@ export const useGetBuyRecords = (accountIds: Array<string>) => {
   const query = useQuery({
     queryKey: ["buyRecords", accountIds],
     queryFn: async () => {
-      const response = await client.api.records.$get({
+      const response = await client.api.records.buy_records.$get({
         query: {
           accountIds: accountIds.join(","),
         },
