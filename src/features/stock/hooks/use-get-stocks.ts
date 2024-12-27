@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { InferResponseType } from "hono";
 import { client } from "@/lib/hono";
+import { stocks as stocksApi } from "stock-api";
 
 export type ResponseType = InferResponseType<
   (typeof client.api.stocks)["$get"],
@@ -12,17 +13,7 @@ export const useGetStocks = (stocks: Array<string>) => {
     enabled: stocks.length > 0,
     queryKey: ["stocks", stocks],
     queryFn: async () => {
-      const response = await client.api.stocks.$get({
-        query: {
-          input: stocks.join(","),
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch images");
-      }
-
-      const { data } = await response.json();
+      const data = await stocksApi.tencent.getStocks(stocks);
       return data;
     },
   });
