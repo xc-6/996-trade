@@ -40,3 +40,55 @@ export const currencyFormatter = (
 
   return formatter.format(num);
 };
+
+const isChineseMarketOpen = () => {
+  const now = new Date();
+  const hours = now.getUTCHours(); // Get current hour in UTC
+  console.log(hours, now.getUTCMinutes());
+
+  return (
+    (hours === 1 && now.getUTCMinutes() >= 30) || // Morning session starts at 9:30 AM UTC+8
+    hours === 2 || // Morning session until 11:30 AM UTC+8
+    (hours === 3 && now.getUTCMinutes() < 30) || // Morning session ends at 11:30 AM UTC+8
+    [5, 6].includes(hours)
+  ); // Afternoon session starts at 1:00 PM UTC+8 Afternoon session ends at 3:00 PM UTC+8
+};
+
+const isUSMarketOpen = () => {
+  const now = new Date();
+  const hours = now.getUTCHours(); // Get current hour in UTC
+  return hours >= 14 && hours < 21; // 9:30 AM to 4:00 PM UTC-5
+};
+
+const isHKMarketOpen = () => {
+  const now = new Date();
+  const hours = now.getUTCHours(); // Get current hour in UTC
+  return (
+    (hours === 1 && now.getUTCMinutes() >= 30) || // Morning session starts at 9:30 AM UTC+8
+    [2, 3, 4, 5].includes(hours) ||
+    (hours === 6 && now.getUTCMinutes() < 30)
+  ); // Afternoon session ends at 3:00 PM UTC+8
+};
+
+export const isMarketOpen = (stocks: Array<string>) => {
+  const now = new Date();
+  // Check the UTC time if it's Saturday or Sunday return false directly
+  if ([0, 6].includes(now.getUTCDay())) {
+    return false;
+  }
+
+  const isChinese = stocks.some(
+    (code) => code.startsWith("SH") || code.startsWith("SZ"),
+  );
+  const isUS = stocks.some((code) => code.startsWith("US"));
+  const isHK = stocks.some((code) => code.startsWith("HK"));
+
+  if (isChinese) {
+    return isChineseMarketOpen();
+  } else if (isUS) {
+    return isUSMarketOpen();
+  } else if (isHK) {
+    return isHKMarketOpen();
+  }
+  return false;
+};

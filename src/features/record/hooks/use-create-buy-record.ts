@@ -29,6 +29,7 @@ export const useCreateBuyRecord = () => {
       toast.success("BuyRecord created");
       queryClient.invalidateQueries({ queryKey: ["buyRecords"] });
       queryClient.invalidateQueries({ queryKey: ["stockcodes"] });
+      queryClient.invalidateQueries({ queryKey: ["stocks"] });
     },
     onError: () => {
       toast.error("BuyRecord create Error!");

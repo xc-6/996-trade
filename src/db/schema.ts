@@ -16,7 +16,7 @@ export const zUser = z.object({
   password: z.string(),
   name: z.string(),
   image: z.string().optional(),
-  createdAt: z.date(),
+  createdAt: z.date().default(() => new Date()),
   // auth-next would not pass it
   accounts: z.array(zAccount).default([]).optional(),
 });

@@ -19,7 +19,7 @@ export const useGetStockcodes = (accountIds: Array<string>) => {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to fetch images");
+        throw new Error("Failed to fetch stockcodes");
       }
 
       const { data } = await response.json();

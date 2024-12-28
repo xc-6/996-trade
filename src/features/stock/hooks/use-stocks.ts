@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef } from "react";
 import { useStocksState } from "../store/use-stocks-store";
 import { useGetStocks } from "./use-get-stocks";
 import { StockInfo } from "@/lib/types";
+import { isMarketOpen } from "@/lib/utils";
 
 export const useStocks = () => {
   const timer = useRef<any>(null);
@@ -10,9 +11,17 @@ export const useStocks = () => {
     stocksState,
     setStocksCodes,
     setStocksState,
+    setInit,
+    init,
     refreshTime,
   } = useStocksState();
   const { data, refetch, isLoading } = useGetStocks(stocksCodes ?? []);
+
+  const _refecth = useCallback(() => {
+    if (!init || isMarketOpen(stocksCodes ?? [])) {
+      refetch();
+    }
+  }, [stocksCodes, refetch, init]);
 
   useEffect(() => {
     if (data) {
@@ -20,9 +29,10 @@ export const useStocks = () => {
         data?.map((obj: StockInfo) => [obj.code, obj]) ?? [],
       ) as Map<string, StockInfo>;
       setStocksState(map);
+      setInit(true);
 
       timer.current = setInterval(() => {
-        refetch();
+        _refecth();
       }, refreshTime);
     }
 
@@ -31,13 +41,11 @@ export const useStocks = () => {
         clearTimeout(timer.current);
       }
     };
-  }, [data, refetch, refreshTime, setStocksState]);
+  }, [data, _refecth, refreshTime, setStocksState, setInit]);
 
   useEffect(() => {
-    if (stocksCodes?.length) {
-      refetch();
-    }
-  }, [refetch, stocksCodes]);
+    _refecth();
+  }, [_refecth]);
 
   const clearTimer = useCallback(() => {
     if (timer.current) {
