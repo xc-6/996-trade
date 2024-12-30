@@ -54,7 +54,7 @@ export const CreateSellRecordModal = () => {
     return SellRecord.extend({
       sellAmount: z
         .string({
-          message: "Sell Amount is required.",
+          message: "Sold Amount is required.",
         })
         .refine(
           (v) => {
@@ -126,7 +126,7 @@ export const CreateSellRecordModal = () => {
       >
         <DialogHeader className="pt-8 px-6">
           <DialogTitle className="text-2xl text-center font-bold">
-            Create Sell Record
+            Create Sold Record
           </DialogTitle>
         </DialogHeader>
         <Form {...form}>
@@ -139,13 +139,13 @@ export const CreateSellRecordModal = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="uppercase text-xs font-bold text-zinc-500 dark:text-secondary/70">
-                        Sell Price
+                        Sold Price
                       </FormLabel>
                       <FormControl>
                         <Input
                           disabled={isLoading}
                           className="bg-zinc-300/50 border-0 focus-visible:ring-0 text-black focus-visible:ring-offset-0"
-                          placeholder="Enter Sell Price"
+                          placeholder="Enter Sold Price"
                           {...field}
                         />
                       </FormControl>
@@ -159,13 +159,13 @@ export const CreateSellRecordModal = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="uppercase text-xs font-bold text-zinc-500 dark:text-secondary/70">
-                        Sell Amount
+                        Sold Amount
                       </FormLabel>
                       <FormControl>
                         <Input
                           disabled={isLoading}
                           className="bg-zinc-300/50 border-0 focus-visible:ring-0 text-black focus-visible:ring-offset-0"
-                          placeholder="Enter Sell Amount"
+                          placeholder="Enter Sold Amount"
                           {...field}
                         />
                       </FormControl>
@@ -179,7 +179,7 @@ export const CreateSellRecordModal = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="uppercase text-xs font-bold text-zinc-500 dark:text-secondary/70">
-                        Sell Date
+                        Sold Date
                       </FormLabel>
                       <FormControl>
                         <Popover>

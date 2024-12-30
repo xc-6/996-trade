@@ -25,7 +25,7 @@ export const useDeleteSellRecord = () => {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to delete sell record");
+        throw new Error("Failed to delete sold record");
       }
 
       return response.json();

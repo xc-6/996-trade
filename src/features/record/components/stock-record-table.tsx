@@ -12,9 +12,11 @@ import { useGetRecordsByStock } from "../hooks/use-get-records-by-stock";
 import { Loader } from "lucide-react";
 import { useActiveAccounts } from "@/features/account/hooks/use-active-accounts";
 import { BuyRecordTable } from "./buy-record-table";
-import { cn } from "@/lib/utils";
+import { cn, numberFormatter } from "@/lib/utils";
 import { useStocksState } from "@/features/stock/store/use-stocks-store";
 import { Fragment, useEffect, useState } from "react";
+import { MoveDown, MoveUp } from "lucide-react";
+
 export const StockRecordTable = () => {
   const [selected, setSelected] = useState(new Set<string>());
   const { stocksState } = useStocksState();
@@ -46,17 +48,15 @@ export const StockRecordTable = () => {
   }
   return (
     <Table className="m-4">
-      <TableCaption>
-        A list of your recent transactions. {selected.size}
-      </TableCaption>
+      <TableCaption>A list of your recent transactions.</TableCaption>
       <TableHeader>
         <TableRow>
           <TableHead className="w-[120px]">Code</TableHead>
           <TableHead className="w-[20%]">Name</TableHead>
-          <TableHead>Current Price | Buy Price | P&L</TableHead>
-          <TableHead>High | Low | Yest</TableHead>
-          <TableHead>Buy Amount</TableHead>
-          <TableHead>Unsold Amount</TableHead>
+          <TableHead>Price | Cost | Unrealized P&L </TableHead>
+          <TableHead>TPC | High | Low | Yesterday</TableHead>
+          <TableHead>Total Cost | Unsold Amount | Buy Amount</TableHead>
+          <TableHead>Realized P&L</TableHead>
           <TableHead>Account</TableHead>
           <TableHead>Buy Date</TableHead>
           <TableHead>Action</TableHead>
@@ -80,20 +80,64 @@ export const StockRecordTable = () => {
               <TableCell className="font-medium">
                 {stocksState?.get(stockCode)?.name}
               </TableCell>
-              <TableCell>
-                {stocksState?.get(stockCode)?.now}
-                <span className="text-sm"></span>
+              <TableCell
+                className={cn(
+                  data?.[stockCode]?.avgCost !== undefined &&
+                    data?.[stockCode]?.avgCost <=
+                      (stocksState?.get(stockCode)?.now ??
+                        data?.[stockCode]?.avgCost)
+                    ? "text-red-500 font-bold"
+                    : "text-green-500",
+                )}
+              >
+                {data?.[stockCode]?.avgCost !== undefined &&
+                data?.[stockCode]?.avgCost <=
+                  (stocksState?.get(stockCode)?.now ??
+                    data?.[stockCode]?.avgCost) ? (
+                  <MoveUp size={16} className="inline" />
+                ) : (
+                  <MoveDown size={16} className="inline" />
+                )}
+                {stocksState?.get(stockCode)?.now} |{" "}
+                {data?.[stockCode]?.avgCost} |
+                <span className="text-sm">
+                  {new Intl.NumberFormat().format(
+                    data?.[stockCode]?.totalPL ?? 0,
+                  )}
+                </span>
+                <span className="text-sm">
+                  (
+                  {(
+                    (((stocksState?.get(stockCode)?.now ??
+                      data?.[stockCode]?.avgCost ??
+                      0) -
+                      (data?.[stockCode]?.avgCost ?? 0)) /
+                      (data?.[stockCode]?.avgCost ?? 1)) *
+                    100
+                  ).toFixed(2)}
+                  %)
+                </span>
+              </TableCell>
+              <TableCell
+                className={cn(
+                  (stocksState?.get(stockCode)?.percent ?? 0) >= 0
+                    ? "text-red-500 font-bold"
+                    : "text-green-500",
+                )}
+              >
+                {((stocksState?.get(stockCode)?.percent ?? 0) * 100).toFixed(2)}{" "}
+                % | {stocksState?.get(stockCode)?.high ?? "N/A"} |
+                {stocksState?.get(stockCode)?.low ?? "N/A"} |
+                {stocksState?.get(stockCode)?.yesterday ?? "N/A"}
               </TableCell>
               <TableCell>
-                {stocksState?.get(stockCode)?.high} |{" "}
-                {stocksState?.get(stockCode)?.low} |{" "}
-                {stocksState?.get(stockCode)?.yesterday}
+                {numberFormatter(data?.[stockCode]?.totalCost)} |{" "}
+                {numberFormatter(data?.[stockCode]?.totalUnsoldAmount)} |{" "}
+                {numberFormatter(data?.[stockCode]?.totalBuyAmount)}{" "}
               </TableCell>
-              <TableCell>{data?.[stockCode]?.totalBuyAmount}</TableCell>
-              <TableCell>{data?.[stockCode]?.totalUnsoldAmount}</TableCell>
-              <TableCell>{data?.[stockCode]?.totalCost}</TableCell>
-              <TableCell>{data?.[stockCode]?.totalPL}</TableCell>
-              <TableCell>{data?.[stockCode]?.avgCost}</TableCell>
+              <TableCell>
+                {numberFormatter(data?.[stockCode]?.totalPL)}
+              </TableCell>
             </TableRow>
             {selected.has(stockCode) && (
               <BuyRecordTable

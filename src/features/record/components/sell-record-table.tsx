@@ -71,12 +71,12 @@ export const SellRecordTable = () => {
         <TableRow>
           <TableHead>Code</TableHead>
           <TableHead>Name</TableHead>
-          <TableHead>Sell Price</TableHead>
-          <TableHead>Sell Amount</TableHead>
-          <TableHead>Sell Total</TableHead>
+          <TableHead>Sold Price</TableHead>
+          <TableHead>Sold Amount</TableHead>
+          <TableHead>Total Sold</TableHead>
           <TableHead>P&L</TableHead>
           <TableHead>APY</TableHead>
-          <TableHead>Sell Date</TableHead>
+          <TableHead>Sold Date</TableHead>
           <TableHead>Action</TableHead>
         </TableRow>
       </TableHeader>

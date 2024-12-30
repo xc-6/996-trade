@@ -164,11 +164,11 @@ const app = new Hono()
       // Calculate remaining amount available to sell
       const remainingAmount = Number(buyRecord.buyAmount) - preSoldAmount;
 
-      // Validate if new sell amount exceeds remaining amount
+      // Validate if new Sold Amount exceeds remaining amount
       if (Number(sellAmount) > remainingAmount) {
         return c.json(
           {
-            error: "Sell amount exceeds available amount",
+            error: "Sold Amount exceeds available amount",
             remainingAmount,
             requestedAmount: sellAmount,
           },
@@ -201,6 +201,7 @@ const app = new Hono()
 
       await buyRecord.updateOne({
         unsoldAmount: remainingAmount - Number(sellAmount),
+        profitLoss: Number(buyRecord.profitLoss) + profitLoss,
         sellRecords: [...(buyRecord?.sellRecords ?? []), sellRecord],
       });
 
@@ -225,7 +226,7 @@ const app = new Hono()
         return c.json({ message: "Buy record not found" }, 404);
       }
 
-      // Find the sell record that's being deleted
+      // Find the sold record that's being deleted
       const sellRecordToDelete = buyRecord.sellRecords.find(
         (record: any) => record._id?.toString() === sellRecordId,
       );
@@ -234,7 +235,7 @@ const app = new Hono()
         return c.json({ message: "Sell record not found" }, 404);
       }
 
-      // Remove the sell record from the array
+      // Remove the sold record from the array
       buyRecord.sellRecords = buyRecord.sellRecords.filter(
         (record: any) => record._id?.toString() !== sellRecordId,
       );
@@ -242,6 +243,9 @@ const app = new Hono()
       // Add back the sold amount to unsoldAmount
       buyRecord.unsoldAmount =
         Number(buyRecord.unsoldAmount) + Number(sellRecordToDelete.sellAmount);
+
+      buyRecord.profitLoss =
+        Number(buyRecord.profitLoss) - Number(sellRecordToDelete.profitLoss);
 
       await buyRecord.save();
 

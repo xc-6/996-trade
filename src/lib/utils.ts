@@ -23,6 +23,11 @@ export const reverseMapping = (mapping: Record<string, Array<string>>) => {
   );
 };
 
+export const numberFormatter = (num?: number) => {
+  if (num === undefined) return "N/A";
+  return new Intl.NumberFormat().format(Number(num.toFixed(2)));
+};
+
 export const currencyFormatter = (
   currency: "CNY" | "USD" | "HKD",
   num: number,

@@ -37,6 +37,7 @@ export const zBuyRecord = z.object({
   accountId: zId(),
   sellRecords: z.array(zSellRecord).default([]),
   unsoldAmount: z.number().default(0),
+  profitLoss: z.number().default(0),
 });
 
 type UserModel = Model<z.infer<typeof zUser>>;

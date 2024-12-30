@@ -7,7 +7,7 @@ export const Currency = z.nativeEnum(arrayToEnum(EXCHANGE));
 export const SellRecord = z.object({
   sellPrice: z
     .string({
-      message: "Sell Price is required.",
+      message: "Sold Price is required.",
     })
     .refine(
       (v) => {
@@ -18,7 +18,7 @@ export const SellRecord = z.object({
     ),
   sellAmount: z
     .string({
-      message: "Sell Amount is required.",
+      message: "Sold Amount is required.",
     })
     .refine(
       (v) => {

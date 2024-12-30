@@ -35,7 +35,7 @@ export default function Dashboard() {
             defaultSize={29}
             className="overflow-scroll"
           >
-            <Button onClick={onClose}>
+            <Button onClick={onClose} className="mr-10 align-middle">
               <X />
             </Button>
             <Button
@@ -43,7 +43,7 @@ export default function Dashboard() {
                 onOpen("createSellRecord", { buyRecordId: recordId })
               }
             >
-              Add Sell Record
+              Add Sold Record
             </Button>
             <SellRecordTable />
           </ResizablePanel>

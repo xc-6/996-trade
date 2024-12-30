@@ -14,10 +14,10 @@ import { Loader } from "lucide-react";
 import { useActiveAccounts } from "@/features/account/hooks/use-active-accounts";
 import { format } from "date-fns";
 import { usePanel } from "../hooks/use-panel";
-import { useEffect } from "react";
+import { useEffect, useReducer } from "react";
 import { Trash2, MoveDown, MoveUp } from "lucide-react";
 import { useConfirm } from "@/hooks/use-confirm";
-import { cn } from "@/lib/utils";
+import { cn, numberFormatter } from "@/lib/utils";
 import { useStocksState } from "@/features/stock/store/use-stocks-store";
 interface BuyRecordTableProps {
   showHeader?: boolean;
@@ -31,7 +31,7 @@ export const BuyRecordTable = ({
     "Are you sure?",
     "You are about to delete this record.",
   );
-  const { onSelect } = usePanel();
+  const { onSelect, recordId } = usePanel();
   const { stocksState } = useStocksState();
   const { activeIds, mapping } = useActiveAccounts();
   const removeMutation = useDeleteBuyRecord();
@@ -61,6 +61,7 @@ export const BuyRecordTable = ({
           className={cn(
             "group",
             !showHeader && "bg-secondary/80 hover:bg-secondary text-sm",
+            recordId === record._id && "bg-secondary",
           )}
           key={record._id}
           onClick={() => {
@@ -90,7 +91,14 @@ export const BuyRecordTable = ({
             ) : (
               <MoveDown size={16} className="inline" />
             )}
-            {stocksState?.get(record.stockCode)?.now} | {record.buyPrice}{" "}
+            {stocksState?.get(record.stockCode)?.now} | {record.buyPrice} |{" "}
+            <span className="text-sm">
+              {numberFormatter(
+                ((stocksState?.get(record.stockCode)?.now ?? record.buyPrice) -
+                  record.buyPrice) *
+                  record.unsoldAmount,
+              )}
+            </span>{" "}
             <span className="text-sm">
               (
               {(
@@ -102,13 +110,30 @@ export const BuyRecordTable = ({
               %)
             </span>
           </TableCell>
-          <TableCell>
-            {stocksState?.get(record.stockCode)?.high} |{" "}
-            {stocksState?.get(record.stockCode)?.low} |{" "}
-            {stocksState?.get(record.stockCode)?.yesterday}
+          <TableCell
+            className={cn(
+              (stocksState?.get(record.stockCode)?.percent ?? 0) >= 0
+                ? "text-red-500 font-bold"
+                : "text-green-500",
+            )}
+          >
+            {showHeader &&
+              `${(
+                (stocksState?.get(record.stockCode)?.percent ?? 0) * 100
+              ).toFixed(
+                2,
+              )} % | ${stocksState?.get(record.stockCode)?.high ?? "N/A"} |
+            ${stocksState?.get(record.stockCode)?.low ?? "N/A"} |
+            ${stocksState?.get(record.stockCode)?.yesterday ?? "N/A"}`}
           </TableCell>
-          <TableCell>{record.buyAmount}</TableCell>
-          <TableCell>{record.unsoldAmount}</TableCell>
+          <TableCell>
+            {numberFormatter(record.buyPrice * record.unsoldAmount)} |{" "}
+            {numberFormatter(record.unsoldAmount)} |{" "}
+            {numberFormatter(record.buyAmount)}
+          </TableCell>
+
+          <TableCell>{numberFormatter(record.profitLoss)}</TableCell>
+
           <TableCell>{mapping[record.accountId]?.name}</TableCell>
           <TableCell>{format(new Date(record.buyDate), "PPP")}</TableCell>
           <TableCell>
@@ -140,15 +165,21 @@ export const BuyRecordTable = ({
       <TableCaption>A list of your recent transactions.</TableCaption>
       <TableHeader>
         <TableRow>
-          <TableHead className="w-[120px]">Code</TableHead>
-          <TableHead className="w-[20%]">Name</TableHead>
-          <TableHead>Current Price | Buy Price | P&L</TableHead>
-          <TableHead>High | Low | Yest</TableHead>
-          <TableHead>Buy Amount</TableHead>
-          <TableHead>Unsold Amount</TableHead>
-          <TableHead>Account</TableHead>
-          <TableHead>Buy Date</TableHead>
-          <TableHead>Action</TableHead>
+          <TableHead className="w-[10%]">Code</TableHead>
+          <TableHead className="w-[10%]">Name</TableHead>
+          <TableHead className="w-[20%]">
+            Price | Cost | Unrealized P&L
+          </TableHead>
+          <TableHead className="w-[20%]">
+            TPC | High | Low | Yesterday
+          </TableHead>
+          <TableHead className="w-[20%]">
+            Total Cost | Unsold Amount | Buy Amount
+          </TableHead>
+          <TableHead className="w-[5%]">Realized P&L</TableHead>
+          <TableHead className="w-[5%]">Account</TableHead>
+          <TableHead className="w-[10%]">Buy Date</TableHead>
+          <TableHead className="w-[1%]">Action</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>{renderRows()}</TableBody>

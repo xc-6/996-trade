@@ -33,7 +33,7 @@ export default function Record() {
             defaultSize={29}
             className="overflow-scroll"
           >
-            <Button onClick={onClose}>
+            <Button onClick={onClose} className="mr-10 align-middle">
               <X />
             </Button>
             <Button
@@ -41,7 +41,7 @@ export default function Record() {
                 onOpen("createSellRecord", { buyRecordId: recordId })
               }
             >
-              Add Sell Record
+              Add Sold Record
             </Button>
             <SellRecordTable />
           </ResizablePanel>
