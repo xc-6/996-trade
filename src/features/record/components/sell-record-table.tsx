@@ -81,7 +81,7 @@ export const SellRecordTable = () => {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {buyRecord?.sellRecords?.map((record) => {
+        {buyRecord?.sellRecords?.map((record: any) => {
           const profitLoss = Number(record.profitLoss);
           console.log(record.apy, typeof record.apy, record.apy.toFixed(2));
           const apy = Number(record.apy).toFixed(2);

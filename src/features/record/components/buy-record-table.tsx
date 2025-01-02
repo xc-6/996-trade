@@ -79,17 +79,17 @@ export const BuyRecordTable = ({
       if (typeof res[0]?.[sort.key] === "string") {
         res.sort((a, b) => {
           if (sort.order === "asc") {
-            return a[sort.key].localeCompare(b[sort.key]);
+            return String(a[sort.key!]).localeCompare(String(b[sort.key!]));
           } else {
-            return b[sort.key].localeCompare(a[sort.key]);
+            return String(b[sort.key!]).localeCompare(String(a[sort.key!]));
           }
         });
       } else {
         res.sort((a, b) => {
           if (sort.order === "asc") {
-            return a[sort.key] < b[sort.key] ? -1 : 1;
+            return a[sort.key!] < b[sort.key!] ? -1 : 1;
           } else {
-            return a[sort.key] > b[sort.key] ? -1 : 1;
+            return a[sort.key!] > b[sort.key!] ? -1 : 1;
           }
         });
       }
@@ -110,7 +110,7 @@ export const BuyRecordTable = ({
     }
   };
 
-  const onSort = (key: string) => {
+  const onSort = (key: keyof BuyRecord) => {
     if (sort.key === key) {
       setSort((prev) => ({
         ...prev,
@@ -150,10 +150,10 @@ export const BuyRecordTable = ({
           <TableCell // Price
             className={cn(
               "text-nowrap",
-              record.percent >= 0 ? "text-red-500 font-bold" : "text-green-500",
+              Number(record.percent) >= 0 ? "text-red-500 font-bold" : "text-green-500",
             )}
           >
-            {record.percent >= 0 ? (
+            { Number(record.percent) >= 0 ? (
               <MoveUp size={16} className="inline" />
             ) : (
               <MoveDown size={16} className="inline" />
@@ -229,8 +229,8 @@ export const BuyRecordTable = ({
     </>
   );
 
-  const renderHeader = (name, key) => (
-    <TableHead className="text-nowrap" onClick={() => onSort(key)}>
+  const renderHeader = (name: string, key: string) => (
+    <TableHead className="text-nowrap" onClick={() => onSort(key as keyof BuyRecord)}>
       <span className={cn(sort.key === key && "font-bold text-blue-500")}>
         {name}
       </span>

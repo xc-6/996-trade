@@ -41,8 +41,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useEffect, useMemo } from "react";
-import { CURRENCY, EXCHANGE } from "@/lib/const";
+import { useEffect } from "react";
+import { EXCHANGE } from "@/lib/const";
 import { ResponseType } from "@/features/account/hooks/use-get-accounts";
 import { ExtractArrayType } from "@/lib/types";
 import { useActiveAccounts } from "@/features/account/hooks/use-active-accounts";

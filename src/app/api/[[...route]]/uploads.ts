@@ -22,9 +22,9 @@ const app = new Hono().post(
         zBuyRecord.omit({ accountId: true }).extend({
           buyDate: z.string(),
           sellRecords: z.array(zSellRecord.extend({ sellDate: z.string() })),
-        }),
+        })
       ),
-    }),
+    })
   ),
   async (c) => {
     const auth = c.get("authUser");
@@ -46,7 +46,7 @@ const app = new Hono().post(
     }
 
     // Process each record
-    let buyRecordsToInsert = [];
+    const buyRecordsToInsert = [];
     for (const record of records) {
       const stockCode = record.stockCode;
       const buyDate = new Date(record.buyDate);
@@ -55,22 +55,22 @@ const app = new Hono().post(
       let unsoldAmount = record.buyAmount;
       let buyRecordProfitLoss = 0;
 
-      let sellRecordsToInsert = [];
+      const sellRecordsToInsert = [];
       // Process and append sell records if they exist
       if (record.sellRecords && record.sellRecords.length > 0) {
         for (const sellRecord of record.sellRecords) {
           // Calculate the profit and loss, APY
-          let soldDate = new Date(sellRecord.sellDate);
-          let profitLoss = Number(
+          const soldDate = new Date(sellRecord.sellDate);
+          const profitLoss = Number(
             ((sellRecord.sellPrice - buyPrice) * sellRecord.sellAmount).toFixed(
-              3,
-            ),
+              3
+            )
           );
-          let holdingDays = Math.ceil(
-            (soldDate.getTime() - buyDate.getTime()) / (1000 * 60 * 60 * 24),
+          const holdingDays = Math.ceil(
+            (soldDate.getTime() - buyDate.getTime()) / (1000 * 60 * 60 * 24)
           );
-          let profitRatio = profitLoss / (buyPrice * sellRecord.sellAmount);
-          let apy = (
+          const profitRatio = profitLoss / (buyPrice * sellRecord.sellAmount);
+          const apy = (
             (Math.pow(1 + profitRatio, 365 / holdingDays) - 1) *
             100
           ).toFixed(2);
@@ -83,7 +83,7 @@ const app = new Hono().post(
           buyRecordProfitLoss += profitLoss;
 
           // Create the sell record
-          let newSoldRecord = new sellRecords({
+          const newSoldRecord = new sellRecords({
             sellDate: soldDate,
             sellAmount: sellRecord.sellAmount,
             sellPrice: sellRecord.sellPrice,
@@ -95,7 +95,7 @@ const app = new Hono().post(
         }
       }
 
-      let newBuyRecord = new buyRecords({
+      const newBuyRecord = new buyRecords({
         stockCode: stockCode,
         buyDate: buyDate,
         buyPrice: buyPrice,
@@ -115,7 +115,7 @@ const app = new Hono().post(
     >;
 
     return c.json({ data: uploadData }, 200);
-  },
+  }
 );
 
 export default app;

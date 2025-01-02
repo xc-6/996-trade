@@ -116,7 +116,7 @@ export const AssetsHeader = () => {
             {order.map((key) => {
               return (
                 <div key={key}>
-                  {key}: {currencyFormatter(key, asset[key] - cost[key] ?? 0)}
+                  {key}: {currencyFormatter(key, asset[key] - cost[key])}
                 </div>
               );
             })}

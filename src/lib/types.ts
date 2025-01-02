@@ -8,14 +8,14 @@ export type Exchange = "SH" | "SZ" | "US" | "HK";
 // }
 
 export interface SellRecord {
-  _id: string;
+  _id?: string;
   sellPrice: string | number;
   sellAmount: string | number;
   sellDate: string;
 }
 
 export interface BuyRecord {
-  _id: string;
+  _id?: string;
   stockCode: string;
   accountId: string;
   currency?: Currency;

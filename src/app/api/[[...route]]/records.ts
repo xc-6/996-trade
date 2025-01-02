@@ -77,7 +77,7 @@ const app = new Hono()
         return c.json({ error: "Something went wrong" }, 400);
       }
 
-      const buyRecord = await buyRecords.findById(id);
+      const buyRecord = await buyRecords.findById(id) as unknown as z.infer<typeof zBuyRecord> & { _id: string };
 
       if (!buyRecord) {
         return c.json({ message: "Buy record not found" }, 404);

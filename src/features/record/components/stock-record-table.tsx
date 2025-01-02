@@ -16,6 +16,8 @@ import { cn, numberFormatter } from "@/lib/utils";
 import { useStocksState } from "@/features/stock/store/use-stocks-store";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { MoveDown, MoveUp } from "lucide-react";
+import { ResponseType } from "../hooks/use-get-records-by-stock";
+
 
 export const StockRecordTable = () => {
   const [selected, setSelected] = useState(new Set<string>());
@@ -23,9 +25,9 @@ export const StockRecordTable = () => {
   const { activeIds } = useActiveAccounts();
   const { data, isLoading, refetch } = useGetRecordsByStock(activeIds ?? []);
 
-  type BuyRecord = ResponseType["data"][0];
+  type StockRecord = ResponseType["data"][0];
 
-  const onSort = (key: string) => {
+  const onSort = (key: keyof StockRecord) => {
     if (sort.key === key) {
       setSort((prev) => ({
         ...prev,
@@ -37,7 +39,7 @@ export const StockRecordTable = () => {
   };
 
   const [sort, setSort] = useState<{
-    key?: keyof BuyRecord;
+    key?: keyof StockRecord;
     order?: "asc" | "desc";
   }>({});
 
@@ -54,7 +56,7 @@ export const StockRecordTable = () => {
       ).toFixed(2);
       const price = stocksState?.get(stockCode)?.now ?? buyPrice;
       const unrealizedPL = numberFormatter(
-        (record?.totalUnsoldAmount ?? 0) * price - (record?.totalCost ?? 0),
+        (record?.totalUnsoldAmount ?? 0) * price - (record?.totalCost ?? 0)
       );
       const high = stocksState?.get(stockCode)?.high ?? "N/A";
       const low = stocksState?.get(stockCode)?.low ?? "N/A";
@@ -84,17 +86,17 @@ export const StockRecordTable = () => {
       if (typeof res[0]?.[sort.key] === "string") {
         res.sort((a, b) => {
           if (sort.order === "asc") {
-            return a[sort.key].localeCompare(b[sort.key]);
+            return String(a[sort.key!]).localeCompare(String(b[sort.key!]));
           } else {
-            return b[sort.key].localeCompare(a[sort.key]);
+            return String(b[sort.key!]).localeCompare(String(a[sort.key!]));
           }
         });
       } else {
         res.sort((a, b) => {
           if (sort.order === "asc") {
-            return a[sort.key] < b[sort.key] ? -1 : 1;
+            return a[sort.key!]! < b[sort.key!]! ? -1 : 1;
           } else {
-            return a[sort.key] > b[sort.key] ? -1 : 1;
+            return a[sort.key!]! > b[sort.key!]! ? -1 : 1;
           }
         });
       }
@@ -103,8 +105,11 @@ export const StockRecordTable = () => {
     return res;
   }, [isLoading, data, sort, stocksState]);
 
-  const renderHeader = (name, key) => (
-    <TableHead className="text-nowrap" onClick={() => onSort(key)}>
+  const renderHeader = (name: string, key: string) => (
+    <TableHead
+      className="text-nowrap"
+      onClick={() => onSort(key as keyof StockRecord)}
+    >
       <span className={cn(sort.key === key && "font-bold text-blue-500")}>
         {name}
       </span>
@@ -115,7 +120,7 @@ export const StockRecordTable = () => {
             "cursor-pointer",
             sort.key === key && sort.order === "asc"
               ? "stroke-blue-500 fill-blue-500"
-              : "",
+              : ""
           )}
         />
         <ChevronDown
@@ -124,7 +129,7 @@ export const StockRecordTable = () => {
             "cursor-pointer",
             sort.key === key && sort.order === "desc"
               ? "stroke-blue-500 fill-blue-500"
-              : "",
+              : ""
           )}
         />
       </div>
@@ -201,7 +206,7 @@ export const StockRecordTable = () => {
 
               <TableCell // Price
                 className={cn(
-                  record.up ? "text-red-500 font-bold" : "text-green-500",
+                  record.up ? "text-red-500 font-bold" : "text-green-500"
                 )}
               >
                 {record.up ? (
@@ -221,7 +226,7 @@ export const StockRecordTable = () => {
                 className={cn(
                   parseFloat(record.unrealized) > 0
                     ? "text-red-500 font-bold"
-                    : "text-green-500",
+                    : "text-green-500"
                 )}
               >
                 {record.unrealized}
@@ -229,28 +234,28 @@ export const StockRecordTable = () => {
 
               <TableCell // TPC
                 className={cn(
-                  record.up ? "text-red-500 font-bold" : "text-green-500",
+                  record.up ? "text-red-500 font-bold" : "text-green-500"
                 )}
               >
                 {record.percent}%
               </TableCell>
               <TableCell // High
                 className={cn(
-                  record.up ? "text-red-500 font-bold" : "text-green-500",
+                  record.up ? "text-red-500 font-bold" : "text-green-500"
                 )}
               >
                 {record.high}
               </TableCell>
               <TableCell // Low
                 className={cn(
-                  record.up ? "text-red-500 font-bold" : "text-green-500",
+                  record.up ? "text-red-500 font-bold" : "text-green-500"
                 )}
               >
                 {record.low}
               </TableCell>
               <TableCell // Yesterday
                 className={cn(
-                  record.up ? "text-red-500 font-bold" : "text-green-500",
+                  record.up ? "text-red-500 font-bold" : "text-green-500"
                 )}
               >
                 {record.yesterday}
