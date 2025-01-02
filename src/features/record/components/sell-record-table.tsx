@@ -83,7 +83,8 @@ export const SellRecordTable = () => {
       <TableBody>
         {buyRecord?.sellRecords?.map((record) => {
           const profitLoss = Number(record.profitLoss);
-          const apy = Number(record.apy);
+          console.log(record.apy, typeof record.apy, record.apy.toFixed(2));
+          const apy = Number(record.apy).toFixed(2);
 
           return (
             <TableRow className="group" key={record._id}>

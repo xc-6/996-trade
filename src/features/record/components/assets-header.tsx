@@ -72,7 +72,7 @@ export const AssetsHeader = () => {
   }, [data, exchange2Currency, isLoading]);
 
   return (
-    <div className="grid gap-4 sm:grid-cols-3 xl:grid-cols-3">
+    <div className="grid gap-4 sm:grid-cols-4 xl:grid-cols-4">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-normal">Total Assets</CardTitle>
@@ -91,22 +91,6 @@ export const AssetsHeader = () => {
       </Card>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-normal">Total PL</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text font-bold">
-            {order.map((key) => {
-              return (
-                <div key={key}>
-                  {key}: {currencyFormatter(key, PL[key])}
-                </div>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-normal">Total Cost</CardTitle>
         </CardHeader>
         <CardContent className="pb-0">
@@ -115,6 +99,42 @@ export const AssetsHeader = () => {
               return (
                 <div key={key}>
                   {key}: {currencyFormatter(key, cost[key])}
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-normal">
+            Total Unrealized P&L
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text font-bold">
+            {order.map((key) => {
+              return (
+                <div key={key}>
+                  {key}: {currencyFormatter(key, asset[key] - cost[key] ?? 0)}
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-normal">
+            Total Realized P&L
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text font-bold">
+            {order.map((key) => {
+              return (
+                <div key={key}>
+                  {key}: {currencyFormatter(key, PL[key])}
                 </div>
               );
             })}

@@ -12,6 +12,7 @@
     "format:check": "prettier --check \"src/**/*.{ts,tsx}\""
   },
   "dependencies": {
+    "@18f/us-federal-holidays": "^4.0.0",
     "@auth/core": "^0.37.4",
     "@auth/mongodb-adapter": "^3.7.4",
     "@hono/auth-js": "^1.0.15",

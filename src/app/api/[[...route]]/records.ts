@@ -186,10 +186,9 @@ const app = new Hono()
           (1000 * 60 * 60 * 24),
       );
       const profitRatio = profitLoss / (buyRecord.buyPrice * sellAmount);
-      const apy = (
-        (Math.pow(1 + profitRatio, 365 / holdingDays) - 1) *
-        100
-      ).toFixed(2);
+      const apy = Number(
+        ((Math.pow(1 + profitRatio, 365 / holdingDays) - 1) * 100).toFixed(2),
+      );
 
       const sellRecord = new sellRecords({
         sellDate: sellDate,

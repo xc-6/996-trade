@@ -9,12 +9,12 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useGetRecordsByStock } from "../hooks/use-get-records-by-stock";
-import { Loader } from "lucide-react";
+import { ChevronDown, ChevronUp, Loader } from "lucide-react";
 import { useActiveAccounts } from "@/features/account/hooks/use-active-accounts";
 import { BuyRecordTable } from "./buy-record-table";
 import { cn, numberFormatter } from "@/lib/utils";
 import { useStocksState } from "@/features/stock/store/use-stocks-store";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { MoveDown, MoveUp } from "lucide-react";
 
 export const StockRecordTable = () => {
@@ -22,6 +22,114 @@ export const StockRecordTable = () => {
   const { stocksState } = useStocksState();
   const { activeIds } = useActiveAccounts();
   const { data, isLoading, refetch } = useGetRecordsByStock(activeIds ?? []);
+
+  type BuyRecord = ResponseType["data"][0];
+
+  const onSort = (key: string) => {
+    if (sort.key === key) {
+      setSort((prev) => ({
+        ...prev,
+        order: prev.order === "asc" ? "desc" : "asc",
+      }));
+    } else {
+      setSort({ key, order: "asc" });
+    }
+  };
+
+  const [sort, setSort] = useState<{
+    key?: keyof BuyRecord;
+    order?: "asc" | "desc";
+  }>({});
+
+  const list = useMemo(() => {
+    if (isLoading) {
+      return [];
+    }
+    const res = Object.keys(data ?? {})?.map((stockCode) => {
+      const record = data?.[stockCode];
+      const buyPrice = record?.avgCost ?? 0;
+      const name = stocksState?.get(stockCode)?.name;
+      const percent = (
+        (stocksState?.get(stockCode)?.percent ?? 0) * 100
+      ).toFixed(2);
+      const price = stocksState?.get(stockCode)?.now ?? buyPrice;
+      const unrealizedPL = numberFormatter(
+        (record?.totalUnsoldAmount ?? 0) * price - (record?.totalCost ?? 0),
+      );
+      const high = stocksState?.get(stockCode)?.high ?? "N/A";
+      const low = stocksState?.get(stockCode)?.low ?? "N/A";
+      const yesterday = stocksState?.get(stockCode)?.yesterday ?? "N/A";
+      const totalCost = buyPrice * (record?.totalUnsoldAmount ?? 0);
+      const totalPL = record?.totalPL ?? 0;
+      const up = (stocksState?.get(stockCode)?.percent ?? 0) >= 0;
+
+      return {
+        ...record,
+        stockCode,
+        buyPrice,
+        unrealized: unrealizedPL,
+        name,
+        percent,
+        price,
+        high,
+        low,
+        yesterday,
+        totalCost,
+        totalPL,
+        up,
+      };
+    });
+
+    if (sort.key && sort.order && res.length > 0) {
+      if (typeof res[0]?.[sort.key] === "string") {
+        res.sort((a, b) => {
+          if (sort.order === "asc") {
+            return a[sort.key].localeCompare(b[sort.key]);
+          } else {
+            return b[sort.key].localeCompare(a[sort.key]);
+          }
+        });
+      } else {
+        res.sort((a, b) => {
+          if (sort.order === "asc") {
+            return a[sort.key] < b[sort.key] ? -1 : 1;
+          } else {
+            return a[sort.key] > b[sort.key] ? -1 : 1;
+          }
+        });
+      }
+    }
+
+    return res;
+  }, [isLoading, data, sort, stocksState]);
+
+  const renderHeader = (name, key) => (
+    <TableHead className="text-nowrap" onClick={() => onSort(key)}>
+      <span className={cn(sort.key === key && "font-bold text-blue-500")}>
+        {name}
+      </span>
+      <div className="inline-flex flex-col align-middle ml-1">
+        <ChevronUp
+          size={12}
+          className={cn(
+            "cursor-pointer",
+            sort.key === key && sort.order === "asc"
+              ? "stroke-blue-500 fill-blue-500"
+              : "",
+          )}
+        />
+        <ChevronDown
+          size={12}
+          className={cn(
+            "cursor-pointer",
+            sort.key === key && sort.order === "desc"
+              ? "stroke-blue-500 fill-blue-500"
+              : "",
+          )}
+        />
+      </div>
+    </TableHead>
+  );
 
   const onSelect = (stockCode: string) => {
     setSelected((prev) => {
@@ -53,97 +161,116 @@ export const StockRecordTable = () => {
         <TableRow>
           <TableHead className="w-[120px]">Code</TableHead>
           <TableHead className="w-[20%]">Name</TableHead>
-          <TableHead>Price | Cost | Unrealized P&L </TableHead>
-          <TableHead>TPC | High | Low | Yesterday</TableHead>
-          <TableHead>Total Cost | Unsold Amount | Buy Amount</TableHead>
-          <TableHead>Realized P&L</TableHead>
+
+          {renderHeader("Price", "price")}
+          {renderHeader("Cost", "buyPrice")}
+          {renderHeader("Unrealized P&L", "unrealized")}
+
+          {renderHeader("TPC", "percent")}
+          {renderHeader("High", "high")}
+          {renderHeader("Low", "low")}
+          {renderHeader("Yesterday", "yesterday")}
+
+          {renderHeader("Total Cost", "totalCost")}
+          {renderHeader("Unsold Amount", "unsoldAmount")}
+          {renderHeader("Buy Amount", "buyAmount")}
+
+          {renderHeader("Realized P&L", "profitLoss")}
+
           <TableHead>Account</TableHead>
           <TableHead>Buy Date</TableHead>
           <TableHead>Action</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody key="table">
-        {Object.keys(data ?? {})?.map((stockCode) => (
-          <Fragment key={stockCode}>
+        {list?.map((record) => (
+          <Fragment key={record.stockCode}>
             <TableRow
-              className="group"
+              className={cn("group")}
               onClick={() => {
-                onSelect(stockCode);
+                onSelect(record.stockCode);
               }}
             >
               <TableCell className="font-medium">
                 <Badge variant="outline" className="mr-2">
-                  {stockCode.slice(0, 2)}
+                  {record.stockCode.slice(0, 2)}
                 </Badge>
-                {stockCode.slice(2)}
+                {record.stockCode.slice(2)}
               </TableCell>
-              <TableCell className="font-medium">
-                {stocksState?.get(stockCode)?.name}
-              </TableCell>
-              <TableCell
+              <TableCell className="font-medium">{record.name}</TableCell>
+
+              <TableCell // Price
                 className={cn(
-                  data?.[stockCode]?.avgCost !== undefined &&
-                    data?.[stockCode]?.avgCost <=
-                      (stocksState?.get(stockCode)?.now ??
-                        data?.[stockCode]?.avgCost)
-                    ? "text-red-500 font-bold"
-                    : "text-green-500",
+                  record.up ? "text-red-500 font-bold" : "text-green-500",
                 )}
               >
-                {data?.[stockCode]?.avgCost !== undefined &&
-                data?.[stockCode]?.avgCost <=
-                  (stocksState?.get(stockCode)?.now ??
-                    data?.[stockCode]?.avgCost) ? (
+                {record.up ? (
                   <MoveUp size={16} className="inline" />
                 ) : (
                   <MoveDown size={16} className="inline" />
                 )}
-                {stocksState?.get(stockCode)?.now} |{" "}
-                {data?.[stockCode]?.avgCost} |
-                <span className="text-sm">
-                  {new Intl.NumberFormat().format(
-                    data?.[stockCode]?.totalPL ?? 0,
-                  )}
-                </span>
-                <span className="text-sm">
-                  (
-                  {(
-                    (((stocksState?.get(stockCode)?.now ??
-                      data?.[stockCode]?.avgCost ??
-                      0) -
-                      (data?.[stockCode]?.avgCost ?? 0)) /
-                      (data?.[stockCode]?.avgCost ?? 1)) *
-                    100
-                  ).toFixed(2)}
-                  %)
-                </span>
+                {record.price}
               </TableCell>
-              <TableCell
+
+              <TableCell // Cost
+              >
+                {record.buyPrice}
+              </TableCell>
+
+              <TableCell // Unrealized P&L
                 className={cn(
-                  (stocksState?.get(stockCode)?.percent ?? 0) >= 0
+                  parseFloat(record.unrealized) > 0
                     ? "text-red-500 font-bold"
                     : "text-green-500",
                 )}
               >
-                {((stocksState?.get(stockCode)?.percent ?? 0) * 100).toFixed(2)}{" "}
-                % | {stocksState?.get(stockCode)?.high ?? "N/A"} |
-                {stocksState?.get(stockCode)?.low ?? "N/A"} |
-                {stocksState?.get(stockCode)?.yesterday ?? "N/A"}
+                {record.unrealized}
               </TableCell>
-              <TableCell>
-                {numberFormatter(data?.[stockCode]?.totalCost)} |{" "}
-                {numberFormatter(data?.[stockCode]?.totalUnsoldAmount)} |{" "}
-                {numberFormatter(data?.[stockCode]?.totalBuyAmount)}{" "}
+
+              <TableCell // TPC
+                className={cn(
+                  record.up ? "text-red-500 font-bold" : "text-green-500",
+                )}
+              >
+                {record.percent}%
               </TableCell>
-              <TableCell>
-                {numberFormatter(data?.[stockCode]?.totalPL)}
+              <TableCell // High
+                className={cn(
+                  record.up ? "text-red-500 font-bold" : "text-green-500",
+                )}
+              >
+                {record.high}
               </TableCell>
+              <TableCell // Low
+                className={cn(
+                  record.up ? "text-red-500 font-bold" : "text-green-500",
+                )}
+              >
+                {record.low}
+              </TableCell>
+              <TableCell // Yesterday
+                className={cn(
+                  record.up ? "text-red-500 font-bold" : "text-green-500",
+                )}
+              >
+                {record.yesterday}
+              </TableCell>
+
+              <TableCell>{numberFormatter(record.totalCost)}</TableCell>
+              <TableCell>{numberFormatter(record.totalUnsoldAmount)}</TableCell>
+              <TableCell>{numberFormatter(record.totalBuyAmount)}</TableCell>
+
+              <TableCell>{numberFormatter(record.totalPL)}</TableCell>
+
+              <TableCell></TableCell>
+              <TableCell></TableCell>
+              <TableCell></TableCell>
             </TableRow>
-            {selected.has(stockCode) && (
+            {selected.has(record.stockCode) && (
               <BuyRecordTable
                 showHeader={false}
-                stockCode={stockCode}
-                key={`${stockCode}-table`}
+                stockCode={record.stockCode}
+                key={`${record.stockCode}-table`}
               />
             )}
           </Fragment>

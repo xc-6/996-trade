@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import * as fedHolidays from "@18f/us-federal-holidays";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -49,7 +50,6 @@ export const currencyFormatter = (
 const isChineseMarketOpen = () => {
   const now = new Date();
   const hours = now.getUTCHours(); // Get current hour in UTC
-  console.log(hours, now.getUTCMinutes());
 
   return (
     (hours === 1 && now.getUTCMinutes() >= 30) || // Morning session starts at 9:30 AM UTC+8
@@ -61,6 +61,11 @@ const isChineseMarketOpen = () => {
 
 const isUSMarketOpen = () => {
   const now = new Date();
+  if (fedHolidays.isAHoliday(now)) {
+    console.log("Today is a holiday");
+    return false;
+  }
+
   const hours = now.getUTCHours(); // Get current hour in UTC
   return hours >= 14 && hours < 21; // 9:30 AM to 4:00 PM UTC-5
 };
@@ -88,12 +93,12 @@ export const isMarketOpen = (stocks: Array<string>) => {
   const isUS = stocks.some((code) => code.startsWith("US"));
   const isHK = stocks.some((code) => code.startsWith("HK"));
 
-  if (isChinese) {
-    return isChineseMarketOpen();
-  } else if (isUS) {
-    return isUSMarketOpen();
-  } else if (isHK) {
-    return isHKMarketOpen();
+  if (isChinese && isChineseMarketOpen()) {
+    return true;
+  } else if (isUS && isUSMarketOpen()) {
+    return true;
+  } else if (isHK && isHKMarketOpen()) {
+    return true;
   }
   return false;
 };
