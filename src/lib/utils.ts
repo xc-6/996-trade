@@ -62,7 +62,6 @@ const isChineseMarketOpen = () => {
 const isUSMarketOpen = () => {
   const now = new Date();
   if (fedHolidays.isAHoliday(now)) {
-    console.log("Today is a holiday");
     return false;
   }
 

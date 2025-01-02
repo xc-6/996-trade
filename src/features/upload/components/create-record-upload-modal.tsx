@@ -28,7 +28,6 @@ export const CreateRecordUploadModal = () => {
       return;
     }
     const text = await files[0].text();
-    console.log(text);
     const lines = text.split("\n");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const records: Array<any> = [];
@@ -79,10 +78,7 @@ export const CreateRecordUploadModal = () => {
         <FileUploader
           maxFileCount={1}
           maxSize={8 * 1024 * 1024}
-          onValueChange={(e) => {
-            console.log(e);
-            setFiles(e);
-          }}
+          onValueChange={setFiles}
           accept={{
             "text/plain": [".txt"],
           }}
