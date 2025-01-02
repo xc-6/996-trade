@@ -6,10 +6,11 @@ import { create } from "zustand";
 export type ModalType =
   | "createAccount"
   | "createBuyRecord"
-  | "createSellRecord";
+  | "createSellRecord"
+  | "createRecordUpload";
 
 interface ModalData {
-  account?: z.infer<typeof Account>;
+  account?: z.infer<typeof Account> & { _id: string };
   buyRecord?: BuyRecord;
   sellRecord?: SellRecord;
   buyRecordId?: string;

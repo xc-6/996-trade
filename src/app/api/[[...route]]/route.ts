@@ -6,6 +6,7 @@ import authConfig from "@/auth.config";
 import users from "./users";
 import accounts from "./accounts";
 import records from "./records";
+import uploads from "./uploads";
 
 const getAuthConfig = (c: Context) => {
   return {
@@ -22,7 +23,8 @@ app.use("*", initAuthConfig(getAuthConfig));
 const routes = app
   .route("/users", users)
   .route("/accounts", accounts)
-  .route("/records", records);
+  .route("/records", records)
+  .route("/uploads", uploads);
 
 export const GET = handle(app);
 export const POST = handle(app);
