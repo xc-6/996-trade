@@ -77,7 +77,9 @@ const app = new Hono()
         return c.json({ error: "Something went wrong" }, 400);
       }
 
-      const buyRecord = await buyRecords.findById(id) as unknown as z.infer<typeof zBuyRecord> & { _id: string };
+      const buyRecord = (await buyRecords.findById(id)) as unknown as z.infer<
+        typeof zBuyRecord
+      > & { _id: string };
 
       if (!buyRecord) {
         return c.json({ message: "Buy record not found" }, 404);
@@ -387,6 +389,30 @@ const app = new Hono()
       const stockCodes = new Set(records.map((record) => record.stockCode));
 
       return c.json({ data: Array.from(stockCodes) }, 200);
+    },
+  )
+  .delete(
+    "stock_groups/:stockCode",
+    verifyAuth(),
+    zValidator("param", z.object({ stockCode: z.string() })),
+    async (c) => {
+      const auth = c.get("authUser");
+      const { stockCode } = c.req.valid("param");
+
+      if (!auth.token?.id) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      await db();
+
+      // Delete all buy records with the specified stockCode
+      const result = await buyRecords.deleteMany({ stockCode });
+
+      if (result.deletedCount === 0) {
+        return c.json({ message: "No records found to delete" }, 404);
+      }
+
+      return c.json({ message: "Records deleted successfully" }, 200);
     },
   );
 export default app;

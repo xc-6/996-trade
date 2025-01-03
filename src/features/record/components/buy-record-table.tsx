@@ -150,10 +150,12 @@ export const BuyRecordTable = ({
           <TableCell // Price
             className={cn(
               "text-nowrap",
-              Number(record.percent) >= 0 ? "text-red-500 font-bold" : "text-green-500",
+              Number(record.percent) >= 0
+                ? "text-red-500 font-bold"
+                : "text-green-500",
             )}
           >
-            { Number(record.percent) >= 0 ? (
+            {Number(record.percent) >= 0 ? (
               <MoveUp size={16} className="inline" />
             ) : (
               <MoveDown size={16} className="inline" />
@@ -230,7 +232,10 @@ export const BuyRecordTable = ({
   );
 
   const renderHeader = (name: string, key: string) => (
-    <TableHead className="text-nowrap" onClick={() => onSort(key as keyof BuyRecord)}>
+    <TableHead
+      className="text-nowrap"
+      onClick={() => onSort(key as keyof BuyRecord)}
+    >
       <span className={cn(sort.key === key && "font-bold text-blue-500")}>
         {name}
       </span>

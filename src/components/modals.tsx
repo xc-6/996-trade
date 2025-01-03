@@ -1,6 +1,7 @@
 "use client";
 
 import { CreateAccountModal } from "@/features/account/components/create-account-modal";
+import { DeleteAccountModal } from "@/features/account/components/delete-account-modal";
 import { CreateBuyRecordModal } from "@/features/record/components/create-buy-record-modal";
 import { CreateSellRecordModal } from "@/features/record/components/create-sell-record-modal";
 import { CreateRecordUploadModal } from "@/features/upload/components/create-record-upload-modal";
@@ -16,6 +17,7 @@ export const Modals = () => {
         <CreateBuyRecordModal />
         <CreateSellRecordModal />
         <CreateRecordUploadModal />
+        <DeleteAccountModal />
       </>
     )
   );

@@ -55,7 +55,8 @@ export const CreateRecordUploadModal = () => {
       }
     });
 
-    mutation.mutate({ accountId: data?.account?._id ?? "", records },
+    mutation.mutate(
+      { accountId: data?.account?._id ?? "", records },
       {
         onSuccess: () => {
           handleClose();

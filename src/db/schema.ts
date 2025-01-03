@@ -13,7 +13,7 @@ export const zAccount = z.object({
 
 export const zUser = z.object({
   email: z.string(),
-  password: z.string(),
+  password: z.string().optional(),
   name: z.string(),
   image: z.string().optional(),
   createdAt: z.date().default(() => new Date()),

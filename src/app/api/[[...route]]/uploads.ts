@@ -22,9 +22,9 @@ const app = new Hono().post(
         zBuyRecord.omit({ accountId: true }).extend({
           buyDate: z.string(),
           sellRecords: z.array(zSellRecord.extend({ sellDate: z.string() })),
-        })
+        }),
       ),
-    })
+    }),
   ),
   async (c) => {
     const auth = c.get("authUser");
@@ -63,11 +63,11 @@ const app = new Hono().post(
           const soldDate = new Date(sellRecord.sellDate);
           const profitLoss = Number(
             ((sellRecord.sellPrice - buyPrice) * sellRecord.sellAmount).toFixed(
-              3
-            )
+              3,
+            ),
           );
           const holdingDays = Math.ceil(
-            (soldDate.getTime() - buyDate.getTime()) / (1000 * 60 * 60 * 24)
+            (soldDate.getTime() - buyDate.getTime()) / (1000 * 60 * 60 * 24),
           );
           const profitRatio = profitLoss / (buyPrice * sellRecord.sellAmount);
           const apy = (
@@ -115,7 +115,7 @@ const app = new Hono().post(
     >;
 
     return c.json({ data: uploadData }, 200);
-  }
+  },
 );
 
 export default app;

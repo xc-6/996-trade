@@ -7,7 +7,8 @@ export type ModalType =
   | "createAccount"
   | "createBuyRecord"
   | "createSellRecord"
-  | "createRecordUpload";
+  | "createRecordUpload"
+  | "deleteAccount";
 
 interface ModalData {
   account?: z.infer<typeof Account> & { _id: string };

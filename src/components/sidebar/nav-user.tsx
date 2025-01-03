@@ -27,10 +27,12 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useSession, signOut } from "next-auth/react";
+import { useModal } from "@/hooks/use-modal-store";
 
 export function NavUser() {
   const { isMobile } = useSidebar();
   const session = useSession();
+  const { onOpen } = useModal();
 
   if (session.status === "loading") {
     return <Loader className="size-4 animate-spin text-muted-foreground" />;
@@ -98,7 +100,7 @@ export function NavUser() {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onOpen("deleteAccount")}>
                 <BadgeCheck />
                 Account
               </DropdownMenuItem>

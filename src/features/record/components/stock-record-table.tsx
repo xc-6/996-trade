@@ -8,6 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { useConfirm } from "@/hooks/use-confirm";
 import { useGetRecordsByStock } from "../hooks/use-get-records-by-stock";
 import { ChevronDown, ChevronUp, Loader } from "lucide-react";
 import { useActiveAccounts } from "@/features/account/hooks/use-active-accounts";
@@ -15,15 +16,20 @@ import { BuyRecordTable } from "./buy-record-table";
 import { cn, numberFormatter } from "@/lib/utils";
 import { useStocksState } from "@/features/stock/store/use-stocks-store";
 import { Fragment, useEffect, useMemo, useState } from "react";
-import { MoveDown, MoveUp } from "lucide-react";
+import { Trash2, MoveDown, MoveUp } from "lucide-react";
 import { ResponseType } from "../hooks/use-get-records-by-stock";
-
+import { useDeleteStockGroups } from "../hooks/use-delete-stock-groups";
 
 export const StockRecordTable = () => {
   const [selected, setSelected] = useState(new Set<string>());
   const { stocksState } = useStocksState();
   const { activeIds } = useActiveAccounts();
   const { data, isLoading, refetch } = useGetRecordsByStock(activeIds ?? []);
+  const removeMutation = useDeleteStockGroups();
+  const [ConfirmDialog, confirm] = useConfirm(
+    "Are you sure?",
+    "You are about to delete this record.",
+  );
 
   type StockRecord = ResponseType["data"][0];
 
@@ -56,7 +62,7 @@ export const StockRecordTable = () => {
       ).toFixed(2);
       const price = stocksState?.get(stockCode)?.now ?? buyPrice;
       const unrealizedPL = numberFormatter(
-        (record?.totalUnsoldAmount ?? 0) * price - (record?.totalCost ?? 0)
+        (record?.totalUnsoldAmount ?? 0) * price - (record?.totalCost ?? 0),
       );
       const high = stocksState?.get(stockCode)?.high ?? "N/A";
       const low = stocksState?.get(stockCode)?.low ?? "N/A";
@@ -120,7 +126,7 @@ export const StockRecordTable = () => {
             "cursor-pointer",
             sort.key === key && sort.order === "asc"
               ? "stroke-blue-500 fill-blue-500"
-              : ""
+              : "",
           )}
         />
         <ChevronDown
@@ -129,7 +135,7 @@ export const StockRecordTable = () => {
             "cursor-pointer",
             sort.key === key && sort.order === "desc"
               ? "stroke-blue-500 fill-blue-500"
-              : ""
+              : "",
           )}
         />
       </div>
@@ -148,6 +154,15 @@ export const StockRecordTable = () => {
     });
   };
 
+  const onDelete = async (e: React.MouseEvent, stockCode: string) => {
+    e.stopPropagation();
+    const ok = await confirm();
+
+    if (ok) {
+      removeMutation.mutate({ stockCode });
+    }
+  };
+
   useEffect(() => {
     refetch();
   }, [activeIds, refetch]);
@@ -161,6 +176,7 @@ export const StockRecordTable = () => {
   }
   return (
     <Table className="m-4">
+      <ConfirmDialog />
       <TableCaption>A list of your recent transactions.</TableCaption>
       <TableHeader>
         <TableRow>
@@ -206,7 +222,7 @@ export const StockRecordTable = () => {
 
               <TableCell // Price
                 className={cn(
-                  record.up ? "text-red-500 font-bold" : "text-green-500"
+                  record.up ? "text-red-500 font-bold" : "text-green-500",
                 )}
               >
                 {record.up ? (
@@ -226,7 +242,7 @@ export const StockRecordTable = () => {
                 className={cn(
                   parseFloat(record.unrealized) > 0
                     ? "text-red-500 font-bold"
-                    : "text-green-500"
+                    : "text-green-500",
                 )}
               >
                 {record.unrealized}
@@ -234,28 +250,28 @@ export const StockRecordTable = () => {
 
               <TableCell // TPC
                 className={cn(
-                  record.up ? "text-red-500 font-bold" : "text-green-500"
+                  record.up ? "text-red-500 font-bold" : "text-green-500",
                 )}
               >
                 {record.percent}%
               </TableCell>
               <TableCell // High
                 className={cn(
-                  record.up ? "text-red-500 font-bold" : "text-green-500"
+                  record.up ? "text-red-500 font-bold" : "text-green-500",
                 )}
               >
                 {record.high}
               </TableCell>
               <TableCell // Low
                 className={cn(
-                  record.up ? "text-red-500 font-bold" : "text-green-500"
+                  record.up ? "text-red-500 font-bold" : "text-green-500",
                 )}
               >
                 {record.low}
               </TableCell>
               <TableCell // Yesterday
                 className={cn(
-                  record.up ? "text-red-500 font-bold" : "text-green-500"
+                  record.up ? "text-red-500 font-bold" : "text-green-500",
                 )}
               >
                 {record.yesterday}
@@ -269,7 +285,13 @@ export const StockRecordTable = () => {
 
               <TableCell></TableCell>
               <TableCell></TableCell>
-              <TableCell></TableCell>
+              <TableCell>
+                <Trash2
+                  size={16}
+                  className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"
+                  onClick={(e) => onDelete(e, record.stockCode)}
+                />
+              </TableCell>
             </TableRow>
             {selected.has(record.stockCode) && (
               <BuyRecordTable

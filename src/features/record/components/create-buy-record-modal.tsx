@@ -49,7 +49,7 @@ import { useActiveAccounts } from "@/features/account/hooks/use-active-accounts"
 import { useCreateBuyRecord } from "../hooks/use-create-buy-record";
 import { BuyRecord } from "../schema";
 
-type Account = ExtractArrayType<ResponseType["data"]>;
+export type Account = ExtractArrayType<ResponseType["data"]>;
 const formSchema = BuyRecord;
 
 export const CreateBuyRecordModal = () => {
@@ -121,7 +121,7 @@ export const CreateBuyRecordModal = () => {
     onClose();
   };
 
-  const renderSelectItem = (menu: (typeof accountsMenu)[number]) => {
+const renderSelectItem = (menu: (typeof accountsMenu)[number]) => {
     return (
       <SelectGroup key={menu.label}>
         <SelectLabel>{menu.label}</SelectLabel>
