@@ -82,12 +82,12 @@ const app = new Hono()
       await buyRecords.deleteMany({ accountId: id });
 
       user.accounts = user.accounts.filter(
-        (account: any) => account?._id?.toString() !== id
+        (account: any) => account?._id?.toString() !== id,
       );
 
       await user.save();
 
       return c.json({ data: user }, 200);
-    }
+    },
   );
 export default app;

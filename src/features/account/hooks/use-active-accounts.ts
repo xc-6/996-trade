@@ -1,7 +1,7 @@
 import { LOCAL_STORAGE_ACCOUNT_KEY } from "@/lib/const";
 import { useGetAccounts } from "./use-get-accounts";
 import { useLocalStorageState } from "ahooks";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { Account } from "@/features/account/schema";
 import { z } from "zod";
 
@@ -70,6 +70,18 @@ export const useActiveAccounts = () => {
     [selected, setSelected],
   );
 
+  const cleanAll = useCallback(() => {
+    setSelected([]);
+  }, [setSelected]);
+
+  useEffect(() => {
+    if (!isLoading && data) {
+      const ids = data?.map((item) => item._id) ?? [];
+      const newSelected = selected?.filter((id) => ids.includes(id)) ?? [];
+      setSelected(newSelected);
+    }
+  }, [data, isLoading, selected, setSelected]);
+
   return {
     isLoading,
     allAccounts: isLoading ? [] : data,
@@ -79,5 +91,6 @@ export const useActiveAccounts = () => {
     removeAccount,
     mapping,
     accountsMenu,
+    cleanAll,
   };
 };

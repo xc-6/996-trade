@@ -121,7 +121,7 @@ export const CreateBuyRecordModal = () => {
     onClose();
   };
 
-const renderSelectItem = (menu: (typeof accountsMenu)[number]) => {
+  const renderSelectItem = (menu: (typeof accountsMenu)[number]) => {
     return (
       <SelectGroup key={menu.label}>
         <SelectLabel>{menu.label}</SelectLabel>

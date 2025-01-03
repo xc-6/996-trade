@@ -53,14 +53,17 @@ export const DeleteAccountModal = () => {
     if (!selectedId) {
       return;
     }
-    mutation.mutate({
-      id: selectedId,
-    }, {
-      onSuccess: () => {
-        handleClose();
-        removeAccount(selectedId);
+    mutation.mutate(
+      {
+        id: selectedId,
       },
-    });
+      {
+        onSuccess: () => {
+          handleClose();
+          removeAccount(selectedId);
+        },
+      },
+    );
   };
 
   const renderSelectItem = (menu: (typeof accountsMenu)[number]) => {

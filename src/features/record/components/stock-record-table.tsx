@@ -15,10 +15,20 @@ import { useActiveAccounts } from "@/features/account/hooks/use-active-accounts"
 import { BuyRecordTable } from "./buy-record-table";
 import { cn, numberFormatter } from "@/lib/utils";
 import { useStocksState } from "@/features/stock/store/use-stocks-store";
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, JSX, useEffect, useMemo, useState } from "react";
 import { Trash2, MoveDown, MoveUp } from "lucide-react";
 import { ResponseType } from "../hooks/use-get-records-by-stock";
 import { useDeleteStockGroups } from "../hooks/use-delete-stock-groups";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { deafultFilter } from "../deafult";
 
 export const StockRecordTable = () => {
   const [selected, setSelected] = useState(new Set<string>());
@@ -33,27 +43,30 @@ export const StockRecordTable = () => {
 
   type StockRecord = ResponseType["data"][0];
 
-  const onSort = (key: keyof StockRecord) => {
-    if (sort.key === key) {
-      setSort((prev) => ({
-        ...prev,
-        order: prev.order === "asc" ? "desc" : "asc",
-      }));
-    } else {
-      setSort({ key, order: "asc" });
-    }
-  };
-
   const [sort, setSort] = useState<{
     key?: keyof StockRecord;
     order?: "asc" | "desc";
   }>({});
+  const [filter, setFilter] = useState<
+    Record<
+      string,
+      {
+        min?: number;
+        max?: number;
+      }
+    >
+  >({ ...deafultFilter });
+  const [tmpFilter, setTmpFilter] = useState<{
+    min?: number;
+    max?: number;
+  }>({});
+  const [filterActive, setFilterActive] = useState("");
 
   const list = useMemo(() => {
     if (isLoading) {
       return [];
     }
-    const res = Object.keys(data ?? {})?.map((stockCode) => {
+    let res = Object.keys(data ?? {})?.map((stockCode) => {
       const record = data?.[stockCode];
       const buyPrice = record?.avgCost ?? 0;
       const name = stocksState?.get(stockCode)?.name;
@@ -88,6 +101,20 @@ export const StockRecordTable = () => {
       };
     });
 
+    res = res.filter((record) => {
+      for (const key in filter) {
+        if (
+          (filter[key].min !== undefined &&
+            Number(record[key as keyof StockRecord]) < filter[key].min) ||
+          (filter[key].max !== undefined &&
+            Number(record[key as keyof StockRecord]) > filter[key].max)
+        ) {
+          return false;
+        }
+      }
+      return true;
+    });
+
     if (sort.key && sort.order && res.length > 0) {
       if (typeof res[0]?.[sort.key] === "string") {
         res.sort((a, b) => {
@@ -109,38 +136,145 @@ export const StockRecordTable = () => {
     }
 
     return res;
-  }, [isLoading, data, sort, stocksState]);
+  }, [isLoading, data, sort.key, sort.order, stocksState, filter]);
 
-  const renderHeader = (name: string, key: string) => (
-    <TableHead
-      className="text-nowrap"
-      onClick={() => onSort(key as keyof StockRecord)}
-    >
-      <span className={cn(sort.key === key && "font-bold text-blue-500")}>
+  const onSort = (key: keyof StockRecord) => {
+    if (sort.key === key) {
+      setSort((prev) => ({
+        ...prev,
+        order: prev.order === "asc" ? "desc" : "asc",
+      }));
+    } else {
+      setSort({ key, order: "asc" });
+    }
+  };
+
+  const onOpenChange = (open: boolean, key: string) => {
+    if (open) {
+      setTmpFilter(filter[key] ?? {});
+      setFilterActive(key);
+    } else {
+      setFilterActive("");
+      setTmpFilter({});
+    }
+  };
+
+  const addFilter = (key: string, children: React.ReactNode) => {
+    return (
+      <Popover
+        open={filterActive === key}
+        onOpenChange={(vis) => onOpenChange(vis, key)}
+      >
+        <PopoverTrigger asChild>{children}</PopoverTrigger>
+        <PopoverContent>
+          <div className="p-1">
+            <div className="flex gap-4 flex-col">
+              <Label>Min</Label>
+              <Input
+                placeholder="Min"
+                className="p-2"
+                type="number"
+                value={tmpFilter?.min}
+                onChange={(e) =>
+                  setTmpFilter((prev) => ({
+                    ...prev,
+                    min: Number(e.target.value),
+                  }))
+                }
+              />
+              <Label>Max</Label>
+              <Input
+                placeholder="Max"
+                className="p-2"
+                type="number"
+                value={tmpFilter?.max}
+                onChange={(e) =>
+                  setTmpFilter((prev) => ({
+                    ...prev,
+                    max: Number(e.target.value),
+                  }))
+                }
+              />
+            </div>
+            <div className="flex justify-end mt-4">
+              <Button
+                className="btn"
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setTmpFilter({ ...deafultFilter[key] });
+                }}
+              >
+                Reset
+              </Button>
+              <Button
+                className="btn btn-primary ml-2"
+                size="sm"
+                onClick={() => {
+                  setFilterActive("");
+                  setFilter((prev) => ({
+                    ...prev,
+                    [key]: {
+                      ...prev?.[key],
+                      ...(tmpFilter ?? {}),
+                    },
+                  }));
+                }}
+              >
+                Apply
+              </Button>
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
+    );
+  };
+
+  const renderHeader = (
+    name: string,
+    key: string,
+    filterable: boolean = false,
+  ): JSX.Element => {
+    const text = (
+      <span
+        className={cn(
+          sort.key === key && "text-blue-500",
+          (filter?.key?.min !== undefined || filter?.key?.max !== undefined) &&
+            "font-bold",
+        )}
+      >
         {name}
       </span>
-      <div className="inline-flex flex-col align-middle ml-1">
-        <ChevronUp
-          size={12}
-          className={cn(
-            "cursor-pointer",
-            sort.key === key && sort.order === "asc"
-              ? "stroke-blue-500 fill-blue-500"
-              : "",
-          )}
-        />
-        <ChevronDown
-          size={12}
-          className={cn(
-            "cursor-pointer",
-            sort.key === key && sort.order === "desc"
-              ? "stroke-blue-500 fill-blue-500"
-              : "",
-          )}
-        />
-      </div>
-    </TableHead>
-  );
+    );
+    return (
+      <TableHead className="text-nowrap">
+        {filterable ? addFilter(key, text) : text}
+        <div
+          className="inline-flex flex-col align-middle ml-1"
+          onClick={() => onSort(key as keyof StockRecord)}
+        >
+          <ChevronUp
+            size={12}
+            className={cn(
+              "cursor-pointer",
+              sort.key === key && sort.order === "asc"
+                ? "stroke-blue-500 fill-blue-500"
+                : "",
+            )}
+          />
+          <ChevronDown
+            size={12}
+            className={cn(
+              "cursor-pointer",
+              sort.key === key && sort.order === "desc"
+                ? "stroke-blue-500 fill-blue-500"
+                : "",
+            )}
+          />
+        </div>
+      </TableHead>
+    );
+  };
 
   const onSelect = (stockCode: string) => {
     setSelected((prev) => {
@@ -198,10 +332,10 @@ export const StockRecordTable = () => {
           {renderHeader("Yesterday", "yesterday")}
 
           {renderHeader("Total Cost", "totalCost")}
-          {renderHeader("Unsold Amount", "unsoldAmount")}
-          {renderHeader("Buy Amount", "buyAmount")}
+          {renderHeader("Unsold Amount", "totalUnsoldAmount", true)}
+          {renderHeader("Buy Amount", "totalBuyAmount")}
 
-          {renderHeader("Realized P&L", "profitLoss")}
+          {renderHeader("Realized P&L", "totalPL")}
 
           <TableHead>Account</TableHead>
           <TableHead>Buy Date</TableHead>

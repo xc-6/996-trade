@@ -30,7 +30,7 @@ export const useDeleteStockGroups = () => {
 
       return await response.json();
     },
-    onSuccess: (_, {}) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["buyRecords"] });
       queryClient.invalidateQueries({
         queryKey: ["buyRecordsByStock"],

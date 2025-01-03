@@ -119,14 +119,14 @@ export function AccontSwitcher() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             {accountsMenu?.map((item) => renderMenuItem(item))}
-            <DropdownMenuItem className="gap-2 p-2">
+            <DropdownMenuItem
+              className="gap-2 p-2"
+              onClick={() => setTimeout(() => onOpen("createAccount"), 20)}
+            >
               <div className="flex size-6 items-center justify-center rounded-md border bg-background">
                 <Plus className="size-4" />
               </div>
-              <div
-                className="font-medium text-muted-foreground"
-                onClick={() => setTimeout(() => onOpen("createAccount"), 20)}
-              >
+              <div className="font-medium text-muted-foreground">
                 Add Account
               </div>
             </DropdownMenuItem>
