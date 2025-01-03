@@ -10,17 +10,18 @@ type ResponseType = InferResponseType<
 
 type RequestType = InferRequestType<
   (typeof client.api.records.stock_groups)[":stockCode"]["$delete"]
->["param"];
+>;
 
 export const useDeleteStockGroups = () => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation<ResponseType, Error, RequestType>({
-    mutationFn: async (param) => {
+    mutationFn: async ({ param, query }) => {
       const response = await client.api.records.stock_groups[
         ":stockCode"
       ].$delete({
         param,
+        query,
       });
 
       if (!response.ok) {

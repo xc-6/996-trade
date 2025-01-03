@@ -159,7 +159,12 @@ export const StockRecordTable = () => {
     const ok = await confirm();
 
     if (ok) {
-      removeMutation.mutate({ stockCode });
+      removeMutation.mutate({
+        param: { stockCode },
+        query: {
+          accountIds: activeIds?.join(",") ?? "",
+        },
+      });
     }
   };
 

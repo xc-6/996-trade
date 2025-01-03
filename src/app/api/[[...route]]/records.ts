@@ -6,6 +6,7 @@ import {
   buyRecords,
   sellRecords,
   users,
+  zAccount,
   zBuyRecord,
   zSellRecord,
 } from "@/db/schema";
@@ -303,6 +304,21 @@ const app = new Hono()
       const { accountIds } = c.req.valid("query");
       const accounts = accountIds.split(",");
 
+      // Check the accounts ids are in this user's accounts
+      const user = await users.findById(auth.token.id);
+      if (!user) {
+        return c.json({ error: "Something went wrong" }, 400);
+      }
+
+      const totalAccounts = user.accounts as Array<
+        z.infer<typeof zAccount> & { _id: string }
+      >;
+      const userAccountIds = totalAccounts?.map((account) => account._id) ?? [];
+
+      if (accounts.some((account) => !userAccountIds.includes(account))) {
+        return c.json({ error: "Unauthorized or account not found" }, 401);
+      }
+
       // Fetch records for the specified accounts
       const records = await buyRecords.find({ accountId: { $in: accounts } });
 
@@ -394,7 +410,7 @@ const app = new Hono()
   .delete(
     "stock_groups/:stockCode",
     verifyAuth(),
-    zValidator("param", z.object({ stockCode: z.string() })),
+    zValidator("query", z.object({ accountIds: z.string() })),
     async (c) => {
       const auth = c.get("authUser");
       const { stockCode } = c.req.valid("param");
@@ -405,8 +421,14 @@ const app = new Hono()
 
       await db();
 
+      const { accountIds } = c.req.valid("query");
+      const accounts = accountIds.split(",");
+
       // Delete all buy records with the specified stockCode
-      const result = await buyRecords.deleteMany({ stockCode });
+      const result = await buyRecords.deleteMany({
+        stockCode,
+        accountId: { $in: accounts },
+      });
 
       if (result.deletedCount === 0) {
         return c.json({ message: "No records found to delete" }, 404);

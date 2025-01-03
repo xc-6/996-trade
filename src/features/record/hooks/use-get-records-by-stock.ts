@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { InferResponseType } from "hono";
 import { client } from "@/lib/hono";
+import { toast } from "sonner";
 
 export type ResponseType = InferResponseType<
   (typeof client.api.records)["stock_groups"]["$get"],
@@ -18,7 +19,9 @@ export const useGetRecordsByStock = (accountIds: Array<string>) => {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to fetch images");
+        const { error } = await response.json();
+        toast.error("Failed to fetch the records. " + error);
+        throw new Error("Failed to fetch the records");
       }
 
       const { data } = await response.json();
