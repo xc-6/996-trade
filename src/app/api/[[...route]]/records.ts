@@ -411,6 +411,7 @@ const app = new Hono()
     "stock_groups/:stockCode",
     verifyAuth(),
     zValidator("query", z.object({ accountIds: z.string() })),
+    zValidator("param", z.object({ stockCode: z.string() })),
     async (c) => {
       const auth = c.get("authUser");
       const { stockCode } = c.req.valid("param");
