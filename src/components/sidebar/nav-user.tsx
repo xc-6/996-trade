@@ -27,12 +27,10 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useSession, signOut } from "next-auth/react";
-import { useActiveAccounts } from "@/features/account/hooks/use-active-accounts";
 import { useModal } from "@/hooks/use-modal-store";
 
 export function NavUser() {
   const { isMobile } = useSidebar();
-  const { cleanAll } = useActiveAccounts();
   const session = useSession();
   const { onOpen } = useModal();
 
@@ -49,7 +47,7 @@ export function NavUser() {
   const email = session.data?.user?.email;
 
   const logout = async () => {
-    cleanAll();
+    localStorage.clear();
     await signOut();
   };
 

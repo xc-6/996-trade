@@ -313,7 +313,7 @@ const app = new Hono()
       const totalAccounts = user.accounts as Array<
         z.infer<typeof zAccount> & { _id: string }
       >;
-      const userAccountIds = totalAccounts?.map((account) => account._id) ?? [];
+      const userAccountIds = totalAccounts?.map((account) => String(account._id)) ?? [];
 
       if (accounts.some((account) => !userAccountIds.includes(account))) {
         return c.json({ error: "Unauthorized or account not found" }, 401);
