@@ -6,6 +6,7 @@ import { create } from "zustand";
 export type ModalType =
   | "createAccount"
   | "createBuyRecord"
+  | "editBuyRecord"
   | "createSellRecord"
   | "createRecordUpload"
   | "deleteAccount";

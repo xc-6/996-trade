@@ -129,6 +129,91 @@ const app = new Hono()
     },
   )
   .post(
+    "/buy_record/:id",
+    verifyAuth(),
+    zValidator("param", z.object({ id: z.string() })),
+    zValidator(
+      "json",
+      zBuyRecord.omit({ sellRecords: true }).extend({ buyDate: z.string() }),
+    ),
+    // Edit the buy record
+    async (c) => {
+      const auth = c.get("authUser");
+      const { id } = c.req.valid("param");
+      const { stockCode, buyDate, buyPrice, buyAmount, accountId } =
+        c.req.valid("json");
+
+      if (!auth.token?.id) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      await db();
+
+      const user = await users.findOne({
+        _id: auth.token.id,
+        "accounts._id": accountId,
+      });
+
+      if (!user) {
+        return c.json({ error: "Something went wrong" }, 400);
+      }
+
+      // Get the buy record and update it
+      const buyRecord = await buyRecords.findOne({
+        _id: id,
+      });
+      if (!buyRecord) {
+        return c.json({ error: "Buy record not found" }, 400);
+      }
+
+      const preSoldAmount = (buyRecord.sellRecords ?? []).reduce(
+        (sum, record) => sum + Number(record.sellAmount),
+        0,
+      );
+
+      if (buyAmount < preSoldAmount) {
+        return c.json(
+          {
+            error: "Buy Amount cannot be less than Sold Amount",
+            preSoldAmount,
+          },
+          400,
+        );
+      }
+
+      // Get the earlier sold date, if the buy date is after the sell date then error
+      const earliestSellDate = buyRecord.sellRecords.reduce(
+        (earliest, record) =>
+          record.sellDate < earliest ? record.sellDate : earliest,
+        new Date(),
+      );
+      if (new Date(buyDate) > earliestSellDate) {
+        return c.json(
+          {
+            error: "Buy Date cannot be later than the earliest sold Date",
+            earliestSellDate,
+          },
+          400,
+        );
+      }
+
+      const data = await buyRecords.findOneAndUpdate(
+        { _id: id },
+        {
+          stockCode,
+          buyDate: new Date(buyDate),
+          buyPrice,
+          buyAmount,
+          accountId,
+          unsoldAmount: buyAmount - preSoldAmount,
+        },
+        { new: true, sellRecords: 0 },
+      );
+
+      return c.json(data, 200);
+    },
+  )
+  .post(
     "/buy_record/:buyRecordId/sell",
     verifyAuth(),
     zValidator("param", z.object({ buyRecordId: z.string() })),
@@ -313,7 +398,8 @@ const app = new Hono()
       const totalAccounts = user.accounts as Array<
         z.infer<typeof zAccount> & { _id: string }
       >;
-      const userAccountIds = totalAccounts?.map((account) => String(account._id)) ?? [];
+      const userAccountIds =
+        totalAccounts?.map((account) => String(account._id)) ?? [];
 
       if (accounts.some((account) => !userAccountIds.includes(account))) {
         return c.json({ error: "Unauthorized or account not found" }, 401);

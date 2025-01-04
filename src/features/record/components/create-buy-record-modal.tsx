@@ -41,12 +41,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { EXCHANGE } from "@/lib/const";
 import { ResponseType } from "@/features/account/hooks/use-get-accounts";
 import { ExtractArrayType } from "@/lib/types";
 import { useActiveAccounts } from "@/features/account/hooks/use-active-accounts";
 import { useCreateBuyRecord } from "../hooks/use-create-buy-record";
+import { useEditBuyRecord } from "../hooks/use-edit-buy-record";
 import { BuyRecord } from "../schema";
 
 export type Account = ExtractArrayType<ResponseType["data"]>;
@@ -54,12 +55,18 @@ const formSchema = BuyRecord;
 
 export const CreateBuyRecordModal = () => {
   const { isOpen, onClose, type, data } = useModal();
-  const mutation = useCreateBuyRecord();
+  const { mutate: createMutate } = useCreateBuyRecord();
+  const { mutate: editMutate } = useEditBuyRecord();
 
-  const isModalOpen = isOpen && type === "createBuyRecord";
+  const isModalOpen =
+    isOpen &&
+    type !== null &&
+    ["createBuyRecord", "editBuyRecord"].includes(type);
   const { buyRecord } = data;
 
   const { accountsMenu } = useActiveAccounts();
+
+  const edit = useMemo(() => type === "editBuyRecord", [type]);
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -83,11 +90,15 @@ export const CreateBuyRecordModal = () => {
       form.setValue("stockCode", stockCode);
       form.setValue("buyPrice", String(buyRecord.buyPrice));
       form.setValue("buyAmount", String(buyRecord.buyAmount));
+      form.setValue("buyDate", new Date(buyRecord.buyDate));
+      form.setValue("accountId", buyRecord.accountId);
     } else {
       form.setValue("exchange", EXCHANGE[0]);
       form.setValue("stockCode", "");
       form.setValue("buyPrice", "");
       form.setValue("buyAmount", "");
+      form.setValue("buyDate", new Date());
+      form.setValue("accountId", "");
     }
   }, [buyRecord, form]);
 
@@ -100,20 +111,44 @@ export const CreateBuyRecordModal = () => {
     const buyDate = values["buyDate"].toISOString();
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { exchange, ...res } = values;
-    mutation.mutate(
-      {
-        ...res,
-        buyPrice,
-        buyAmount,
-        stockCode,
-        buyDate,
-      },
-      {
-        onSuccess: () => {
-          handleClose();
+    if (edit) {
+      if (buyRecord?._id === undefined) return;
+      editMutate(
+        {
+          param: {
+            id: buyRecord._id,
+          },
+          json: {
+            ...res,
+            buyPrice,
+            buyAmount,
+            stockCode,
+            buyDate,
+          },
         },
-      },
-    );
+        {
+          onSuccess: () => {
+            handleClose();
+          },
+        },
+      );
+      return;
+    } else {
+      createMutate(
+        {
+          ...res,
+          buyPrice,
+          buyAmount,
+          stockCode,
+          buyDate,
+        },
+        {
+          onSuccess: () => {
+            handleClose();
+          },
+        },
+      );
+    }
   };
 
   const handleClose = () => {
@@ -142,7 +177,7 @@ export const CreateBuyRecordModal = () => {
       >
         <DialogHeader className="pt-8 px-6">
           <DialogTitle className="text-2xl text-center font-bold">
-            Create Buy Record
+            {edit ? "Edit" : "Create"} Buy Record
           </DialogTitle>
         </DialogHeader>
         <Form {...form}>

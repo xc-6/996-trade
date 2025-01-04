@@ -10,7 +10,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useGetBuyRecords } from "../hooks/use-get-buy-records";
 import { useDeleteBuyRecord } from "../hooks/use-delete-buy-record";
-import { ChevronDown, ChevronUp, Loader } from "lucide-react";
+import { ChevronDown, ChevronUp, Loader, Pencil } from "lucide-react";
 import { useActiveAccounts } from "@/features/account/hooks/use-active-accounts";
 import { format } from "date-fns";
 import { usePanel } from "../hooks/use-panel";
@@ -29,6 +29,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
+import { useModal } from "@/hooks/use-modal-store";
 import { deafultFilter } from "../deafult";
 
 type BuyRecord = ResponseType["data"][0];
@@ -40,6 +41,7 @@ export const BuyRecordTable = ({
   showHeader = true,
   stockCode,
 }: BuyRecordTableProps = {}) => {
+  const { onOpen } = useModal();
   const [ConfirmDialog, confirm] = useConfirm(
     "Are you sure?",
     "You are about to delete this record.",
@@ -146,6 +148,11 @@ export const BuyRecordTable = ({
     if (ok) {
       removeMutation.mutate({ id });
     }
+  };
+
+  const onEdit = (e: React.MouseEvent, buyRecord: BuyRecord) => {
+    e.stopPropagation();
+    onOpen("editBuyRecord", { buyRecord });
   };
 
   const onSort = (key: keyof BuyRecord) => {
@@ -267,7 +274,12 @@ export const BuyRecordTable = ({
 
           <TableCell>{record.accountName}</TableCell>
           <TableCell>{format(new Date(record.buyDate), "PPP")}</TableCell>
-          <TableCell>
+          <TableCell className="flex gap-2 items-center">
+            <Pencil
+              size={16}
+              className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"
+              onClick={(e) => onEdit(e, record)}
+            />
             <Trash2
               size={16}
               className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"

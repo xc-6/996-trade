@@ -77,12 +77,12 @@ export const useActiveAccounts = () => {
   useEffect(() => {
     if (!isLoading && data) {
       const ids = data?.map((item) => item._id) ?? [];
-      setSelected((prev)=>{
+      setSelected((prev) => {
         const newSelected = prev?.filter((id) => ids.includes(id)) ?? [];
         return newSelected;
       });
     }
-  }, [data, isLoading,, setSelected]);
+  }, [data, isLoading, , setSelected]);
 
   return {
     isLoading,
