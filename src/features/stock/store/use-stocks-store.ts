@@ -18,5 +18,5 @@ export const useStocksState = create<BuyRecordState>((set) => ({
   setStocksCodes: (data: string[]) => set({ stocksCodes: data }),
   setInit: (data: boolean) => set({ init: data }),
   setStocksState: (data: Map<string, StockInfo>) => set({ stocksState: data }),
-  refreshTime: 10000,
+  refreshTime: 1000,
 }));
