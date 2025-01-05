@@ -43,7 +43,7 @@ export default async function Layout({
             </Breadcrumb>
           </div>
         </header>
-        <main>{children}</main>
+        <main className="px-4 py-2">{children}</main>
       </SidebarInset>
     </SidebarProvider>
   );

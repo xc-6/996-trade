@@ -1,5 +1,5 @@
 "use client";
-import { Frame, SquareTerminal, Upload } from "lucide-react";
+import { Download, Frame, SquareTerminal, Upload } from "lucide-react";
 
 import { NavMain } from "./nav-main";
 import { NavSub } from "./nav-sub";
@@ -13,8 +13,11 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { useModal } from "@/hooks/use-modal-store";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useActiveAccounts } from "@/features/account/hooks/use-active-accounts";
+import { queryFn } from "@/features/record/hooks/use-get-buy-records";
+import { useQuery } from "@tanstack/react-query";
+import { downloadRecords } from "@/lib/utils";
 
 const navMain = [
   {
@@ -37,7 +40,22 @@ const navMain = [
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { onOpen } = useModal();
-  const { accountsMenu } = useActiveAccounts();
+  const { accountsMenu, mapping } = useActiveAccounts();
+  const [accountId, setAccountId] = useState<string>("");
+  const { data, isLoading } = useQuery({
+    enabled: !!accountId,
+    queryKey: ["buyRecords", [accountId]],
+    queryFn: () => queryFn([accountId], undefined, true),
+  });
+
+  useEffect(() => {
+    if (isLoading || !data || !accountId) {
+      return;
+    }
+    const fileName = `[trade-insight]-${mapping[accountId]?.name}-${mapping[accountId]?.currency}.txt`;
+    downloadRecords(fileName, data ?? []);
+    setAccountId("");
+  }, [accountId, data, isLoading, mapping, setAccountId]);
 
   const navSub = useMemo(() => {
     return [
@@ -57,6 +75,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             name: item.name,
             onClick: () => {
               onOpen("createRecordUpload", { account: item });
+            },
+          })),
+        })),
+      },
+      {
+        name: "Export To File",
+        icon: Download,
+        groups: accountsMenu.map((account) => ({
+          label: account.label,
+          items: account.items.map((item) => ({
+            name: item.name,
+            onClick: () => {
+              setAccountId(item._id);
             },
           })),
         })),

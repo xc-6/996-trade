@@ -4,7 +4,7 @@ import { StockInfo } from "@/lib/types";
 type BuyRecordState = {
   init: boolean;
   stocksCodes?: string[];
-  stocksState: Map<string, StockInfo>;
+  stocksState: Map<string | number, StockInfo>;
   setStocksCodes: (data: string[]) => void;
   setInit: (data: boolean) => void;
   setStocksState: (data: Map<string, StockInfo>) => void;

@@ -64,7 +64,7 @@ export const SellRecordTable = () => {
   }
 
   return (
-    <Table className="m-4">
+    <Table>
       <ConfirmDialog />
       <TableCaption>A list of your recent transactions.</TableCaption>
       <TableHeader>
@@ -131,12 +131,6 @@ export const SellRecordTable = () => {
           );
         })}
       </TableBody>
-      {/* <TableFooter>
-          <TableRow>
-            <TableCell colSpan={3}>Total</TableCell>
-            <TableCell className="text-right">$2,500.00</TableCell>
-          </TableRow>
-        </TableFooter> */}
     </Table>
   );
 };

@@ -1,10 +1,10 @@
-export const deafultFilter: Record<string, { min?: number; max?: number }> = {
+export const defaultFilter: Record<string, { min?: number; max?: number }> = {
   unsoldAmount: {
-    min: 1,
+    min: 0.000001,
     max: 1000000,
   },
   totalUnsoldAmount: {
-    min: 1,
+    min: 0.000001,
     max: 1000000,
   },
 };

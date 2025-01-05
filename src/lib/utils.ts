@@ -1,6 +1,8 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import * as fedHolidays from "@18f/us-federal-holidays";
+import { format } from "date-fns";
+import { BuyRecord } from "./types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -120,4 +122,32 @@ export const formatBytes = (
       ? (accurateSizes[i] ?? "Bytes")
       : (sizes[i] ?? "Bytes")
   }`;
+};
+
+export const downloadRecords = (
+  fileName: string,
+  records: Array<BuyRecord>,
+) => {
+  console.log(records);
+  const lines = records.map((record) => {
+    const sellRecords = record.sellRecords.map((sellRecord) => {
+      return `${format(new Date(sellRecord.sellDate), "MM/dd/yyyy")},${sellRecord.sellPrice},${sellRecord.sellAmount}`;
+    });
+    const buyRecord = `${format(new Date(record.buyDate), "MM/dd/yyyy")},${record.stockCode},${record.buyPrice},${record.buyAmount}`;
+    return buyRecord + "\n" + sellRecords.join("\n") + "\n";
+  });
+  const content = lines.join("\n");
+  const blob = new Blob([content], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+  downloadFile(fileName, url);
+};
+
+export const downloadFile = (fileName: string, url: string) => {
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 };

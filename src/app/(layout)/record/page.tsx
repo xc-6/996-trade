@@ -11,11 +11,13 @@ import { usePanel } from "@/features/record/hooks/use-panel";
 import { Button } from "@/components/ui/button";
 import { useModal } from "@/hooks/use-modal-store";
 import { useRefreshStocks } from "@/features/stock/hooks/use-refresh-stocks";
+import { useClient } from "@/lib/hooks";
 
 export default function Record() {
   useRefreshStocks();
   const { onOpen } = useModal();
   const { recordId, onClose } = usePanel();
+  const onlyClient = useClient();
   const showPanel = !!recordId;
   return (
     <ResizablePanelGroup
@@ -23,7 +25,7 @@ export default function Record() {
       autoSaveId="ca-workspace-layout"
     >
       <ResizablePanel defaultSize={100} minSize={50}>
-        <BuyRecordTable />
+        {onlyClient && <BuyRecordTable />}
       </ResizablePanel>
       {showPanel && (
         <>

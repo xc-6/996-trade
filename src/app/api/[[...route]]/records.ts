@@ -22,6 +22,7 @@ const app = new Hono()
       z.object({
         accountIds: z.string().optional(),
         stockCode: z.string().optional(),
+        showSold: z.string().optional().default("false"),
       }),
     ),
     async (c) => {
@@ -39,16 +40,18 @@ const app = new Hono()
         return c.json({ error: "Something went wrong" }, 400);
       }
 
-      const { accountIds, stockCode } = c.req.valid("query");
+      const { accountIds, stockCode, showSold } = c.req.valid("query");
 
       const accounts = accountIds?.split(",");
+
+      const selectFields = showSold === "true" ? {} : { sellRecords: 0 };
 
       const records = await buyRecords.find(
         {
           accountId: { $in: accounts ?? user.accounts },
           stockCode: stockCode ? { $in: [stockCode] } : { $exists: true },
         },
-        { sellRecords: 0 },
+        selectFields,
       );
 
       const data = records as unknown as Array<
