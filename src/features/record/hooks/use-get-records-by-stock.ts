@@ -10,8 +10,12 @@ export type ResponseType = InferResponseType<
 
 export const useGetRecordsByStock = (accountIds: Array<string>) => {
   const query = useQuery({
+    enabled: !!accountIds.length,
     queryKey: ["buyRecordsByStock", accountIds],
     queryFn: async () => {
+      if (!accountIds.length) {
+        return {};
+      }
       const response = await client.api.records.stock_groups.$get({
         query: {
           accountIds: accountIds.join(","),
