@@ -135,12 +135,18 @@ export const StockRecordTable = () => {
       key: "totalUnsoldAmount",
       label: "Unsold Amount",
       filterable: true,
-      render: (item) => numberFormatter(item.totalUnsoldAmount),
+      render: (item) =>
+        item.totalUnsoldAmount.toLocaleString("en-US", {
+          maximumFractionDigits: 4,
+        }),
     },
     {
       key: "buyAmount",
       label: "Buy Amount",
-      render: (item) => numberFormatter(item.totalBuyAmount),
+      render: (item) =>
+        item.totalBuyAmount.toLocaleString("en-US", {
+          maximumFractionDigits: 4,
+        }),
     },
     {
       key: "totalUnrealized",
@@ -248,6 +254,7 @@ export const StockRecordTable = () => {
       columns={columns}
       dataIndex="stockCode"
       className="mb-2"
+      rowClassName={"group"}
     >
       <ConfirmDialog />
     </Table>

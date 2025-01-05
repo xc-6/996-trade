@@ -28,7 +28,7 @@ export const reverseMapping = (mapping: Record<string, Array<string>>) => {
 
 export const numberFormatter = (num?: number) => {
   if (num === undefined) return "N/A";
-  return new Intl.NumberFormat().format(Number(num.toFixed(2)));
+  return num.toLocaleString("en-US", { maximumFractionDigits: 3 });
 };
 
 export const currencyFormatter = (

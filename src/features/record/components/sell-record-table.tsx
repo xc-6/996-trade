@@ -97,10 +97,14 @@ export const SellRecordTable = () => {
                 {stocksState?.get(buyRecord.stockCode)?.name}
               </TableCell>
               <TableCell>{record.sellPrice}</TableCell>
-              <TableCell>{record.sellAmount}</TableCell>
+              <TableCell>
+                {record.sellAmount.toLocaleString("en-US", {
+                  maximumFractionDigits: 4,
+                })}
+              </TableCell>
               <TableCell>
                 {(Number(record.sellPrice) * Number(record.sellAmount)).toFixed(
-                  2,
+                  3,
                 )}
               </TableCell>
               <TableCell

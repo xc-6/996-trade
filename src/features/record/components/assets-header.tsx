@@ -75,7 +75,9 @@ export const AssetsHeader = () => {
     <div className="grid gap-4 sm:grid-cols-4 xl:grid-cols-4">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-normal">Total Assets</CardTitle>
+          <CardTitle className="text-sm font-normal">
+            Total Market Value
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text font-bold">

@@ -146,12 +146,14 @@ export const BuyRecordTable = ({
       key: "unsoldAmount",
       label: "Unsold Amount",
       filterable: true,
-      render: (item) => numberFormatter(item.unsoldAmount),
+      render: (item) =>
+        item.unsoldAmount.toLocaleString("en-US", { maximumFractionDigits: 4 }),
     },
     {
       key: "buyAmount",
       label: "Buy Amount",
-      render: (item) => numberFormatter(item.buyAmount),
+      render: (item) =>
+        item.buyAmount.toLocaleString("en-US", { maximumFractionDigits: 4 }),
     },
     {
       key: "profitLoss",

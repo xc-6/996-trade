@@ -12,11 +12,13 @@ import { useModal } from "@/hooks/use-modal-store";
 import { useRefreshStocks } from "@/features/stock/hooks/use-refresh-stocks";
 import { AssetsHeader } from "@/features/record/components/assets-header";
 import { StockRecordTable } from "@/features/record/components/stock-record-table";
+import { useClient } from "@/lib/hooks";
 
 export default function Dashboard() {
   useRefreshStocks();
   const { onOpen } = useModal();
   const { recordId, onClose } = usePanel();
+  const onlyClient = useClient();
   const showPanel = !!recordId;
   return (
     <ResizablePanelGroup
@@ -25,7 +27,7 @@ export default function Dashboard() {
     >
       <ResizablePanel defaultSize={100} minSize={50}>
         <AssetsHeader />
-        <StockRecordTable />
+        {onlyClient && <StockRecordTable />}
       </ResizablePanel>
       {showPanel && (
         <>
