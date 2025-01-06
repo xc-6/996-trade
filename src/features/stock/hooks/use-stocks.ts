@@ -3,6 +3,7 @@ import { useStocksState } from "../store/use-stocks-store";
 import { useGetStocks } from "./use-get-stocks";
 import { StockInfo } from "@/lib/types";
 import { isMarketOpen } from "@/lib/utils";
+import { useDocumentVisibility } from "ahooks";
 
 export const useStocks = () => {
   const timer = useRef<any>(null);
@@ -15,13 +16,18 @@ export const useStocks = () => {
     init,
     refreshTime,
   } = useStocksState();
+  const documentVisibility = useDocumentVisibility();
   const { data, refetch, isLoading } = useGetStocks(stocksCodes ?? []);
+  const visible = documentVisibility && documentVisibility != "hidden";
 
   const _refecth = useCallback(() => {
+    if (!visible) {
+      return;
+    }
     if (!init || isMarketOpen(stocksCodes ?? [])) {
       refetch();
     }
-  }, [stocksCodes, refetch, init]);
+  }, [stocksCodes, refetch, init, visible]);
 
   useEffect(() => {
     if (data) {
