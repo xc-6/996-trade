@@ -54,7 +54,7 @@ const isChineseMarketOpen = () => {
   const hours = now.getUTCHours(); // Get current hour in UTC
 
   return (
-    (hours === 1 && now.getUTCMinutes() >= 30) || // Morning session starts at 9:30 AM UTC+8
+    hours === 1 || // Morning session starts at 9:00 AM UTC+8
     hours === 2 || // Morning session until 11:30 AM UTC+8
     (hours === 3 && now.getUTCMinutes() < 30) || // Morning session ends at 11:30 AM UTC+8
     [5, 6].includes(hours)
@@ -75,9 +75,7 @@ const isHKMarketOpen = () => {
   const now = new Date();
   const hours = now.getUTCHours(); // Get current hour in UTC
   return (
-    (hours === 1 && now.getUTCMinutes() >= 30) || // Morning session starts at 9:30 AM UTC+8
-    [2, 3, 4, 5].includes(hours) ||
-    (hours === 6 && now.getUTCMinutes() < 30)
+    [1, 2, 3, 4, 5].includes(hours) || (hours === 6 && now.getUTCMinutes() < 30)
   ); // Afternoon session ends at 3:00 PM UTC+8
 };
 

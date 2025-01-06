@@ -31,8 +31,12 @@ const navMain = [
         url: "/dashboard",
       },
       {
-        title: "Record History",
-        url: "/record",
+        title: "Buy Record History",
+        url: "/buy_record",
+      },
+      {
+        title: "Sell Record History",
+        url: "/sell_record",
       },
     ],
   },

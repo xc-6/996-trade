@@ -12,6 +12,7 @@ import {
 } from "@/db/schema";
 import { db } from "@/db/mongo";
 import { z } from "zod";
+import { ObjectId } from "mongodb";
 
 const app = new Hono()
   .get(
@@ -42,7 +43,7 @@ const app = new Hono()
 
       const { accountIds, stockCode, showSold } = c.req.valid("query");
 
-      const accounts = accountIds?.split(",");
+      const accounts = accountIds?.split(",").map((id) => new ObjectId(id));
 
       const selectFields = showSold === "true" ? {} : { sellRecords: 0 };
 
@@ -57,6 +58,73 @@ const app = new Hono()
       const data = records as unknown as Array<
         z.infer<typeof zBuyRecord> & { _id: string }
       >;
+
+      return c.json({ data: data ?? [] }, 200);
+    },
+  )
+  .get(
+    "/sell_records",
+    verifyAuth(),
+    zValidator(
+      "query",
+      z.object({
+        accountIds: z.string().optional(),
+      }),
+    ),
+    async (c) => {
+      const auth = c.get("authUser");
+
+      if (!auth.token?.id) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      await db();
+
+      const user = await users.findById(auth.token.id);
+
+      if (!user) {
+        return c.json({ error: "Something went wrong" }, 400);
+      }
+
+      const { accountIds } = c.req.valid("query");
+
+      const accounts = accountIds?.split(",").map((id) => new ObjectId(id));
+
+      const sellRecords = await buyRecords.aggregate([
+        {
+          $match: {
+            accountId: { $in: accounts ?? user.accounts },
+          },
+        },
+        {
+          $unwind: "$sellRecords",
+        },
+        {
+          $project: {
+            allFields: {
+              $mergeObjects: [
+                "$$ROOT",
+                "$sellRecords",
+                { buyRecordId: "$_id" },
+              ],
+            },
+          },
+        },
+        {
+          $replaceRoot: { newRoot: "$allFields" },
+        },
+        {
+          $project: {
+            sellRecords: 0,
+          },
+        },
+      ]);
+      const data = sellRecords as unknown as Array<
+        z.infer<typeof zSellRecord> &
+          z.infer<typeof zBuyRecord> & { _id: string; buyRecordId: string }
+      >;
+
+      console.log(data);
 
       return c.json({ data: data ?? [] }, 200);
     },
@@ -81,8 +149,13 @@ const app = new Hono()
         return c.json({ error: "Something went wrong" }, 400);
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const _zBuyRecord = zBuyRecord.extend({
+        sellRecords: z.array(zSellRecord.extend({ _id: z.string() })),
+      });
+
       const buyRecord = (await buyRecords.findById(id)) as unknown as z.infer<
-        typeof zBuyRecord
+        typeof _zBuyRecord
       > & { _id: string };
 
       if (!buyRecord) {

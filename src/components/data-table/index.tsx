@@ -234,7 +234,7 @@ export const DataTable = <T,>(props: DataTableProps<T>) => {
                 placeholder="Min"
                 className="p-2"
                 type="number"
-                value={tmpFilter.min}
+                value={tmpFilter.min ?? ""}
                 onChange={(e) =>
                   setTmpFilter((prev) => ({
                     ...prev,
@@ -247,7 +247,7 @@ export const DataTable = <T,>(props: DataTableProps<T>) => {
                 placeholder="Max"
                 className="p-2"
                 type="number"
-                value={tmpFilter.max}
+                value={tmpFilter.max ?? ""}
                 onChange={(e) =>
                   setTmpFilter((prev) => ({
                     ...prev,
