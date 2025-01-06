@@ -43,7 +43,7 @@ export const currencyFormatter = (
   const formatter = new Intl.NumberFormat(lanuage[currency], {
     style: "currency",
     currency,
-    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   });
 
   return formatter.format(num);

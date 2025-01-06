@@ -103,12 +103,12 @@ export const BuyRecordTable = ({
     {
       key: "unrealized",
       label: "Unrealized P&L",
-      className: ({ up }) =>
-        cn(up ? "text-red-500 font-bold" : "text-green-500"),
+      className: ({ unrealized }) =>
+        cn(unrealized > 0 ? "text-red-500 font-bold" : "text-green-500"),
       render: (item) => (
         <>
           {numberFormatter((item.price - item.buyPrice) * item.unsoldAmount)}
-          <span className="text-sm">({item.unrealized}%)</span>
+          <span className="text-sm">({item.unrealized.toFixed(2)}%)</span>
         </>
       ),
     },

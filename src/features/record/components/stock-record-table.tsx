@@ -97,9 +97,14 @@ export const StockRecordTable = () => {
     {
       key: "unrealized",
       label: "Unrealized P&L",
-      className: ({ up }) =>
-        cn(up ? "text-red-500 font-bold" : "text-green-500"),
-      render: (item) => `${item.percent} %`,
+      className: ({ unrealized }) =>
+        cn(unrealized > 0 ? "text-red-500 font-bold" : "text-green-500"),
+      render: ({ unrealized, totalCost }) => (
+        <>
+          {numberFormatter(unrealized)}
+          <span>({((unrealized / totalCost) * 100).toFixed(2)}%)</span>
+        </>
+      ),
     },
     {
       key: "percent",
@@ -188,9 +193,8 @@ export const StockRecordTable = () => {
         (stocksState?.get(stockCode)?.percent ?? 0) * 100
       ).toFixed(2);
       const price = stocksState?.get(stockCode)?.now ?? buyPrice;
-      const unrealizedPL = numberFormatter(
-        (record?.totalUnsoldAmount ?? 0) * price - (record?.totalCost ?? 0),
-      );
+      const unrealizedPL =
+        (record?.totalUnsoldAmount ?? 0) * price - (record?.totalCost ?? 0);
       const high = stocksState?.get(stockCode)?.high ?? "N/A";
       const low = stocksState?.get(stockCode)?.low ?? "N/A";
       const yesterday = stocksState?.get(stockCode)?.yesterday ?? "N/A";
