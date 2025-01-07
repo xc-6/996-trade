@@ -86,8 +86,8 @@ export const SellRecordsTable = (props: { style?: React.CSSProperties }) => {
     },
     {
       key: "buyDate",
-      label: "Buy Date",
-      render: (item) => format(new Date(item.buyDate), "PPP"),
+      label: "Sold Date",
+      render: (item) => format(new Date(item.sellDate), "PPP"),
     },
     {
       key: "action",

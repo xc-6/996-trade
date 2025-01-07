@@ -86,9 +86,9 @@ export const SellRecordTable = (props: { className?: string }) => {
       render: (item) => `${Number(item.apy).toFixed(2)}%`,
     },
     {
-      key: "buyDate",
-      label: "Buy Date",
-      render: (item) => format(new Date(item.buyDate), "PPP"),
+      key: "sellDate",
+      label: "Sold Date",
+      render: (item) => format(new Date(item.sellDate), "PPP"),
     },
     {
       key: "action",
@@ -129,8 +129,9 @@ export const SellRecordTable = (props: { className?: string }) => {
   const list = useMemo(() => {
     if (buyRecord) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { sellRecords, profitLoss, ..._buyRecord } = buyRecord;
+      const { sellRecords, ..._buyRecord } = buyRecord;
       return buyRecord.sellRecords.map((sellRecord) => {
+        const { profitLoss } = sellRecord;
         return {
           ..._buyRecord,
           ...sellRecord,
