@@ -27,6 +27,7 @@ const app = new Hono()
       }),
     ),
     async (c) => {
+      // Get all buy records by the account ids
       const auth = c.get("authUser");
 
       if (!auth.token?.id) {
@@ -47,13 +48,15 @@ const app = new Hono()
 
       const selectFields = showSold === "true" ? {} : { sellRecords: 0 };
 
-      const records = await buyRecords.find(
-        {
-          accountId: { $in: accounts ?? user.accounts },
-          stockCode: stockCode ? { $in: [stockCode] } : { $exists: true },
-        },
-        selectFields,
-      );
+      const records = await buyRecords
+        .find(
+          {
+            accountId: { $in: accounts ?? user.accounts },
+            stockCode: stockCode ? { $in: [stockCode] } : { $exists: true },
+          },
+          selectFields,
+        )
+        .sort({ buyDate: -1 });
 
       const data = records as unknown as Array<
         z.infer<typeof zBuyRecord> & { _id: string }
@@ -72,6 +75,7 @@ const app = new Hono()
       }),
     ),
     async (c) => {
+      // Get the sell records by the account ids, and insert the buy record id in each sell record
       const auth = c.get("authUser");
 
       if (!auth.token?.id) {
@@ -98,6 +102,11 @@ const app = new Hono()
         },
         {
           $unwind: "$sellRecords",
+        },
+        {
+          $sort: {
+            "sellRecords.sellDate": -1,
+          },
         },
         {
           $project: {
@@ -132,6 +141,7 @@ const app = new Hono()
     verifyAuth(),
     zValidator("param", z.object({ id: z.string() })),
     async (c) => {
+      // Get the buy record by the buy record id
       const auth = c.get("authUser");
       const { id } = c.req.valid("param");
 
@@ -160,6 +170,11 @@ const app = new Hono()
         return c.json({ message: "Buy record not found" }, 404);
       }
 
+      // Sort the sellRecords by sellDate in descending order
+      buyRecord.sellRecords.sort((a, b) => {
+        return new Date(b.sellDate).getTime() - new Date(a.sellDate).getTime();
+      });
+
       return c.json({ data: buyRecord }, 200);
     },
   )
@@ -171,6 +186,7 @@ const app = new Hono()
       zBuyRecord.omit({ sellRecords: true }).extend({ buyDate: z.string() }),
     ),
     async (c) => {
+      // Create a new buy record
       const auth = c.get("authUser");
       const { stockCode, buyDate, buyPrice, buyAmount, accountId } =
         c.req.valid("json");
@@ -210,8 +226,8 @@ const app = new Hono()
       "json",
       zBuyRecord.omit({ sellRecords: true }).extend({ buyDate: z.string() }),
     ),
-    // Edit the buy record
     async (c) => {
+      // Edit the buy record by the buy record id
       const auth = c.get("authUser");
       const { id } = c.req.valid("param");
       const { stockCode, buyDate, buyPrice, buyAmount, accountId } =
@@ -293,6 +309,7 @@ const app = new Hono()
     zValidator("param", z.object({ buyRecordId: z.string() })),
     zValidator("json", zSellRecord.extend({ sellDate: z.string() })),
     async (c) => {
+      // Create a new sell record
       const auth = c.get("authUser");
       const { buyRecordId } = c.req.valid("param");
       const { sellDate, sellAmount, sellPrice } = c.req.valid("json");
@@ -380,6 +397,7 @@ const app = new Hono()
       }),
     ),
     async (c) => {
+      // Delete the sell record by the buy record id and sell record id
       const { buyRecordId, sellRecordId } = c.req.valid("param");
 
       const buyRecord = await buyRecords.findById(buyRecordId);
@@ -418,6 +436,7 @@ const app = new Hono()
     verifyAuth(),
     zValidator("param", z.object({ id: z.string() })),
     async (c) => {
+      // Delete the buy record by the buy record id
       const auth = c.get("authUser");
       const { id } = c.req.valid("param");
 
@@ -452,6 +471,7 @@ const app = new Hono()
       }),
     ),
     async (c) => {
+      // Get the stock groups by the account ids
       const auth = c.get("authUser");
 
       if (!auth.token?.id) {
@@ -547,6 +567,7 @@ const app = new Hono()
       }),
     ),
     async (c) => {
+      // Get the stock codes by the account ids
       const auth = c.get("authUser");
 
       if (!auth.token?.id) {
@@ -573,6 +594,7 @@ const app = new Hono()
     zValidator("query", z.object({ accountIds: z.string() })),
     zValidator("param", z.object({ stockCode: z.string() })),
     async (c) => {
+      // Delete the stock groups by the stock code
       const auth = c.get("authUser");
       const { stockCode } = c.req.valid("param");
 
