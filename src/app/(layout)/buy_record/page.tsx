@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { useModal } from "@/hooks/use-modal-store";
 import { useRefreshStocks } from "@/features/stock/hooks/use-refresh-stocks";
 import { useClient } from "@/lib/hooks";
+import { useRef } from "react";
+import { useSize } from "ahooks";
 
 export default function Record() {
   useRefreshStocks();
@@ -19,13 +21,19 @@ export default function Record() {
   const { recordId, onClose } = usePanel();
   const onlyClient = useClient();
   const showPanel = !!recordId;
+  const ref = useRef<HTMLDivElement>(null);
+  const size = useSize(ref);
   return (
     <ResizablePanelGroup
       direction="horizontal"
       autoSaveId="ca-workspace-layout"
     >
-      <ResizablePanel defaultSize={100} minSize={50}>
-        {onlyClient && <BuyRecordTable />}
+      <ResizablePanel defaultSize={100} minSize={50} className="flex flex-col">
+        {onlyClient && (
+          <div className="grow overflow-scroll" ref={ref}>
+            <BuyRecordTable style={{ height: `${size?.height}px` }} />
+          </div>
+        )}
       </ResizablePanel>
       {showPanel && (
         <>

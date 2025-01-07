@@ -33,11 +33,13 @@ type BuyRecord = ResponseType["data"][0] &
 interface BuyRecordTableProps {
   showHeader?: boolean;
   stockCode?: string;
+  style?: React.CSSProperties;
 }
 const Table = DataTable<BuyRecord>;
 export const BuyRecordTable = ({
   showHeader = true,
   stockCode,
+  ...props
 }: BuyRecordTableProps = {}) => {
   const { onOpen } = useModal();
   const [ConfirmDialog, confirm] = useConfirm(
@@ -265,6 +267,7 @@ export const BuyRecordTable = ({
         )
       }
       onRowClick={(_, item) => onSelect(item._id)}
+      {...props}
     >
       <ConfirmDialog />
     </Table>

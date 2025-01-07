@@ -28,7 +28,10 @@ type StockRecord = ResponseType["data"][0] &
     stockCode: string;
   };
 const Table = DataTable<StockRecord>;
-export const StockRecordTable = () => {
+export const StockRecordTable = (props: {
+  className?: string;
+  style?: React.CSSProperties;
+}) => {
   const { stocksState } = useStocksState();
   const { activeIds } = useActiveAccounts();
   const { data, isLoading, refetch } = useGetRecordsByStock(activeIds ?? []);
@@ -259,6 +262,7 @@ export const StockRecordTable = () => {
       dataIndex="stockCode"
       className="mb-2"
       rowClassName={"group"}
+      {...props}
     >
       <ConfirmDialog />
     </Table>

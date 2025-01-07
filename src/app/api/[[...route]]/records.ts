@@ -124,8 +124,6 @@ const app = new Hono()
           z.infer<typeof zBuyRecord> & { _id: string; buyRecordId: string }
       >;
 
-      console.log(data);
-
       return c.json({ data: data ?? [] }, 200);
     },
   )

@@ -43,7 +43,9 @@ export default async function Layout({
             </Breadcrumb>
           </div>
         </header>
-        <main className="px-4 py-2">{children}</main>
+        <main className="px-4 py-2" style={{ height: "calc(100vh - 64px)" }}>
+          {children}
+        </main>
       </SidebarInset>
     </SidebarProvider>
   );

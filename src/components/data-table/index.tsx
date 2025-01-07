@@ -32,6 +32,7 @@ interface DataTableProps<T> {
   columns: Column<T>[];
   dataIndex: keyof T;
   className?: string;
+  style?: React.CSSProperties;
   rowClassName?: string | ((row: T) => string);
   showHeader?: boolean;
   onSort?: (key: keyof T, direction: "asc" | "desc") => void;
@@ -44,6 +45,7 @@ export const DataTable = <T,>(props: DataTableProps<T>) => {
     columns,
     data,
     className,
+    style,
     rowClassName,
     dataIndex,
     showHeader = true,
@@ -51,6 +53,7 @@ export const DataTable = <T,>(props: DataTableProps<T>) => {
     onRowClick,
     defaultFilter = {},
   } = props;
+
   const [expanedSet, setExpanedSet] = useState(new Set<string>());
   const [sort, setSort] = useState<{
     key?: keyof T;
@@ -310,7 +313,7 @@ export const DataTable = <T,>(props: DataTableProps<T>) => {
       </span>
     );
     return (
-      <TableHead className="text-nowrap" key={key}>
+      <TableHead className="text-nowrap sticky top-0 bg-white" key={key}>
         {type === "text" && filterable ? addFilter(key, text) : text}
         {type === "text" && sortable && (
           <div
@@ -343,7 +346,7 @@ export const DataTable = <T,>(props: DataTableProps<T>) => {
 
   const renderHeaders = () => (
     <TableHeader>
-      <TableRow key="header">
+      <TableRow key="header" className="sticky top-0 drop-shadow-md">
         {keys.map((key) => {
           const col = mapping[key];
           return renderHeader(
@@ -363,7 +366,7 @@ export const DataTable = <T,>(props: DataTableProps<T>) => {
   }
 
   return (
-    <Table className={className ?? ""}>
+    <Table className={cn(className)} style={style}>
       {renderHeaders()}
 
       <TableBody>{renderRows()}</TableBody>

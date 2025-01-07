@@ -13,6 +13,8 @@ import { useRefreshStocks } from "@/features/stock/hooks/use-refresh-stocks";
 import { AssetsHeader } from "@/features/record/components/assets-header";
 import { StockRecordTable } from "@/features/record/components/stock-record-table";
 import { useClient } from "@/lib/hooks";
+import { useRef } from "react";
+import { useSize } from "ahooks";
 
 export default function Dashboard() {
   useRefreshStocks();
@@ -20,14 +22,20 @@ export default function Dashboard() {
   const { recordId, onClose } = usePanel();
   const onlyClient = useClient();
   const showPanel = !!recordId;
+  const ref = useRef<HTMLDivElement>(null);
+  const size = useSize(ref);
   return (
     <ResizablePanelGroup
       direction="horizontal"
       autoSaveId="ca-workspace-layout"
     >
-      <ResizablePanel defaultSize={100} minSize={50}>
+      <ResizablePanel defaultSize={100} minSize={50} className="flex flex-col">
         <AssetsHeader />
-        {onlyClient && <StockRecordTable />}
+        {onlyClient && (
+          <div className="mt-4 grow overflow-scroll" ref={ref}>
+            <StockRecordTable style={{ height: `${size?.height}px` }} />
+          </div>
+        )}
       </ResizablePanel>
       {showPanel && (
         <>

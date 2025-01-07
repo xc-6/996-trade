@@ -20,7 +20,7 @@ type SellRecord = ResponseType["data"]["sellRecords"][0] &
   };
 const Table = DataTable<SellRecord>;
 
-export const SellRecordTable = () => {
+export const SellRecordTable = (props: { className?: string }) => {
   const [ConfirmDialog, confirm] = useConfirm(
     "Are you sure?",
     "You are about to delete this record.",
@@ -158,6 +158,7 @@ export const SellRecordTable = () => {
       dataIndex="_id"
       className="mb-2"
       rowClassName="group"
+      {...props}
     >
       <ConfirmDialog />
     </Table>
