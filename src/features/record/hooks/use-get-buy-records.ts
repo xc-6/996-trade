@@ -1,46 +1,97 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { InferResponseType } from "hono";
 import { client } from "@/lib/hono";
+import { Filter, Sort } from "@/lib/types";
 
 export type ResponseType = InferResponseType<
-  (typeof client.api.records)["buy_records"]["$get"],
+  (typeof client.api.records)["buy_records"]["$post"],
   200
 >;
 
 export const useGetBuyRecords = (
   accountIds: Array<string>,
+  filter?: Filter,
+  sort?: Sort,
   stockCode?: string,
   showSold?: boolean,
 ) => {
-  const query = useQuery({
+  const query = useInfiniteQuery<ResponseType, Error>({
+    staleTime: 0,
     enabled: !!accountIds.length,
-    queryKey: ["buyRecords", accountIds, stockCode],
-    queryFn: () => queryFn(accountIds, stockCode, showSold),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => lastPage.nextPage,
+    queryKey: ["buyRecords", accountIds, stockCode, filter, sort],
+    queryFn: ({ pageParam }) =>
+      queryFn(
+        {
+          accountIds,
+          stockCode,
+          showSold,
+        },
+        filter,
+        sort,
+        Object.keys(sort ?? {}).length == 0
+          ? undefined
+          : {
+              page: pageParam as unknown as number,
+            },
+      ),
   });
 
   return query;
 };
 
+interface Options {
+  accountIds: Array<string>;
+  stockCode?: string;
+  showSold?: boolean;
+}
+
+interface Pagnation {
+  page: number;
+  limit?: number;
+}
+
 export const queryFn = async (
-  accountIds: Array<string>,
-  stockCode?: string,
-  showSold?: boolean,
+  { accountIds, stockCode, showSold }: Options,
+  filter?: Filter,
+  sort?: Sort,
+  pageParam?: Pagnation,
 ) => {
   if (!accountIds.length) {
-    return [];
+    return {
+      data: [],
+      nextPage: null,
+      total: 0,
+    };
   }
-  const response = await client.api.records.buy_records.$get({
-    query: {
-      accountIds: accountIds.join(","),
+
+  sort = sort ?? {
+    key: "buyDate",
+    order: "desc",
+  };
+
+  pageParam = pageParam ?? {
+    page: 1,
+    limit: Number.MAX_SAFE_INTEGER,
+  };
+  const page = pageParam?.page ?? 1;
+  const limit = pageParam?.limit ?? 50;
+  const response = await client.api.records.buy_records.$post({
+    json: {
+      accountIds: accountIds,
       stockCode,
-      showSold: showSold?.toString(),
+      showSold: showSold ?? false,
+      page,
+      limit,
+      filter,
+      ...sort,
     },
   });
 
   if (!response.ok) {
-    throw new Error("Failed to fetch images");
+    throw new Error("Something went wrong");
   }
 
-  const { data } = await response.json();
-  return data;
+  return response.json();
 };

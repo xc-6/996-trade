@@ -48,15 +48,18 @@ export const SellRecordTable = (props: { className?: string }) => {
           </>
         );
       },
+      sortable: "local",
     },
     {
       key: "name",
       label: "Name",
       className: "font-medium",
+      sortable: "local",
     },
     {
       key: "sellPrice",
       label: "Sold Price",
+      sortable: "local",
     },
     {
       key: "sellAmount",
@@ -65,18 +68,21 @@ export const SellRecordTable = (props: { className?: string }) => {
         item.sellAmount.toLocaleString("en-US", {
           maximumFractionDigits: 4,
         }),
+      sortable: "local",
     },
     {
       key: "unrealized",
       label: "Total Sold",
       render: (item) =>
         (Number(item.sellPrice) * Number(item.sellAmount)).toFixed(2),
+      sortable: "local",
     },
     {
       key: "profitLoss",
       label: "P&L",
       className: ({ up }) =>
         cn(up ? "text-red-500 font-bold" : "text-green-500"),
+      sortable: "local",
     },
     {
       key: "apy",
@@ -84,11 +90,13 @@ export const SellRecordTable = (props: { className?: string }) => {
       className: ({ up }) =>
         cn(up ? "text-red-500 font-bold" : "text-green-500"),
       render: (item) => `${Number(item.apy).toFixed(2)}%`,
+      sortable: "local",
     },
     {
       key: "sellDate",
       label: "Sold Date",
       render: (item) => format(new Date(item.sellDate), "PPP"),
+      sortable: "local",
     },
     {
       key: "action",

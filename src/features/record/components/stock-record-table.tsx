@@ -11,7 +11,7 @@ import { Fragment, useEffect, useMemo } from "react";
 import { Trash2, MoveDown, MoveUp } from "lucide-react";
 import { ResponseType } from "../hooks/use-get-records-by-stock";
 import { useDeleteStockGroups } from "../hooks/use-delete-stock-groups";
-import { defaultFilter } from "../deafult";
+import { totalUnsoldAmount } from "../deafult";
 import { StockInfo } from "@/lib/types";
 
 type StockRecord = ResponseType["data"][0] &
@@ -56,6 +56,7 @@ export const StockRecordTable = (props: {
           />
         );
       },
+      sortable: false,
     },
     {
       key: "stockCode",
@@ -70,12 +71,14 @@ export const StockRecordTable = (props: {
           </>
         );
       },
+      sortable: "local",
     },
     {
       key: "name",
       label: "Name",
       className: "font-medium",
       render: (item) => item.name ?? "",
+      sortable: "local",
     },
     {
       key: "price",
@@ -92,10 +95,12 @@ export const StockRecordTable = (props: {
           {item.price}
         </>
       ),
+      sortable: "local",
     },
     {
       key: "buyPrice",
       label: "Cost",
+      sortable: "local",
     },
     {
       key: "unrealized",
@@ -108,6 +113,7 @@ export const StockRecordTable = (props: {
           <span>({((unrealized / totalCost) * 100).toFixed(2)}%)</span>
         </>
       ),
+      sortable: "local",
     },
     {
       key: "percent",
@@ -115,38 +121,44 @@ export const StockRecordTable = (props: {
       className: ({ up }) =>
         cn(up ? "text-red-500 font-bold" : "text-green-500"),
       render: (item) => `${item.percent} %`,
+      sortable: "local",
     },
     {
       key: "high",
       label: "High",
       className: ({ up }) =>
         cn(up ? "text-red-500 font-bold" : "text-green-500"),
+      sortable: "local",
     },
     {
       key: "low",
       label: "Low",
       className: ({ up }) =>
         cn(up ? "text-red-500 font-bold" : "text-green-500"),
+      sortable: "local",
     },
     {
       key: "yesterday",
       label: "Yesterday",
       className: ({ up }) =>
         cn(up ? "text-red-500 font-bold" : "text-green-500"),
+      sortable: "local",
     },
     {
       key: "totalCost",
       label: "Total Cost",
       render: (item) => numberFormatter(item.totalCost),
+      sortable: "local",
     },
     {
       key: "totalUnsoldAmount",
       label: "Unsold Amount",
-      filterable: true,
       render: (item) =>
         item.totalUnsoldAmount.toLocaleString("en-US", {
           maximumFractionDigits: 4,
         }),
+      sortable: "local",
+      filterable: "local",
     },
     {
       key: "buyAmount",
@@ -155,15 +167,18 @@ export const StockRecordTable = (props: {
         item.totalBuyAmount.toLocaleString("en-US", {
           maximumFractionDigits: 4,
         }),
+      sortable: "local",
     },
     {
       key: "totalUnrealized",
       label: "Realized P&L",
       render: (item) => numberFormatter(item.totalPL),
+      sortable: "local",
     },
     {
       key: "accountName",
       label: "Account",
+      sortable: false,
     },
     {
       key: "buyDate",
@@ -256,7 +271,7 @@ export const StockRecordTable = (props: {
   }
   return (
     <Table
-      defaultFilter={defaultFilter}
+      defaultFilter={{ totalUnsoldAmount }}
       data={list}
       columns={columns}
       dataIndex="stockCode"

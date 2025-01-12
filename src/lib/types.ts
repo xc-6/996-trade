@@ -37,3 +37,15 @@ export interface StockInfo {
 }
 
 export type ExtractArrayType<T> = T extends Array<infer U> ? U : never;
+export type Filter = Record<
+  string,
+  {
+    min?: number;
+    max?: number;
+  }
+>;
+
+export type Sort = {
+  key?: string;
+  order?: "asc" | "desc";
+};

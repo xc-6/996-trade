@@ -3,11 +3,11 @@ import { Column, DataTable } from "@/components/data-table";
 import { Badge } from "@/components/ui/badge";
 import { useGetBuyRecords } from "../hooks/use-get-buy-records";
 import { useDeleteBuyRecord } from "../hooks/use-delete-buy-record";
-import { Loader, Pencil } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { useActiveAccounts } from "@/features/account/hooks/use-active-accounts";
 import { format } from "date-fns";
 import { usePanel } from "../hooks/use-panel";
-import { useEffect, useMemo } from "react";
+import { useMemo, useState, memo } from "react";
 import { Trash2, MoveDown, MoveUp } from "lucide-react";
 import { useConfirm } from "@/hooks/use-confirm";
 import { cn, numberFormatter } from "@/lib/utils";
@@ -15,8 +15,8 @@ import { useStocksState } from "@/features/stock/store/use-stocks-store";
 import { ResponseType } from "../hooks/use-get-buy-records";
 
 import { useModal } from "@/hooks/use-modal-store";
-import { defaultFilter } from "../deafult";
-import { StockInfo } from "@/lib/types";
+import { unsoldAmount } from "../deafult";
+import { StockInfo, Sort, Filter } from "@/lib/types";
 
 type BuyRecord = ResponseType["data"][0] &
   StockInfo & {
@@ -35,7 +35,9 @@ interface BuyRecordTableProps {
   stockCode?: string;
   style?: React.CSSProperties;
 }
-const Table = DataTable<BuyRecord>;
+const Table = memo(DataTable<BuyRecord>);
+
+const _defaultFilter = { unsoldAmount };
 export const BuyRecordTable = ({
   showHeader = true,
   stockCode,
@@ -50,10 +52,19 @@ export const BuyRecordTable = ({
   const { stocksState } = useStocksState();
   const { activeIds, mapping } = useActiveAccounts();
   const removeMutation = useDeleteBuyRecord();
-  const { data, isLoading, refetch } = useGetBuyRecords(
+  const [filter, setFilter] = useState<Filter>({ ..._defaultFilter });
+  const [sort, setSort] = useState<Sort>({
+    key: "buyDate",
+    order: "desc",
+  });
+  const { data, status, fetchNextPage, hasNextPage } = useGetBuyRecords(
     activeIds ?? [],
+    filter,
+    sort,
     stockCode,
   );
+
+  const isLoading = status == "pending";
 
   const columns: Array<Column<BuyRecord>> = [
     {
@@ -81,6 +92,7 @@ export const BuyRecordTable = ({
       label: "Name",
       className: "font-medium",
       render: (item) => item.name ?? "",
+      sortable: "local",
     },
     {
       key: "price",
@@ -97,10 +109,12 @@ export const BuyRecordTable = ({
           {item.price}
         </>
       ),
+      sortable: "local",
     },
     {
       key: "buyPrice",
       label: "Cost",
+      sortable: "local",
     },
     {
       key: "unrealized",
@@ -113,6 +127,7 @@ export const BuyRecordTable = ({
           <span className="text-sm">({item.unrealized.toFixed(2)}%)</span>
         </>
       ),
+      sortable: "local",
     },
     {
       key: "percent",
@@ -120,29 +135,34 @@ export const BuyRecordTable = ({
       className: ({ up }) =>
         cn(up ? "text-red-500 font-bold" : "text-green-500"),
       render: (item) => `${item.percent} %`,
+      sortable: "local",
     },
     {
       key: "high",
       label: "High",
       className: ({ up }) =>
         cn(up ? "text-red-500 font-bold" : "text-green-500"),
+      sortable: "local",
     },
     {
       key: "low",
       label: "Low",
       className: ({ up }) =>
         cn(up ? "text-red-500 font-bold" : "text-green-500"),
+      sortable: "local",
     },
     {
       key: "yesterday",
       label: "Yesterday",
       className: ({ up }) =>
         cn(up ? "text-red-500 font-bold" : "text-green-500"),
+      sortable: "local",
     },
     {
       key: "totalCost",
       label: "Total Cost",
       render: (item) => numberFormatter(item.totalCost),
+      sortable: "local",
     },
     {
       key: "unsoldAmount",
@@ -165,6 +185,7 @@ export const BuyRecordTable = ({
     {
       key: "accountName",
       label: "Account",
+      sortable: "local",
     },
     {
       key: "buyDate",
@@ -197,8 +218,9 @@ export const BuyRecordTable = ({
     if (isLoading) {
       return [];
     }
+    const totalList = data?.pages.flatMap((page) => page.data) ?? [];
     const res =
-      data?.map((record) => ({
+      totalList.map((record) => ({
         ...record,
         unrealized: Number(
           (
@@ -223,9 +245,13 @@ export const BuyRecordTable = ({
     return res as unknown as BuyRecord[];
   }, [data, isLoading, stocksState, mapping]);
 
-  useEffect(() => {
-    refetch();
-  }, [activeIds, refetch]);
+  const onSortChangeHandler = async (sort: Sort, fetchSort?: boolean) => {
+    if (fetchSort) {
+      setSort({});
+    } else {
+      setSort(sort);
+    }
+  };
 
   const onDelete = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
@@ -241,18 +267,11 @@ export const BuyRecordTable = ({
     onOpen("editBuyRecord", { buyRecord });
   };
 
-  if (isLoading && showHeader) {
-    return (
-      <div className="h-full flex-1 flex items-center justify-center flex-col gap-2">
-        <Loader className="size-6 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
   return (
     <Table
-      defaultFilter={defaultFilter}
+      defaultFilter={{ ..._defaultFilter }}
       data={list}
+      loading={isLoading}
       showHeader={showHeader}
       columns={columns}
       dataIndex="_id"
@@ -267,6 +286,10 @@ export const BuyRecordTable = ({
         )
       }
       onRowClick={(_, item) => onSelect(item._id)}
+      hasNextPage={hasNextPage}
+      loadMore={fetchNextPage}
+      onFilterChange={(_filter) => setFilter(_filter)}
+      onSortChange={onSortChangeHandler}
       {...props}
     >
       <ConfirmDialog />

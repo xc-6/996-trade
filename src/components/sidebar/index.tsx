@@ -49,7 +49,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data, isLoading } = useQuery({
     enabled: !!accountId,
     queryKey: ["buyRecords", [accountId]],
-    queryFn: () => queryFn([accountId], undefined, true),
+    queryFn: () =>
+      queryFn({
+        accountIds: [accountId],
+        showSold: true,
+      }),
   });
 
   useEffect(() => {
@@ -57,7 +61,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       return;
     }
     const fileName = `[trade-insight]-${mapping[accountId]?.name}-${mapping[accountId]?.currency}.txt`;
-    downloadRecords(fileName, data ?? []);
+    downloadRecords(fileName, data?.data ?? []);
     setAccountId("");
   }, [accountId, data, isLoading, mapping, setAccountId]);
 

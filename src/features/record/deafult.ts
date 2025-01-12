@@ -1,10 +1,11 @@
-export const defaultFilter: Record<string, { min?: number; max?: number }> = {
-  unsoldAmount: {
-    min: 0.000001,
-    max: 1000000,
-  },
-  totalUnsoldAmount: {
-    min: 0.000001,
-    max: 1000000,
-  },
+import { Filter } from "@/lib/types";
+
+export const unsoldAmount: Filter[string] = {
+  min: 0.000001,
+  max: 1000000,
+};
+
+export const totalUnsoldAmount: Filter[string] = {
+  min: 0.000001,
+  max: 1000000,
 };

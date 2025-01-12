@@ -48,30 +48,36 @@ export const SellRecordsTable = (props: { style?: React.CSSProperties }) => {
           </>
         );
       },
+      sortable: "local",
     },
     {
       key: "name",
       label: "Name",
       className: "font-medium",
+      sortable: "local",
     },
     {
       key: "sellPrice",
       label: "Sold Price",
+      sortable: "local",
     },
     {
       key: "sellAmount",
       label: "Sold Amount",
+      sortable: "local",
     },
     {
       key: "totalSold",
       label: "Total Sold",
       render: ({ totalSold }) => totalSold.toFixed(2),
+      sortable: "local",
     },
     {
       key: "profitLoss",
       label: "P&L",
       className: ({ up }) =>
         cn(up ? "text-red-500 font-bold" : "text-green-500"),
+      sortable: "local",
     },
     {
       key: "apy",
@@ -79,15 +85,18 @@ export const SellRecordsTable = (props: { style?: React.CSSProperties }) => {
       className: ({ up }) =>
         cn(up ? "text-red-500 font-bold" : "text-green-500"),
       render: (item) => `${Number(item.apy).toFixed(2)}%`,
+      sortable: "local",
     },
     {
       key: "accountName",
       label: "Account",
+      sortable: "local",
     },
     {
       key: "buyDate",
       label: "Sold Date",
       render: (item) => format(new Date(item.sellDate), "PPP"),
+      sortable: "local",
     },
     {
       key: "action",

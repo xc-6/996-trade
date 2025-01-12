@@ -13,17 +13,35 @@ import {
 import { db } from "@/db/mongo";
 import { z } from "zod";
 import { ObjectId } from "mongodb";
+import { generateFilter } from "../_utils";
 
 const app = new Hono()
-  .get(
+  .post(
     "/buy_records",
     verifyAuth(),
     zValidator(
-      "query",
+      "json",
       z.object({
-        accountIds: z.string().optional(),
+        accountIds: z.array(z.string()).optional(),
         stockCode: z.string().optional(),
-        showSold: z.string().optional().default("false"),
+        showSold: z.boolean().optional().default(false),
+        page: z.number().optional().default(1),
+        limit: z.number().optional().default(50),
+        key: z.string().optional().default("buyDate"),
+        order: z.enum(["asc", "desc"]).optional().default("desc"),
+        filter: z
+          .record(
+            z.string(),
+            z
+              .object({
+                min: z.union([z.number(), z.string()]).optional(),
+                max: z.union([z.number(), z.string()]).optional(),
+              })
+              .optional()
+              .default({}),
+          )
+          .optional()
+          .default({}),
       }),
     ),
     async (c) => {
@@ -42,27 +60,66 @@ const app = new Hono()
         return c.json({ error: "Something went wrong" }, 400);
       }
 
-      const { accountIds, stockCode, showSold } = c.req.valid("query");
+      const {
+        accountIds,
+        stockCode,
+        showSold,
+        page,
+        limit,
+        key,
+        order,
+        filter,
+      } = c.req.valid("json");
 
-      const accounts = accountIds?.split(",").map((id) => new ObjectId(id));
+      const accounts = accountIds?.map((id) => new ObjectId(id));
 
-      const selectFields = showSold === "true" ? {} : { sellRecords: 0 };
+      const selectFields = showSold ? {} : { sellRecords: 0 };
 
-      const records = await buyRecords
-        .find(
-          {
+      const pipeline: any[] = [
+        {
+          $match: {
             accountId: { $in: accounts ?? user.accounts },
             stockCode: stockCode ? { $in: [stockCode] } : { $exists: true },
+            ...generateFilter(filter),
           },
-          selectFields,
-        )
-        .sort({ buyDate: -1 });
+        },
+        {
+          $sort: {
+            [key]: order === "asc" ? 1 : -1,
+          },
+        },
+        {
+          $facet: {
+            total: [{ $count: "count" }],
+            records: [
+              { $skip: (page - 1) * limit },
+              { $limit: limit },
+              { $project: selectFields },
+            ],
+          },
+        },
+        {
+          $project: {
+            total: { $arrayElemAt: ["$total.count", 0] },
+            records: 1,
+          },
+        },
+      ];
 
-      const data = records as unknown as Array<
+      const result = await buyRecords.aggregate(pipeline).exec();
+      const total = result[0]?.total ?? 0;
+      const list = (result[0]?.records ?? []) as unknown as Array<
         z.infer<typeof zBuyRecord> & { _id: string }
       >;
 
-      return c.json({ data: data ?? [] }, 200);
+      return c.json(
+        {
+          data: list ?? [],
+          nextPage: list.length === limit ? page + 1 : null,
+          total,
+        },
+        200,
+      );
     },
   )
   .get(
