@@ -134,7 +134,7 @@ export const BuyRecordTable = ({
       label: "TPC",
       className: ({ up }) =>
         cn(up ? "text-red-500 font-bold" : "text-green-500"),
-      render: (item) => `${item.percent} %`,
+      render: (item) => `${item.percent.toFixed(2)} %`,
       sortable: "local",
     },
     {
@@ -231,9 +231,7 @@ export const BuyRecordTable = ({
           ).toFixed(2),
         ),
         name: stocksState?.get(record.stockCode)?.name,
-        percent: (
-          (stocksState?.get(record.stockCode)?.percent ?? 0) * 100
-        ).toFixed(2),
+        percent: (stocksState?.get(record.stockCode)?.percent ?? 0) * 100,
         price: stocksState?.get(record.stockCode)?.now ?? record.buyPrice,
         high: stocksState?.get(record.stockCode)?.high ?? "N/A",
         low: stocksState?.get(record.stockCode)?.low ?? "N/A",

@@ -4,7 +4,7 @@ import { useGetRecordsByStock } from "../hooks/use-get-records-by-stock";
 import { useStocksState } from "@/features/stock/store/use-stocks-store";
 import { CURRENCY, CURRENCY_GROUP } from "@/lib/const";
 import { useMemo } from "react";
-import { currencyFormatter, reverseMapping } from "@/lib/utils";
+import { cn, currencyFormatter, reverseMapping } from "@/lib/utils";
 
 export const AssetsHeader = () => {
   const { activeIds, accountsMenu } = useActiveAccounts();
@@ -117,7 +117,14 @@ export const AssetsHeader = () => {
           <div className="text font-bold">
             {order.map((key) => {
               return (
-                <div key={key}>
+                <div
+                  key={key}
+                  className={cn(
+                    asset[key] - cost[key] <= 0
+                      ? "text-green-500"
+                      : "text-red-500",
+                  )}
+                >
                   {key}: {currencyFormatter(key, asset[key] - cost[key])}
                 </div>
               );
@@ -135,7 +142,12 @@ export const AssetsHeader = () => {
           <div className="text font-bold">
             {order.map((key) => {
               return (
-                <div key={key}>
+                <div
+                  key={key}
+                  className={cn(
+                    PL[key] <= 0 ? "text-green-500" : "text-red-500",
+                  )}
+                >
                   {key}: {currencyFormatter(key, PL[key])}
                 </div>
               );

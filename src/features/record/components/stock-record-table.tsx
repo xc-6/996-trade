@@ -18,6 +18,7 @@ type StockRecord = ResponseType["data"][0] &
   StockInfo & {
     price: number;
     unrealized: number;
+    unrealizedPLPercent: number;
     total: number;
     totalCost: number;
     totalAmount: number;
@@ -103,14 +104,14 @@ export const StockRecordTable = (props: {
       sortable: "local",
     },
     {
-      key: "unrealized",
+      key: "unrealizedPLPercent",
       label: "Unrealized P&L",
       className: ({ unrealized }) =>
         cn(unrealized > 0 ? "text-red-500 font-bold" : "text-green-500"),
-      render: ({ unrealized, totalCost }) => (
+      render: ({ unrealizedPLPercent, unrealized }) => (
         <>
           {numberFormatter(unrealized)}
-          <span>({((unrealized / totalCost) * 100).toFixed(2)}%)</span>
+          <span>({unrealizedPLPercent.toFixed(2)}%)</span>
         </>
       ),
       sortable: "local",
@@ -120,7 +121,7 @@ export const StockRecordTable = (props: {
       label: "TPC",
       className: ({ up }) =>
         cn(up ? "text-red-500 font-bold" : "text-green-500"),
-      render: (item) => `${item.percent} %`,
+      render: (item) => `${item.percent.toFixed(2)} %`,
       sortable: "local",
     },
     {
@@ -207,9 +208,7 @@ export const StockRecordTable = (props: {
       const record = data?.[stockCode];
       const buyPrice = record?.avgCost ?? 0;
       const name = stocksState?.get(stockCode)?.name;
-      const percent = (
-        (stocksState?.get(stockCode)?.percent ?? 0) * 100
-      ).toFixed(2);
+      const percent = (stocksState?.get(stockCode)?.percent ?? 0) * 100;
       const price = stocksState?.get(stockCode)?.now ?? buyPrice;
       const unrealizedPL =
         (record?.totalUnsoldAmount ?? 0) * price - (record?.totalCost ?? 0);
@@ -221,11 +220,13 @@ export const StockRecordTable = (props: {
       const totalBuyAmount = record?.totalBuyAmount ?? 0;
       const totalUnsoldAmount = record?.totalUnsoldAmount ?? 0;
       const up = (stocksState?.get(stockCode)?.percent ?? 0) >= 0;
+      const unrealizedPLPercent = Number((unrealizedPL / totalCost) * 100);
 
       return {
         ...record,
         stockCode,
         buyPrice,
+        unrealizedPLPercent,
         unrealized: unrealizedPL,
         name,
         percent,
