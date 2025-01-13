@@ -573,7 +573,10 @@ const app = new Hono()
               totalPL: 0,
             };
           }
-
+          // skip the record if it has no unsold amount
+          if (record.unsoldAmount === 0) {
+            return acc;
+          }
           // Update totals
           acc[stockCode].totalBuyAmount += Number(record.buyAmount);
           acc[stockCode].totalUnsoldAmount += Number(record.unsoldAmount);
