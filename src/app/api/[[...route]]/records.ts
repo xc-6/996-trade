@@ -573,6 +573,14 @@ const app = new Hono()
               totalPL: 0,
             };
           }
+
+          // Calculate total Profit and Loss
+          const totalPL = record.sellRecords.reduce(
+            (sum, sellRecord) => sum + Number(sellRecord.profitLoss),
+            0,
+          );
+          acc[stockCode].totalPL += totalPL;
+
           // skip the record if it has no unsold amount
           if (record.unsoldAmount === 0) {
             return acc;
@@ -592,13 +600,6 @@ const app = new Hono()
                   ).toFixed(3),
                 )
               : 0;
-
-          // Calculate total Profit and Loss
-          const totalPL = record.sellRecords.reduce(
-            (sum, sellRecord) => sum + Number(sellRecord.profitLoss),
-            0,
-          );
-          acc[stockCode].totalPL += totalPL;
 
           return acc;
         },
