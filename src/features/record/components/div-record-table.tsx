@@ -101,7 +101,7 @@ export const DivRecordTable = (props: DivRecordTableProps) => {
     if (data) {
       const res = data.map((item) => {
         const info = stocksState.get(item.stockCode);
-        const total = item.perDiv * item.divAmount;
+        const total = (item.perDiv * item.divAmount).toFixed(2);
         return {
           ...item,
           ...info,

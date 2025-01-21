@@ -71,7 +71,7 @@ export const DivBatchTable = (props: DivBatchTableProps) => {
       key: "total",
       label: "Total",
       sortable: false,
-      render: (item) => item?.total ?? "N/A",
+      render: (item) => item?.total.toFixed(2) ?? "N/A",
     },
     {
       key: "buyPrice",
