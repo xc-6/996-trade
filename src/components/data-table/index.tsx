@@ -501,13 +501,15 @@ export const DataTable = <T,>(props: DataTableProps<T>) => {
         {data?.length === 0 ? (
           <TableRow className="hover:bg-[none]">
             <TableCell className="text-center" colSpan={keys.length}>
-              <div className="absolute flex-1 flex items-center justify-center flex-col gap-2 top-0 right-0 bottom-0 left-0">
-                {loading ? (
+              {loading ? (
+                <div className="absolute flex-1 flex items-center justify-center flex-col gap-2 top-0 right-0 bottom-0 left-0">
                   <Loader className="size-8 animate-spin text-muted-foreground" />
-                ) : (
+                </div>
+              ) : (
+                <div className="absolute flex-1 flex items-center justify-center flex-col gap-2 top-[4rem] right-0 bottom-0 left-0">
                   <Package className="size-12 text-muted-foreground-900" />
-                )}
-              </div>
+                </div>
+              )}
             </TableCell>
           </TableRow>
         ) : (
@@ -517,7 +519,7 @@ export const DataTable = <T,>(props: DataTableProps<T>) => {
           </>
         )}
       </TableBody>
-      {!loading && renderFooter?.()}
+      {!loading && !!data.length && renderFooter?.()}
     </Table>
   );
 };

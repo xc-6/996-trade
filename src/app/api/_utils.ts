@@ -13,10 +13,11 @@ interface DBFilter {
   };
 }
 
-export const generateFilter = (filer: Filter): DBFilter => {
-  let arr = Object.keys(filer).map((key) => {
+export const generateFilter = (filter: Filter, path?: string): DBFilter => {
+  let arr = Object.keys(filter).map((_key) => {
     const query: DBFilter[string] = {};
-    const { min, max } = filer[key] ?? {};
+    const key = path ? `${path}.${_key}` : _key;
+    const { min, max } = filter[_key] ?? {};
     if (min !== undefined) {
       query.$exists = true;
       query.$gte = typeof min === "string" ? new Date(min) : Number(min);

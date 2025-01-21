@@ -54,11 +54,15 @@ const app = new Hono().post(
       {
         $match: {
           accountId: { $in: accounts ?? user.accounts },
-          ...generateFilter(filter),
         },
       },
       {
         $unwind: "$sellRecords",
+      },
+      {
+        $match: {
+          ...generateFilter(filter, "sellRecords"),
+        },
       },
       {
         $sort: {
