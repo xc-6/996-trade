@@ -1,7 +1,7 @@
 "use client";
 
 import { Fragment, useMemo, type MouseEvent } from "react";
-import { Check, ChevronsUpDown, Plus } from "lucide-react";
+import { Check, ChevronsUpDown, Plus, } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -41,16 +41,31 @@ export function AccontSwitcher() {
   const switchAccount = (e: MouseEvent, account: Account) => {
     e.preventDefault();
     if (activeIdSet.has(account._id)) {
-      removeAccount(account._id);
+      removeAccount([account._id]);
     } else {
-      selectAccount(account._id);
+      selectAccount([account._id]);
     }
   };
+
+  const handleLebelClick = (label: (typeof accountsMenu)[number]['label']) => {
+    const menu = accountsMenu.find((menu) => menu.label === label);
+    const accounts = menu?.items?.map((account) => account._id) ?? [];
+    if (!accounts.length) {
+      return
+    }
+    if (accounts.every((id) => activeIdSet.has(id))) {
+      removeAccount(accounts);
+    } else {
+      selectAccount(accounts)
+    }
+  }
 
   const renderMenuItem = (menu: (typeof accountsMenu)[number]) => {
     return (
       <Fragment key={menu.label}>
-        <DropdownMenuLabel>{menu.label}</DropdownMenuLabel>
+        <DropdownMenuLabel className="cursor-pointer hover:bg-secondary" onClick={()=>handleLebelClick(menu.label)}>
+          {menu.label}
+        </DropdownMenuLabel>
         {menu.items.map((account: Account) => (
           <DropdownMenuItem
             key={account._id}

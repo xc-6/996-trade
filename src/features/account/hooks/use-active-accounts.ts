@@ -53,18 +53,18 @@ export const useActiveAccounts = () => {
   }, [data, isLoading]);
 
   const selectAccount = useCallback(
-    (id: string) => {
+    (ids: string[]) => {
       const s = new Set(selected);
-      s.add(id);
+      ids.forEach((id) => s.add(id));
       setSelected([...s]);
     },
     [selected, setSelected],
   );
 
   const removeAccount = useCallback(
-    (id: string) => {
+    (ids: string[]) => {
       const s = new Set(selected);
-      s.delete(id);
+      ids.forEach((id) => s.delete(id));
       setSelected([...s]);
     },
     [selected, setSelected],

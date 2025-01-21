@@ -60,7 +60,7 @@ export const DeleteAccountModal = () => {
       {
         onSuccess: () => {
           handleClose();
-          removeAccount(selectedId);
+          removeAccount([selectedId]);
         },
       },
     );
