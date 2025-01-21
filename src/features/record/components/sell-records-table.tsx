@@ -1,17 +1,18 @@
 import { Column, DataTable } from "@/components/data-table";
 import { format } from "date-fns";
-import { Link, Loader, Trash2 } from "lucide-react";
+import { Link, Trash2 } from "lucide-react";
 import { useDeleteSellRecord } from "../hooks/use-delete-sell-record";
 import { useConfirm } from "@/hooks/use-confirm";
 import { Badge } from "@/components/ui/badge";
 import { useStocksState } from "@/features/stock/store/use-stocks-store";
-import { cn } from "@/lib/utils";
-import { useMemo } from "react";
+import { cn, numberFormatter } from "@/lib/utils";
+import { useMemo, useState } from "react";
 import { ResponseType } from "../hooks/use-get-sell-records";
-import { BuyRecord, StockInfo } from "@/lib/types";
+import { BuyRecord, Filter, StockInfo } from "@/lib/types";
 import { useActiveAccounts } from "@/features/account/hooks/use-active-accounts";
 import { useGetSellRecords } from "../hooks/use-get-sell-records";
 import { useRouter } from "next/navigation";
+import { TableCell, TableFooter, TableRow } from "@/components/ui/table";
 
 type SellRecord = ResponseType["data"][0] &
   Omit<BuyRecord, "sellRecords"> &
@@ -22,6 +23,7 @@ type SellRecord = ResponseType["data"][0] &
     totalSold: number;
   };
 const Table = DataTable<SellRecord>;
+const _defaultFilter = {};
 
 export const SellRecordsTable = (props: { style?: React.CSSProperties }) => {
   const [ConfirmDialog, confirm] = useConfirm(
@@ -32,7 +34,8 @@ export const SellRecordsTable = (props: { style?: React.CSSProperties }) => {
   const router = useRouter();
 
   const { activeIds, mapping } = useActiveAccounts();
-  const { data, isLoading } = useGetSellRecords(activeIds ?? []);
+  const [filter, setFilter] = useState<Filter>({});
+  const { data, isLoading } = useGetSellRecords(activeIds ?? [], filter);
 
   const columns: Array<Column<SellRecord>> = [
     {
@@ -97,6 +100,8 @@ export const SellRecordsTable = (props: { style?: React.CSSProperties }) => {
       label: "Sold Date",
       render: (item) => format(new Date(item.sellDate), "PPP"),
       sortable: "local",
+      filterable: true,
+      filterType: "date",
     },
     {
       key: "action",
@@ -160,21 +165,32 @@ export const SellRecordsTable = (props: { style?: React.CSSProperties }) => {
     return [];
   }, [data, stocksState, mapping]);
 
-  if (isLoading) {
-    return (
-      <div className="h-full flex-1 flex items-center justify-center flex-col gap-2">
-        <Loader className="size-6 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
+  const totalPL = useMemo(() => {
+    return list.reduce((acc, cur) => acc + cur.profitLoss, 0);
+  }, [list]);
+
+  const renderFooter = () => (
+    <TableFooter>
+      <TableRow>
+        <TableCell colSpan={5}>Total P&L</TableCell>
+        <TableCell colSpan={5} className="text-left font-bold">
+          {numberFormatter(totalPL)}
+        </TableCell>
+      </TableRow>
+    </TableFooter>
+  );
 
   return (
     <Table
+      defaultFilter={{ ..._defaultFilter }}
       data={list}
+      loading={isLoading}
       columns={columns}
       dataIndex="_id"
       className="mb-2"
       rowClassName="group"
+      onFilterChange={(_filter) => setFilter(_filter)}
+      renderFooter={renderFooter}
       {...props}
     >
       <ConfirmDialog />

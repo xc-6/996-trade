@@ -149,3 +149,12 @@ export const downloadFile = (fileName: string, url: string) => {
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
 };
+
+export const isValidDate = (dateString: any) => {
+  const date = new Date(dateString);
+  return (
+    date instanceof Date &&
+    !isNaN(date.getTime()) &&
+    date.toString() !== "Invalid Date"
+  );
+};

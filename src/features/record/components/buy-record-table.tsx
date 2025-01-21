@@ -206,6 +206,8 @@ export const BuyRecordTable = ({
       key: "buyDate",
       label: "Buy Date",
       render: (item) => format(new Date(item.buyDate), "PPP"),
+      filterable: true,
+      filterType: "date",
     },
     {
       key: "action",

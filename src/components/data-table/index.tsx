@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Fragment, JSX, useMemo, useState } from "react";
-import { cn } from "@/lib/utils";
+import { cn, isValidDate } from "@/lib/utils";
 import {
   ChevronDown,
   ChevronRight,
@@ -33,6 +33,7 @@ export interface Column<T> {
   render?: (row: T) => React.ReactNode;
   sortable?: boolean | "local";
   filterable?: boolean | "local";
+  filterType?: "date" | "number";
   className?: string | ((row: T) => string);
   type?: "expand" | "text";
 }
@@ -46,7 +47,10 @@ interface DataTableProps<T> {
   rowClassName?: string | ((row: T) => string);
   showHeader?: boolean;
   onSort?: (key: keyof T, order: "asc" | "desc") => void;
-  defaultFilter?: Record<string, { min?: number; max?: number }>;
+  defaultFilter?: Record<
+    string,
+    { min?: number | string; max?: number | string }
+  >;
   children?: JSX.Element;
   onRowClick?: (e: React.MouseEvent, row: T) => void;
   onSortChange?: (
@@ -56,6 +60,7 @@ interface DataTableProps<T> {
   onFilterChange?: (filter: Filter) => void;
   hasNextPage?: boolean;
   loadMore?: () => void;
+  renderFooter?: () => JSX.Element;
 }
 export const DataTable = <T,>(props: DataTableProps<T>) => {
   const {
@@ -74,6 +79,7 @@ export const DataTable = <T,>(props: DataTableProps<T>) => {
     hasNextPage = true,
     loadMore,
     defaultFilter = {},
+    renderFooter,
   } = props;
   const _onSortChange = useEvent(onSortChange);
   const _onFilterChange = useEvent(onFilterChange);
@@ -119,8 +125,10 @@ export const DataTable = <T,>(props: DataTableProps<T>) => {
         for (const key in filter) {
           if (
             (filter[key].min !== undefined &&
+              typeof filter[key].min === "number" &&
               Number(record[key as keyof T]) < filter[key].min) ||
             (filter[key].max !== undefined &&
+              typeof filter[key].max === "number" &&
               Number(record[key as keyof T]) > filter[key].max)
           ) {
             return false;
@@ -267,41 +275,78 @@ export const DataTable = <T,>(props: DataTableProps<T>) => {
   );
 
   const addFilter = (key: string, children: React.ReactNode) => {
+    const filterType = mapping[key]?.filterType ?? "number";
+    const isNum = filterType === "number";
+    const isDate = filterType === "date";
     return (
       <Popover
         open={filterActive === key}
         onOpenChange={(vis) => onOpenChange(vis, key)}
       >
-        <PopoverTrigger asChild>{children}</PopoverTrigger>
+        <PopoverTrigger asChild className="cursor-pointer">
+          {children}
+        </PopoverTrigger>
         <PopoverContent>
           <div className="p-1">
             <div className="flex gap-4 flex-col">
               <Label>Min</Label>
-              <Input
-                placeholder="Min"
-                className="p-2"
-                type="number"
-                value={tmpFilter.min ?? ""}
-                onChange={(e) =>
-                  setTmpFilter((prev) => ({
-                    ...prev,
-                    min: Number(e.target.value),
-                  }))
-                }
-              />
+              {isNum && (
+                <Input
+                  placeholder="Min"
+                  className="p-2"
+                  type="number"
+                  value={(tmpFilter.min ?? "") as string}
+                  onChange={(e) =>
+                    setTmpFilter((prev) => ({
+                      ...prev,
+                      min: Number(e.target.value),
+                    }))
+                  }
+                />
+              )}
+              {isDate && (
+                <Input
+                  placeholder="MM/dd/yyyy"
+                  className="p-2"
+                  type="input"
+                  value={tmpFilter.min ?? ""}
+                  onChange={(e) =>
+                    setTmpFilter((prev) => ({
+                      ...prev,
+                      min: e.target.value,
+                    }))
+                  }
+                />
+              )}
               <Label>Max</Label>
-              <Input
-                placeholder="Max"
-                className="p-2"
-                type="number"
-                value={tmpFilter.max ?? ""}
-                onChange={(e) =>
-                  setTmpFilter((prev) => ({
-                    ...prev,
-                    max: Number(e.target.value),
-                  }))
-                }
-              />
+              {isNum && (
+                <Input
+                  placeholder="Max"
+                  className="p-2"
+                  type="number"
+                  value={(tmpFilter.max ?? "") as string}
+                  onChange={(e) =>
+                    setTmpFilter((prev) => ({
+                      ...prev,
+                      max: Number(e.target.value),
+                    }))
+                  }
+                />
+              )}
+              {isDate && (
+                <Input
+                  placeholder="MM/dd/yyyy"
+                  className="p-2"
+                  type="input"
+                  value={tmpFilter.max ?? ""}
+                  onChange={(e) =>
+                    setTmpFilter((prev) => ({
+                      ...prev,
+                      max: e.target.value,
+                    }))
+                  }
+                />
+              )}
             </div>
             <div className="flex justify-end mt-4">
               <Button
@@ -319,6 +364,13 @@ export const DataTable = <T,>(props: DataTableProps<T>) => {
               <Button
                 className="btn btn-primary ml-2"
                 size="sm"
+                disabled={
+                  isDate &&
+                  ((tmpFilter.min !== undefined &&
+                    !isValidDate(tmpFilter.min)) ||
+                    (tmpFilter.max !== undefined &&
+                      !isValidDate(tmpFilter.max)))
+                }
                 onClick={() => {
                   setFilterActive("");
                   setFilter((prev) => ({
@@ -465,6 +517,7 @@ export const DataTable = <T,>(props: DataTableProps<T>) => {
           </>
         )}
       </TableBody>
+      {renderFooter?.()}
     </Table>
   );
 };

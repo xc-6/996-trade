@@ -4,16 +4,30 @@ import { db } from "@/db/mongo";
 import { z } from "zod";
 import { ObjectId } from "mongodb";
 import { zValidator } from "@hono/zod-validator";
+import { generateFilter } from "../_utils";
 
 import { buyRecords, users, zSellRecord, zBuyRecord } from "@/db/schema";
 
-const app = new Hono().get(
+const app = new Hono().post(
   "/",
   verifyAuth(),
   zValidator(
-    "query",
+    "json",
     z.object({
-      accountIds: z.string().optional(),
+      accountIds: z.array(z.string()).optional(),
+      filter: z
+        .record(
+          z.string(),
+          z
+            .object({
+              min: z.union([z.number(), z.string()]).optional(),
+              max: z.union([z.number(), z.string()]).optional(),
+            })
+            .optional()
+            .default({}),
+        )
+        .optional()
+        .default({}),
     }),
   ),
   async (c) => {
@@ -32,14 +46,15 @@ const app = new Hono().get(
       return c.json({ error: "Something went wrong" }, 400);
     }
 
-    const { accountIds } = c.req.valid("query");
+    const { accountIds, filter } = c.req.valid("json");
 
-    const accounts = accountIds?.split(",").map((id) => new ObjectId(id));
+    const accounts = accountIds?.map((id) => new ObjectId(id));
 
     const sellRecords = await buyRecords.aggregate([
       {
         $match: {
           accountId: { $in: accounts ?? user.accounts },
+          ...generateFilter(filter),
         },
       },
       {

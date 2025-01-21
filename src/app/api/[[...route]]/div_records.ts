@@ -275,17 +275,24 @@ const app = new Hono()
         buyRecordList.map((item) => [String(item._id), item]),
       );
 
-      const list = _divRecords.map((item) => {
-        const info = buyRecordsMap.get(String(item.buyRecordId));
-        return {
-          ...item,
-          accountId: info?.accountId,
-          buyRecordId: info?._id,
-          buyAmount: info?.buyAmount,
-          buyDate: info?.buyDate,
-          buyPrice: info?.buyPrice,
-        };
-      });
+      const list = _divRecords
+        .map((item) => {
+          const info = buyRecordsMap.get(String(item.buyRecordId));
+          return {
+            ...item,
+            accountId: info?.accountId,
+            buyRecordId: info?._id,
+            buyAmount: info?.buyAmount,
+            buyDate: info?.buyDate,
+            buyPrice: info?.buyPrice,
+          };
+        })
+        .sort((a, b) => {
+          return (
+            new Date(b.buyDate ?? 0).getTime() -
+            new Date(a.buyDate ?? 0).getTime()
+          );
+        });
 
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const zData = zDivBatchRecord

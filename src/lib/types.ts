@@ -60,8 +60,8 @@ export type ExtractArrayType<T> = T extends Array<infer U> ? U : never;
 export type Filter = Record<
   string,
   {
-    min?: number;
-    max?: number;
+    min?: number | string;
+    max?: number | string;
   }
 >;
 
