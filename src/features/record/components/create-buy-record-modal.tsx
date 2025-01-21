@@ -54,7 +54,7 @@ export type Account = ExtractArrayType<ResponseType["data"]>;
 const formSchema = BuyRecord;
 
 export const CreateBuyRecordModal = () => {
-  const { isOpen, onClose, type, data } = useModal();
+  const { isOpen, onClose, type, data, setData } = useModal();
   const { mutate: createMutate } = useCreateBuyRecord();
   const { mutate: editMutate } = useEditBuyRecord();
 
@@ -153,6 +153,7 @@ export const CreateBuyRecordModal = () => {
 
   const handleClose = () => {
     form.reset();
+    setData({});
     onClose();
   };
 
@@ -348,7 +349,7 @@ export const CreateBuyRecordModal = () => {
               </div>
             </div>
             <DialogFooter className="bg-gray-100 px-6 py-4">
-              <Button disabled={isLoading}>Create</Button>
+              <Button disabled={isLoading}>{edit ? "Edit" : "Create"}</Button>
             </DialogFooter>
           </form>
         </Form>

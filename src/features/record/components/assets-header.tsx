@@ -71,8 +71,24 @@ export const AssetsHeader = () => {
     );
   }, [data, exchange2Currency, isLoading]);
 
+  const Div = useMemo(() => {
+    const currencys = Object.keys(CURRENCY_GROUP);
+    const res = Object.fromEntries(currencys.map((key) => [key, 0]));
+    if (isLoading) {
+      return res;
+    }
+    return (
+      Object.keys(data ?? {}).reduce((obj, item) => {
+        const exchange = item.slice(0, 2);
+        const currency = exchange2Currency[exchange];
+        obj[currency] += data?.[item].totalDiv ?? 0;
+        return obj;
+      }, res) ?? res
+    );
+  }, [data, exchange2Currency, isLoading]);
+
   return (
-    <div className="grid gap-4 sm:grid-cols-4 xl:grid-cols-4">
+    <div className="grid gap-4 sm:grid-cols-5 xl:grid-cols-5">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-normal">
@@ -125,7 +141,12 @@ export const AssetsHeader = () => {
                       : "text-red-500",
                   )}
                 >
-                  {key}: {currencyFormatter(key, asset[key] - cost[key])}
+                  {key}: {currencyFormatter(key, asset[key] - cost[key])} (
+                  {(cost[key] !== 0
+                    ? ((asset[key] - cost[key]) / cost[key]) * 100
+                    : 0
+                  ).toFixed(2)}
+                  %)
                 </div>
               );
             })}
@@ -149,6 +170,22 @@ export const AssetsHeader = () => {
                   )}
                 >
                   {key}: {currencyFormatter(key, PL[key])}
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-normal">Total Dividend</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text font-bold">
+            {order.map((key) => {
+              return (
+                <div key={key}>
+                  {key}: {currencyFormatter(key, Div[key])}
                 </div>
               );
             })}

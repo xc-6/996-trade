@@ -7,6 +7,13 @@ export type Exchange = "SH" | "SZ" | "US" | "HK";
 //     currency: Currency;
 // }
 
+export interface DivRecord {
+  _id?: string;
+  divDate: string;
+  divAmount: string | number;
+  perDiv: string | number;
+}
+
 export interface SellRecord {
   _id?: string;
   sellPrice: string | number;
@@ -24,6 +31,19 @@ export interface BuyRecord {
   buyDate: string;
   sellRecords: Array<SellRecord>;
   unsoldAmount: string | number;
+}
+
+export interface DivBatch {
+  _id?: string;
+  divDate: string;
+  perDiv: string | number;
+  stockCode: string;
+  accountIds: Array<string>;
+  divRecords?: Array<{
+    buyRecordId: string;
+    accountId: string;
+    divAmount: number;
+  }>;
 }
 
 export interface StockInfo {

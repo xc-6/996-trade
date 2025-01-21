@@ -1,5 +1,5 @@
 import { Account } from "@/features/account/schema";
-import { BuyRecord, SellRecord } from "@/lib/types";
+import { BuyRecord, DivBatch, SellRecord } from "@/lib/types";
 import { z } from "zod";
 import { create } from "zustand";
 
@@ -9,6 +9,8 @@ export type ModalType =
   | "editBuyRecord"
   | "createSellRecord"
   | "createRecordUpload"
+  | "createDivBatch"
+  | "editDivBatch"
   | "deleteAccount";
 
 interface ModalData {
@@ -16,6 +18,8 @@ interface ModalData {
   buyRecord?: BuyRecord;
   sellRecord?: SellRecord;
   buyRecordId?: string;
+  stockCode?: string;
+  divBatch?: DivBatch;
 }
 
 interface ModalStore {
@@ -24,6 +28,7 @@ interface ModalStore {
   isOpen: boolean;
   onOpen: (type: ModalType, data?: ModalData) => void;
   onClose: () => void;
+  setData: (data: ModalData) => void;
 }
 
 export const useModal = create<ModalStore>((set) => ({
@@ -32,4 +37,5 @@ export const useModal = create<ModalStore>((set) => ({
   isOpen: false,
   onOpen: (type, data = {}) => set({ isOpen: true, type, data }),
   onClose: () => set({ type: null, isOpen: false }),
+  setData: (data) => set({ data }),
 }));

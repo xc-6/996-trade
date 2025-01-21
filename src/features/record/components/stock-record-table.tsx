@@ -2,7 +2,7 @@ import { Column, DataTable } from "@/components/data-table";
 import { Badge } from "@/components/ui/badge";
 import { useConfirm } from "@/hooks/use-confirm";
 import { useGetRecordsByStock } from "../hooks/use-get-records-by-stock";
-import { Loader } from "lucide-react";
+import { Loader, PiggyBank } from "lucide-react";
 import { useActiveAccounts } from "@/features/account/hooks/use-active-accounts";
 import { BuyRecordTable } from "./buy-record-table";
 import { cn, numberFormatter } from "@/lib/utils";
@@ -13,6 +13,7 @@ import { ResponseType } from "../hooks/use-get-records-by-stock";
 import { useDeleteStockGroups } from "../hooks/use-delete-stock-groups";
 import { totalUnsoldAmount } from "../deafult";
 import { StockInfo } from "@/lib/types";
+import { useModal } from "@/hooks/use-modal-store";
 
 type StockRecord = ResponseType["data"][0] &
   StockInfo & {
@@ -33,6 +34,7 @@ export const StockRecordTable = (props: {
   className?: string;
   style?: React.CSSProperties;
 }) => {
+  const { onOpen } = useModal();
   const { stocksState } = useStocksState();
   const { activeIds } = useActiveAccounts();
   const { data, isLoading, refetch } = useGetRecordsByStock(activeIds ?? []);
@@ -53,6 +55,7 @@ export const StockRecordTable = (props: {
           <BuyRecordTable
             showHeader={false}
             stockCode={item.stockCode}
+            fetchAll={true}
             key={`${item.stockCode}-table`}
           />
         );
@@ -110,7 +113,7 @@ export const StockRecordTable = (props: {
         cn(unrealized > 0 ? "text-red-500 font-bold" : "text-green-500"),
       render: ({ unrealizedPLPercent, unrealized }) => (
         <>
-          {numberFormatter(unrealized)}
+          {numberFormatter(unrealized)}{" "}
           <span>({unrealizedPLPercent.toFixed(2)}%)</span>
         </>
       ),
@@ -190,12 +193,23 @@ export const StockRecordTable = (props: {
       key: "action",
       label: "Action",
       sortable: false,
+      className: "flex flex-row gap-4",
       render: (item) => (
-        <Trash2
-          size={16}
-          className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"
-          onClick={(e) => onDelete(e, item.stockCode)}
-        />
+        <>
+          <PiggyBank
+            size={16}
+            className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"
+            onClick={(e) => {
+              onOpen("createDivBatch", { stockCode: item.stockCode });
+              e.stopPropagation();
+            }}
+          />
+          <Trash2
+            size={16}
+            className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"
+            onClick={(e) => onDelete(e, item.stockCode)}
+          />
+        </>
       ),
     },
   ];

@@ -2,522 +2,12 @@ import { verifyAuth } from "@hono/auth-js";
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 
-import {
-  buyRecords,
-  sellRecords,
-  users,
-  zAccount,
-  zBuyRecord,
-  zSellRecord,
-} from "@/db/schema";
+import { buyRecords, users, divBatchRecords } from "@/db/schema";
 import { db } from "@/db/mongo";
 import { z } from "zod";
 import { ObjectId } from "mongodb";
-import { generateFilter } from "../_utils";
 
 const app = new Hono()
-  .post(
-    "/buy_records",
-    verifyAuth(),
-    zValidator(
-      "json",
-      z.object({
-        accountIds: z.array(z.string()).optional(),
-        stockCode: z.string().optional(),
-        showSold: z.boolean().optional().default(false),
-        page: z.number().optional().default(1),
-        limit: z.number().optional().default(50),
-        key: z.string().optional().default("buyDate"),
-        order: z.enum(["asc", "desc"]).optional().default("desc"),
-        filter: z
-          .record(
-            z.string(),
-            z
-              .object({
-                min: z.union([z.number(), z.string()]).optional(),
-                max: z.union([z.number(), z.string()]).optional(),
-              })
-              .optional()
-              .default({}),
-          )
-          .optional()
-          .default({}),
-      }),
-    ),
-    async (c) => {
-      // Get all buy records by the account ids
-      const auth = c.get("authUser");
-
-      if (!auth.token?.id) {
-        return c.json({ error: "Unauthorized" }, 401);
-      }
-
-      await db();
-
-      const user = await users.findById(auth.token.id);
-
-      if (!user) {
-        return c.json({ error: "Something went wrong" }, 400);
-      }
-
-      const {
-        accountIds,
-        stockCode,
-        showSold,
-        page,
-        limit,
-        key,
-        order,
-        filter,
-      } = c.req.valid("json");
-
-      const accounts = accountIds?.map((id) => new ObjectId(id));
-
-      const selectFields = showSold ? {} : { sellRecords: 0 };
-
-      const pipeline: any[] = [
-        {
-          $match: {
-            accountId: { $in: accounts ?? user.accounts },
-            stockCode: stockCode ? { $in: [stockCode] } : { $exists: true },
-            ...generateFilter(filter),
-          },
-        },
-        {
-          $sort: {
-            [key]: order === "asc" ? 1 : -1,
-          },
-        },
-        {
-          $facet: {
-            total: [{ $count: "count" }],
-            records: [
-              { $skip: (page - 1) * limit },
-              { $limit: limit },
-              { $project: selectFields },
-            ],
-          },
-        },
-        {
-          $project: {
-            total: { $arrayElemAt: ["$total.count", 0] },
-            records: 1,
-          },
-        },
-      ];
-
-      const result = await buyRecords.aggregate(pipeline).exec();
-      const total = result[0]?.total ?? 0;
-      const list = (result[0]?.records ?? []) as unknown as Array<
-        z.infer<typeof zBuyRecord> & { _id: string }
-      >;
-
-      return c.json(
-        {
-          data: list ?? [],
-          nextPage: list.length === limit ? page + 1 : null,
-          total,
-        },
-        200,
-      );
-    },
-  )
-  .get(
-    "/sell_records",
-    verifyAuth(),
-    zValidator(
-      "query",
-      z.object({
-        accountIds: z.string().optional(),
-      }),
-    ),
-    async (c) => {
-      // Get the sell records by the account ids, and insert the buy record id in each sell record
-      const auth = c.get("authUser");
-
-      if (!auth.token?.id) {
-        return c.json({ error: "Unauthorized" }, 401);
-      }
-
-      await db();
-
-      const user = await users.findById(auth.token.id);
-
-      if (!user) {
-        return c.json({ error: "Something went wrong" }, 400);
-      }
-
-      const { accountIds } = c.req.valid("query");
-
-      const accounts = accountIds?.split(",").map((id) => new ObjectId(id));
-
-      const sellRecords = await buyRecords.aggregate([
-        {
-          $match: {
-            accountId: { $in: accounts ?? user.accounts },
-          },
-        },
-        {
-          $unwind: "$sellRecords",
-        },
-        {
-          $sort: {
-            "sellRecords.sellDate": -1,
-          },
-        },
-        {
-          $project: {
-            allFields: {
-              $mergeObjects: [
-                "$$ROOT",
-                "$sellRecords",
-                { buyRecordId: "$_id" },
-              ],
-            },
-          },
-        },
-        {
-          $replaceRoot: { newRoot: "$allFields" },
-        },
-        {
-          $project: {
-            sellRecords: 0,
-          },
-        },
-      ]);
-      const data = sellRecords as unknown as Array<
-        z.infer<typeof zSellRecord> &
-          z.infer<typeof zBuyRecord> & { _id: string; buyRecordId: string }
-      >;
-
-      return c.json({ data: data ?? [] }, 200);
-    },
-  )
-  .get(
-    "/buy_record/:id",
-    verifyAuth(),
-    zValidator("param", z.object({ id: z.string() })),
-    async (c) => {
-      // Get the buy record by the buy record id
-      const auth = c.get("authUser");
-      const { id } = c.req.valid("param");
-
-      if (!auth.token?.id) {
-        return c.json({ error: "Unauthorized" }, 401);
-      }
-
-      await db();
-
-      const user = await users.findOne({ _id: auth.token.id });
-
-      if (!user) {
-        return c.json({ error: "Something went wrong" }, 400);
-      }
-
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const _zBuyRecord = zBuyRecord.extend({
-        sellRecords: z.array(zSellRecord.extend({ _id: z.string() })),
-      });
-
-      const buyRecord = (await buyRecords.findById(id)) as unknown as z.infer<
-        typeof _zBuyRecord
-      > & { _id: string };
-
-      if (!buyRecord) {
-        return c.json({ message: "Buy record not found" }, 404);
-      }
-
-      // Sort the sellRecords by sellDate in descending order
-      buyRecord.sellRecords.sort((a, b) => {
-        return new Date(b.sellDate).getTime() - new Date(a.sellDate).getTime();
-      });
-
-      return c.json({ data: buyRecord }, 200);
-    },
-  )
-  .post(
-    "/buy_record",
-    verifyAuth(),
-    zValidator(
-      "json",
-      zBuyRecord.omit({ sellRecords: true }).extend({ buyDate: z.string() }),
-    ),
-    async (c) => {
-      // Create a new buy record
-      const auth = c.get("authUser");
-      const { stockCode, buyDate, buyPrice, buyAmount, accountId } =
-        c.req.valid("json");
-
-      if (!auth.token?.id) {
-        return c.json({ error: "Unauthorized" }, 401);
-      }
-
-      await db();
-
-      const user = await users.findOne({
-        _id: auth.token.id,
-        "accounts._id": accountId,
-      });
-
-      if (!user) {
-        return c.json({ error: "Something went wrong" }, 400);
-      }
-
-      const data = await buyRecords.create({
-        stockCode,
-        buyDate: new Date(buyDate),
-        buyPrice,
-        buyAmount,
-        accountId,
-        unsoldAmount: buyAmount,
-      });
-
-      return c.json(data, 200);
-    },
-  )
-  .post(
-    "/buy_record/:id",
-    verifyAuth(),
-    zValidator("param", z.object({ id: z.string() })),
-    zValidator(
-      "json",
-      zBuyRecord.omit({ sellRecords: true }).extend({ buyDate: z.string() }),
-    ),
-    async (c) => {
-      // Edit the buy record by the buy record id
-      const auth = c.get("authUser");
-      const { id } = c.req.valid("param");
-      const { stockCode, buyDate, buyPrice, buyAmount, accountId } =
-        c.req.valid("json");
-
-      if (!auth.token?.id) {
-        return c.json({ error: "Unauthorized" }, 401);
-      }
-
-      await db();
-
-      const user = await users.findOne({
-        _id: auth.token.id,
-        "accounts._id": accountId,
-      });
-
-      if (!user) {
-        return c.json({ error: "Something went wrong" }, 400);
-      }
-
-      // Get the buy record and update it
-      const buyRecord = await buyRecords.findOne({
-        _id: id,
-      });
-      if (!buyRecord) {
-        return c.json({ error: "Buy record not found" }, 400);
-      }
-
-      const preSoldAmount = (buyRecord.sellRecords ?? []).reduce(
-        (sum, record) => sum + Number(record.sellAmount),
-        0,
-      );
-
-      if (buyAmount < preSoldAmount) {
-        return c.json(
-          {
-            error: "Buy Amount cannot be less than Sold Amount",
-            preSoldAmount,
-          },
-          400,
-        );
-      }
-
-      // Get the earlier sold date, if the buy date is after the sell date then error
-      const earliestSellDate = buyRecord.sellRecords.reduce(
-        (earliest, record) =>
-          record.sellDate < earliest ? record.sellDate : earliest,
-        new Date(),
-      );
-      if (new Date(buyDate) > earliestSellDate) {
-        return c.json(
-          {
-            error: "Buy Date cannot be later than the earliest sold Date",
-            earliestSellDate,
-          },
-          400,
-        );
-      }
-
-      const data = await buyRecords.findOneAndUpdate(
-        { _id: id },
-        {
-          stockCode,
-          buyDate: new Date(buyDate),
-          buyPrice,
-          buyAmount,
-          accountId,
-          unsoldAmount: buyAmount - preSoldAmount,
-        },
-        { new: true, sellRecords: 0 },
-      );
-
-      return c.json(data, 200);
-    },
-  )
-  .post(
-    "/buy_record/:buyRecordId/sell",
-    verifyAuth(),
-    zValidator("param", z.object({ buyRecordId: z.string() })),
-    zValidator("json", zSellRecord.extend({ sellDate: z.string() })),
-    async (c) => {
-      // Create a new sell record
-      const auth = c.get("authUser");
-      const { buyRecordId } = c.req.valid("param");
-      const { sellDate, sellAmount, sellPrice } = c.req.valid("json");
-
-      if (!auth.token?.id) {
-        return c.json({ error: "Unauthorized" }, 401);
-      }
-
-      await db();
-
-      const user = await users.findOne({ _id: auth.token.id });
-
-      if (!user) {
-        return c.json({ error: "Something went wrong" }, 400);
-      }
-
-      const buyRecord = await buyRecords.findOne({
-        _id: buyRecordId,
-      });
-
-      if (!buyRecord) {
-        return c.json({ error: "Buy record not found" }, 400);
-      }
-
-      // Calculate total sold amount from previous sell records
-      const preSoldAmount = (buyRecord.sellRecords ?? []).reduce(
-        (sum, record) => sum + Number(record.sellAmount),
-        0,
-      );
-
-      // Calculate remaining amount available to sell
-      const remainingAmount = Number(buyRecord.buyAmount) - preSoldAmount;
-
-      // Validate if new Sold Amount exceeds remaining amount
-      if (Number(sellAmount) > remainingAmount) {
-        return c.json(
-          {
-            error: "Sold Amount exceeds available amount",
-            remainingAmount,
-            requestedAmount: sellAmount,
-          },
-          400,
-        );
-      }
-
-      // Calculate the profit and loss, APY
-      const soldDate = new Date(sellDate);
-      const profitLoss = Number(
-        ((sellPrice - buyRecord.buyPrice) * sellAmount).toFixed(3),
-      );
-      const holdingDays = Math.ceil(
-        (soldDate.getTime() - new Date(buyRecord.buyDate).getTime()) /
-          (1000 * 60 * 60 * 24),
-      );
-      const profitRatio = profitLoss / (buyRecord.buyPrice * sellAmount);
-      const apy = Number(
-        ((Math.pow(1 + profitRatio, 365 / holdingDays) - 1) * 100).toFixed(2),
-      );
-
-      const sellRecord = new sellRecords({
-        sellDate: sellDate,
-        sellAmount: sellAmount,
-        sellPrice: sellPrice,
-        profitLoss: profitLoss,
-        apy: apy,
-      });
-
-      await buyRecord.updateOne({
-        unsoldAmount: remainingAmount - Number(sellAmount),
-        profitLoss: Number(buyRecord.profitLoss) + profitLoss,
-        sellRecords: [...(buyRecord?.sellRecords ?? []), sellRecord],
-      });
-
-      return c.json({ data: sellRecord }, 200);
-    },
-  )
-  .delete(
-    "/buy_record/:buyRecordId/sell/:sellRecordId",
-    verifyAuth(),
-    zValidator(
-      "param",
-      z.object({
-        buyRecordId: z.string(),
-        sellRecordId: z.string(),
-      }),
-    ),
-    async (c) => {
-      // Delete the sell record by the buy record id and sell record id
-      const { buyRecordId, sellRecordId } = c.req.valid("param");
-
-      const buyRecord = await buyRecords.findById(buyRecordId);
-      if (!buyRecord) {
-        return c.json({ message: "Buy record not found" }, 404);
-      }
-
-      // Find the sold record that's being deleted
-      const sellRecordToDelete = buyRecord.sellRecords.find(
-        (record: any) => record._id?.toString() === sellRecordId,
-      );
-
-      if (!sellRecordToDelete) {
-        return c.json({ message: "Sell record not found" }, 404);
-      }
-
-      // Remove the sold record from the array
-      buyRecord.sellRecords = buyRecord.sellRecords.filter(
-        (record: any) => record._id?.toString() !== sellRecordId,
-      );
-
-      // Add back the sold amount to unsoldAmount
-      buyRecord.unsoldAmount =
-        Number(buyRecord.unsoldAmount) + Number(sellRecordToDelete.sellAmount);
-
-      buyRecord.profitLoss =
-        Number(buyRecord.profitLoss) - Number(sellRecordToDelete.profitLoss);
-
-      await buyRecord.save();
-
-      return c.json({ message: "Sell record deleted successfully" }, 200);
-    },
-  )
-  .delete(
-    "/buy_record/:id",
-    verifyAuth(),
-    zValidator("param", z.object({ id: z.string() })),
-    async (c) => {
-      // Delete the buy record by the buy record id
-      const auth = c.get("authUser");
-      const { id } = c.req.valid("param");
-
-      if (!auth.token?.id) {
-        return c.json({ error: "Unauthorized" }, 401);
-      }
-
-      await db();
-
-      const user = await users.findOne({ _id: auth.token.id });
-
-      if (!user) {
-        return c.json({ error: "Something went wrong" }, 400);
-      }
-
-      const data = await buyRecords.findOneAndDelete({ _id: id });
-
-      if (!data) {
-        return c.json({ error: "Not found" }, 404);
-      }
-
-      return c.json({ data: { id } }, 200);
-    },
-  )
   .get(
     "/stock_groups",
     verifyAuth(),
@@ -538,7 +28,7 @@ const app = new Hono()
       await db();
 
       const { accountIds } = c.req.valid("query");
-      const accounts = accountIds.split(",");
+      const inputAccounts = accountIds.split(",");
 
       // Check the accounts ids are in this user's accounts
       const user = await users.findById(auth.token.id);
@@ -546,18 +36,19 @@ const app = new Hono()
         return c.json({ error: "Something went wrong" }, 400);
       }
 
-      const totalAccounts = user.accounts as Array<
-        z.infer<typeof zAccount> & { _id: string }
-      >;
+      const accountsInDB = user.accounts ?? [];
       const userAccountIds =
-        totalAccounts?.map((account) => String(account._id)) ?? [];
+        accountsInDB?.map((account) => String(account._id)) ?? [];
 
-      if (accounts.some((account) => !userAccountIds.includes(account))) {
+      // Check if the input accounts are really in the user's accounts
+      if (inputAccounts.some((account) => !userAccountIds.includes(account))) {
         return c.json({ error: "Unauthorized or account not found" }, 401);
       }
 
       // Fetch records for the specified accounts
-      const records = await buyRecords.find({ accountId: { $in: accounts } });
+      const records = await buyRecords.find({
+        accountId: { $in: inputAccounts },
+      });
 
       // Group and calculate totals by stock code
       const groupedRecords = records.reduce(
@@ -571,6 +62,7 @@ const app = new Hono()
               totalCost: 0,
               avgCost: 0,
               totalPL: 0,
+              totalDiv: 0,
             };
           }
 
@@ -611,10 +103,62 @@ const app = new Hono()
             totalCost: number;
             avgCost: number;
             totalPL: number;
+            totalDiv: number;
           }
         >,
       );
 
+      // Calculate the total Dividends
+      const list = await divBatchRecords
+        .aggregate([
+          {
+            $unwind: "$divRecords",
+          },
+          {
+            $match: {
+              "divRecords.accountId": {
+                $in: inputAccounts.map((id) => new ObjectId(id)),
+              },
+            },
+          },
+          {
+            $project: {
+              allFields: {
+                $mergeObjects: ["$$ROOT", "$divRecords", { batchId: "$_id" }],
+              },
+            },
+          },
+          {
+            $replaceRoot: { newRoot: "$allFields" },
+          },
+          {
+            $project: {
+              perDiv: 1,
+              divAmount: 1,
+              stockCode: 1,
+            },
+          },
+        ])
+        .exec();
+
+      // Calculate total dividends for each stockCode
+      const totalDividendsByStockCode = list.reduce(
+        (acc, record) => {
+          const totalDiv = record.perDiv * record.divAmount;
+          if (!acc[record.stockCode]) {
+            acc[record.stockCode] = 0;
+          }
+          acc[record.stockCode] += totalDiv;
+          return acc;
+        },
+        {} as Record<string, number>,
+      );
+
+      // Insert totalDiv into groupedRecords based on stockCode
+      for (const stockCode in groupedRecords) {
+        groupedRecords[stockCode].totalDiv =
+          totalDividendsByStockCode[stockCode] || 0; // Add totalDiv to each stockCode
+      }
       return c.json({ data: groupedRecords }, 200);
     },
   )
@@ -676,6 +220,37 @@ const app = new Hono()
 
       if (result.deletedCount === 0) {
         return c.json({ message: "No records found to delete" }, 404);
+      }
+
+      // Delete all divBatchRecords with the specified stockCode and accountIds
+      // Find the divBatchRecords for the specified stockCode and accountIds
+      const mathcedDivBatchRecords = await divBatchRecords.find({
+        stockCode: stockCode,
+        accountIds: { $in: accounts.map((id) => new ObjectId(id)) },
+      });
+
+      for (const divBatchRecord of mathcedDivBatchRecords) {
+        const matchedAccountIds = divBatchRecord.accountIds.filter(
+          (accountId) => accounts.includes(accountId.toString()),
+        );
+
+        // Check if all accountIds are matched
+        if (matchedAccountIds.length === divBatchRecord.accountIds.length) {
+          // Delete the whole document if all accountIds match
+          await divBatchRecords.deleteOne({ _id: divBatchRecord._id });
+        } else if (matchedAccountIds.length > 0) {
+          // Delete only the matching divRecords if at least one accountId matches
+          divBatchRecord.divRecords = divBatchRecord.divRecords.filter(
+            (divRecord) => !accountIds.includes(divRecord.accountId.toString()),
+          );
+
+          // Remove the matched accountIds from the accountIds array
+          divBatchRecord.accountIds = divBatchRecord.accountIds.filter(
+            (accountId) => !accounts.includes(accountId.toString()),
+          );
+
+          await divBatchRecord.save();
+        }
       }
 
       return c.json({ message: "Records deleted successfully" }, 200);

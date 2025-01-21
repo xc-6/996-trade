@@ -17,7 +17,7 @@ import { useSize } from "ahooks";
 export default function Record() {
   useRefreshStocks();
   const { onOpen } = useModal();
-  const { recordId, onClose } = usePanel();
+  const { id: recordId, onClose } = usePanel();
   const onlyClient = useClient();
   const showPanel = !!recordId;
   const ref = useRef<HTMLDivElement>(null);

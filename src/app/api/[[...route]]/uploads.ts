@@ -19,9 +19,11 @@ const app = new Hono().post(
     z.object({
       accountId: z.string(),
       records: z.array(
-        zBuyRecord.omit({ accountId: true }).extend({
+        zBuyRecord.omit({ accountId: true, _id: true }).extend({
           buyDate: z.string(),
-          sellRecords: z.array(zSellRecord.extend({ sellDate: z.string() })),
+          sellRecords: z.array(
+            zSellRecord.omit({ _id: true }).extend({ sellDate: z.string() }),
+          ),
         }),
       ),
     }),

@@ -3,21 +3,22 @@ import { InferResponseType } from "hono";
 import { client } from "@/lib/hono";
 
 export type ResponseType = InferResponseType<
-  (typeof client.api.records)["sell_record"]["$get"],
+  (typeof client.api.records)["div_record"]["batch"]["$post"],
   200
 >;
 
-export const useGetSellRecords = (accountIds: Array<string>) => {
+export const useGetDivBatches = (
+  accountIds: Array<string>,
+  stockCode: string,
+) => {
   const query = useQuery({
     enabled: !!accountIds.length,
-    queryKey: ["sellRecords", accountIds],
+    queryKey: ["divBatches", accountIds, stockCode],
     queryFn: async () => {
-      if (!accountIds.length) {
-        return [];
-      }
-      const response = await client.api.records.sell_record.$get({
-        query: {
-          accountIds: accountIds.join(","),
+      const response = await client.api.records.div_record.batch.$post({
+        json: {
+          accountIds,
+          stockCode,
         },
       });
 

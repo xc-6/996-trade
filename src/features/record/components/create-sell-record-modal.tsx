@@ -39,7 +39,7 @@ import { useCreateSellRecord } from "../hooks/use-create-sell-record";
 import { SellRecord } from "../schema";
 
 export const CreateSellRecordModal = () => {
-  const { isOpen, onClose, type, data } = useModal();
+  const { isOpen, onClose, type, data, setData } = useModal();
   const mutation = useCreateSellRecord();
   const { buyRecord } = useBuyRecordState();
 
@@ -88,7 +88,7 @@ export const CreateSellRecordModal = () => {
     }
   }, [sellRecord, form]);
 
-  const isLoading = form.formState.isSubmitting;
+  const isLoading = mutation.isPending;
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const sellPrice = Number(values["sellPrice"]);
@@ -115,6 +115,7 @@ export const CreateSellRecordModal = () => {
 
   const handleClose = () => {
     form.reset();
+    setData({});
     onClose();
   };
 

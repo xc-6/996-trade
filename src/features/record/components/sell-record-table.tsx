@@ -26,7 +26,7 @@ export const SellRecordTable = (props: { className?: string }) => {
     "You are about to delete this record.",
   );
 
-  const { recordId } = usePanel();
+  const { id: recordId } = usePanel();
   const { setBuyRecord } = useBuyRecordState();
   const {
     data: buyRecord,
@@ -165,7 +165,7 @@ export const SellRecordTable = (props: { className?: string }) => {
       data={list}
       columns={columns}
       dataIndex="_id"
-      className="mb-2"
+      className={cn(list.length == 0 && "min-h-[40vh]")}
       rowClassName="group"
       {...props}
     >

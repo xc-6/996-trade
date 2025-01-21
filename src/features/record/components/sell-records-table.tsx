@@ -108,7 +108,7 @@ export const SellRecordsTable = (props: { style?: React.CSSProperties }) => {
           <Link
             size={16}
             className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"
-            onClick={() => router.push(`buy_record?id=${item.buyRecordId}`)}
+            onClick={() => router.push(`/buy_record?id=${item.buyRecordId}`)}
           />
           <Trash2
             size={16}

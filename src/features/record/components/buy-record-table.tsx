@@ -17,6 +17,7 @@ import { ResponseType } from "../hooks/use-get-buy-records";
 import { useModal } from "@/hooks/use-modal-store";
 import { unsoldAmount } from "../deafult";
 import { StockInfo, Sort, Filter } from "@/lib/types";
+import { useUpdateLayoutEffect } from "ahooks";
 
 type BuyRecord = ResponseType["data"][0] &
   StockInfo & {
@@ -33,6 +34,7 @@ type BuyRecord = ResponseType["data"][0] &
 interface BuyRecordTableProps {
   showHeader?: boolean;
   stockCode?: string;
+  fetchAll?: boolean;
   style?: React.CSSProperties;
 }
 const Table = memo(DataTable<BuyRecord>);
@@ -40,6 +42,7 @@ const Table = memo(DataTable<BuyRecord>);
 const _defaultFilter = { unsoldAmount };
 export const BuyRecordTable = ({
   showHeader = true,
+  fetchAll = false,
   stockCode,
   ...props
 }: BuyRecordTableProps = {}) => {
@@ -48,7 +51,7 @@ export const BuyRecordTable = ({
     "Are you sure?",
     "You are about to delete this record.",
   );
-  const { onSelect, recordId } = usePanel();
+  const { onSelect, id: recordId } = usePanel();
   const { stocksState } = useStocksState();
   const { activeIds, mapping } = useActiveAccounts();
   const removeMutation = useDeleteBuyRecord();
@@ -57,12 +60,22 @@ export const BuyRecordTable = ({
     key: "buyDate",
     order: "desc",
   });
-  const { data, status, fetchNextPage, hasNextPage } = useGetBuyRecords(
-    activeIds ?? [],
+  const _fetchAll = useMemo(() => {
+    if (fetchAll || !!recordId) {
+      return true;
+    } else if (Object.keys(filter).length === 0) {
+      return true;
+    }
+    return false;
+  }, [fetchAll, filter, recordId]);
+  const { data, status, fetchNextPage, hasNextPage } = useGetBuyRecords({
+    accountIds: activeIds ?? [],
     filter,
     sort,
     stockCode,
-  );
+    showSold: false,
+    fetchAll: _fetchAll,
+  });
 
   const isLoading = status == "pending";
 
@@ -91,7 +104,9 @@ export const BuyRecordTable = ({
       key: "name",
       label: "Name",
       className: "font-medium",
-      render: (item) => item.name ?? "",
+      render: (item) => (
+        <span id={`buyRecord-${item._id}`}>{item.name ?? ""}</span>
+      ),
       sortable: "local",
     },
     {
@@ -123,7 +138,7 @@ export const BuyRecordTable = ({
         cn(unrealized > 0 ? "text-red-500 font-bold" : "text-green-500"),
       render: (item) => (
         <>
-          {numberFormatter((item.price - item.buyPrice) * item.unsoldAmount)}
+          {numberFormatter((item.price - item.buyPrice) * item.unsoldAmount)}{" "}
           <span className="text-sm">({item.unrealized.toFixed(2)}%)</span>
         </>
       ),
@@ -242,6 +257,17 @@ export const BuyRecordTable = ({
       })) ?? [];
     return res as unknown as BuyRecord[];
   }, [data, isLoading, stocksState, mapping]);
+
+  useUpdateLayoutEffect(() => {
+    if (recordId && list?.length) {
+      const ele = document?.getElementById(`buyRecord-${recordId}`);
+      ele?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+        inline: "center",
+      });
+    }
+  }, [list, recordId]);
 
   const onSortChangeHandler = async (sort: Sort, fetchSort?: boolean) => {
     if (fetchSort) {

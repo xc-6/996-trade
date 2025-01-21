@@ -1,17 +1,17 @@
-import { useRecordId } from "./use-record-id";
+import { useId } from "./use-record-id";
 export const usePanel = () => {
-  const [recordId, setRecordId] = useRecordId();
+  const [id, setId] = useId();
 
   const onSelect = (id: string) => {
-    setRecordId(id);
+    setId(id);
   };
 
   const onClose = () => {
-    setRecordId(null);
+    setId(null);
   };
 
   return {
-    recordId,
+    id,
     onSelect,
     onClose,
   };

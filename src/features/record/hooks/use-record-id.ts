@@ -1,5 +1,5 @@
 import { useQueryState } from "nuqs";
 
-export const useRecordId = () => {
+export const useId = () => {
   return useQueryState("id");
 };

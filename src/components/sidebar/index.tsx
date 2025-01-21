@@ -38,6 +38,10 @@ const navMain = [
         title: "Sell Record History",
         url: "/sell_record",
       },
+      {
+        title: "Dividend Record History",
+        url: "/div_record",
+      },
     ],
   },
 ];

@@ -7,6 +7,9 @@ import users from "./users";
 import accounts from "./accounts";
 import records from "./records";
 import uploads from "./uploads";
+import div_records from "./div_records";
+import buy_records from "./buy_records";
+import sell_records from "./sell_records";
 
 const getAuthConfig = (c: Context) => {
   return {
@@ -23,6 +26,9 @@ app.use("*", initAuthConfig(getAuthConfig));
 const routes = app
   .route("/users", users)
   .route("/accounts", accounts)
+  .route("/records/buy_record", buy_records)
+  .route("/records/div_record", div_records)
+  .route("/records/sell_record", sell_records)
   .route("/records", records)
   .route("/uploads", uploads);
 

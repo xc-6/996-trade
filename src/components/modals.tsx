@@ -5,6 +5,7 @@ import { DeleteAccountModal } from "@/features/account/components/delete-account
 import { CreateBuyRecordModal } from "@/features/record/components/create-buy-record-modal";
 import { CreateSellRecordModal } from "@/features/record/components/create-sell-record-modal";
 import { CreateRecordUploadModal } from "@/features/upload/components/create-record-upload-modal";
+import { CreateDivBatchModal } from "@/features/record/components/create-div-batch-modal";
 import { useClient } from "@/lib/hooks";
 
 export const Modals = () => {
@@ -17,6 +18,7 @@ export const Modals = () => {
         <CreateBuyRecordModal />
         <CreateSellRecordModal />
         <CreateRecordUploadModal />
+        <CreateDivBatchModal />
         <DeleteAccountModal />
       </>
     )

@@ -6,18 +6,17 @@ import {
 } from "@/components/ui/resizable";
 import { usePanel } from "@/features/record/hooks/use-panel";
 import { useRefreshStocks } from "@/features/stock/hooks/use-refresh-stocks";
-import { AssetsHeader } from "@/features/record/components/assets-header";
-import { BuyRecordPanel } from "@/features/record/components/buy-record-panel";
-import { StockRecordTable } from "@/features/record/components/stock-record-table";
+import { StockDivBatchesTable } from "@/features/record/components/stock-div-batches-table";
+import { DivBatchPanel } from "@/features/record/components/div-batch-panel";
 import { useClient } from "@/lib/hooks";
 import { useRef } from "react";
 import { useSize } from "ahooks";
 
 export default function Dashboard() {
   useRefreshStocks();
-  const { id: recordId } = usePanel();
+  const { id: batchId } = usePanel();
   const onlyClient = useClient();
-  const showPanel = !!recordId;
+  const showPanel = !!batchId;
   const ref = useRef<HTMLDivElement>(null);
   const size = useSize(ref);
   return (
@@ -26,10 +25,9 @@ export default function Dashboard() {
       autoSaveId="ca-workspace-layout"
     >
       <ResizablePanel defaultSize={100} minSize={50} className="flex flex-col">
-        <AssetsHeader />
         {onlyClient && (
           <div className="mt-4 grow overflow-scroll" ref={ref}>
-            <StockRecordTable style={{ height: `${size?.height}px` }} />
+            <StockDivBatchesTable style={{ height: `${size?.height}px` }} />
           </div>
         )}
       </ResizablePanel>
@@ -41,7 +39,7 @@ export default function Dashboard() {
             defaultSize={29}
             className="overflow-scroll"
           >
-            <BuyRecordPanel />
+            <DivBatchPanel />
           </ResizablePanel>
         </>
       )}

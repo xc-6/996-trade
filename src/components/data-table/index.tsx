@@ -447,7 +447,7 @@ export const DataTable = <T,>(props: DataTableProps<T>) => {
 
       <TableBody>
         {data?.length === 0 ? (
-          <TableRow>
+          <TableRow className="hover:bg-[none]">
             <TableCell className="text-center" colSpan={keys.length}>
               <div className="absolute flex-1 flex items-center justify-center flex-col gap-2 top-0 right-0 bottom-0 left-0">
                 {loading ? (

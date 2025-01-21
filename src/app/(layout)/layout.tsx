@@ -14,6 +14,15 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { protectServer } from "@/features/auth/utils";
+import { headers } from "next/headers";
+
+const MAPPING = {
+  "/dashboard": "Dashboard",
+  "/buy_record": "Buy Record History",
+  "/sell_record": "Sell Record History",
+  "/div_record": "Dividend Record History",
+  default: "Trade Insight",
+};
 
 export default async function Layout({
   children,
@@ -21,6 +30,10 @@ export default async function Layout({
   children: React.ReactNode;
 }) {
   await protectServer();
+  const headerList = headers();
+  const pathname =
+    ((await headerList).get("x-current-path") as keyof typeof MAPPING) ??
+    "default";
 
   return (
     <SidebarProvider>
@@ -37,7 +50,7 @@ export default async function Layout({
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
                 <BreadcrumbItem>
-                  <BreadcrumbPage>Data Fetching</BreadcrumbPage>
+                  <BreadcrumbPage>{MAPPING[pathname]}</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>

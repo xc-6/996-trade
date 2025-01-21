@@ -4,23 +4,33 @@ import { client } from "@/lib/hono";
 import { Filter, Sort } from "@/lib/types";
 
 export type ResponseType = InferResponseType<
-  (typeof client.api.records)["buy_records"]["$post"],
+  (typeof client.api.records)["buy_record"]["list"]["$post"],
   200
 >;
 
-export const useGetBuyRecords = (
-  accountIds: Array<string>,
-  filter?: Filter,
-  sort?: Sort,
-  stockCode?: string,
-  showSold?: boolean,
-) => {
+interface Params {
+  accountIds: Array<string>;
+  filter?: Filter;
+  sort?: Sort;
+  stockCode?: string;
+  showSold?: boolean;
+  fetchAll?: boolean;
+}
+
+export const useGetBuyRecords = ({
+  accountIds,
+  filter,
+  sort,
+  stockCode,
+  showSold,
+  fetchAll,
+}: Params) => {
   const query = useInfiniteQuery<ResponseType, Error>({
     staleTime: 0,
     enabled: !!accountIds.length,
     initialPageParam: 1,
     getNextPageParam: (lastPage) => lastPage.nextPage,
-    queryKey: ["buyRecords", accountIds, stockCode, filter, sort],
+    queryKey: ["buyRecords", accountIds, stockCode, filter, sort, fetchAll],
     queryFn: ({ pageParam }) =>
       queryFn(
         {
@@ -30,7 +40,7 @@ export const useGetBuyRecords = (
         },
         filter,
         sort,
-        Object.keys(sort ?? {}).length == 0
+        fetchAll
           ? undefined
           : {
               page: pageParam as unknown as number,
@@ -77,7 +87,7 @@ export const queryFn = async (
   };
   const page = pageParam?.page ?? 1;
   const limit = pageParam?.limit ?? 50;
-  const response = await client.api.records.buy_records.$post({
+  const response = await client.api.records.buy_record.list.$post({
     json: {
       accountIds: accountIds,
       stockCode,
