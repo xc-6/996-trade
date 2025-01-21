@@ -517,7 +517,7 @@ export const DataTable = <T,>(props: DataTableProps<T>) => {
           </>
         )}
       </TableBody>
-      {renderFooter?.()}
+      {!loading && renderFooter?.()}
     </Table>
   );
 };
