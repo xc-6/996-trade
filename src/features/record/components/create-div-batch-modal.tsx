@@ -325,7 +325,7 @@ export const CreateDivBatchModal = () => {
                         <Input
                           disabled={isLoading}
                           className="bg-zinc-300/50 border-0 focus-visible:ring-0 text-black focus-visible:ring-offset-0"
-                          placeholder="Enter Sold Price"
+                          placeholder="Enter dividend per share"
                           {...field}
                         />
                       </FormControl>
