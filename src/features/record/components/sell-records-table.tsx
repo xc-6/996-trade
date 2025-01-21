@@ -96,7 +96,7 @@ export const SellRecordsTable = (props: { style?: React.CSSProperties }) => {
       sortable: "local",
     },
     {
-      key: "soldDate",
+      key: "sellDate",
       label: "Sold Date",
       render: (item) => format(new Date(item.sellDate), "PPP"),
       sortable: "local",
