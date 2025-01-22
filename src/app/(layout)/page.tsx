@@ -4,16 +4,20 @@ import { useGetAccounts } from "@/features/account/hooks/use-get-accounts";
 import { useModal } from "@/hooks/use-modal-store";
 import { Loader } from "lucide-react";
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 export default function Page() {
   const { onOpen } = useModal();
+  const router = useRouter();
   const { data, isLoading } = useGetAccounts();
 
   useEffect(() => {
     if (isLoading) return;
     if (!data?.length) {
       onOpen("createAccount");
+    } else {
+      router.push("/dashboard");
     }
-  }, [isLoading, data, onOpen]);
+  }, [isLoading, data, onOpen, router]);
 
   if (isLoading) {
     return (
