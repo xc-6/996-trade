@@ -52,7 +52,6 @@ export const currencyFormatter = (
     let cur = res[1];
     res = cur + "-" + res.slice(2);
   }
-
   return res;
 };
 
