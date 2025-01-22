@@ -49,7 +49,7 @@ export const currencyFormatter = (
   let res = formatter.format(num);
 
   if (res && res.length > 1 && res?.[0] === "-") {
-    let cur = res[1];
+    const cur = res[1];
     res = cur + "-" + res.slice(2);
   }
   return res;
