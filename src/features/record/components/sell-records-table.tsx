@@ -21,6 +21,7 @@ type SellRecord = ResponseType["data"][0] &
     accountName: string;
     sellPrice: number;
     totalSold: number;
+    holdDays: number;
   };
 const Table = DataTable<SellRecord>;
 const _defaultFilter = {};
@@ -60,6 +61,11 @@ export const SellRecordsTable = (props: { style?: React.CSSProperties }) => {
       sortable: "local",
     },
     {
+      key: "buyPrice",
+      label: "Buy Price",
+      sortable: "local",
+    },
+    {
       key: "sellPrice",
       label: "Sold Price",
       sortable: "local",
@@ -88,6 +94,11 @@ export const SellRecordsTable = (props: { style?: React.CSSProperties }) => {
       className: ({ up }) =>
         cn(up ? "text-red-500 font-bold" : "text-green-500"),
       render: (item) => `${Number(item.apy).toFixed(2)}%`,
+      sortable: "local",
+    },
+    {
+      key: "holdDays",
+      label: "Hold Days",
       sortable: "local",
     },
     {
@@ -148,12 +159,19 @@ export const SellRecordsTable = (props: { style?: React.CSSProperties }) => {
   const list = useMemo(() => {
     if (data) {
       return data?.map((sellRecord) => {
-        const { stockCode, profitLoss, accountId, ...rest } = sellRecord;
+        const { stockCode, profitLoss, accountId, sellDate, buyDate, ...rest } =
+          sellRecord;
         return {
           ...rest,
           stockCode,
           accountId,
           profitLoss,
+          sellDate,
+          buyDate,
+          holdDays: Math.ceil(
+            (new Date(sellDate).getTime() - new Date(buyDate).getTime()) /
+              (1000 * 60 * 60 * 24),
+          ),
           totalSold:
             Number(sellRecord.sellPrice) * Number(sellRecord.sellAmount),
           up: Number(profitLoss) >= 0,
@@ -172,8 +190,8 @@ export const SellRecordsTable = (props: { style?: React.CSSProperties }) => {
   const renderFooter = () => (
     <TableFooter>
       <TableRow>
-        <TableCell colSpan={5}>Total P&L</TableCell>
-        <TableCell colSpan={5} className="text-left font-bold">
+        <TableCell colSpan={6}>Total P&L</TableCell>
+        <TableCell colSpan={7} className="text-left font-bold">
           {numberFormatter(totalPL)}
         </TableCell>
       </TableRow>

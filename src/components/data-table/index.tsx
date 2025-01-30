@@ -35,6 +35,7 @@ export interface Column<T> {
   filterable?: boolean | "local";
   filterType?: "date" | "number";
   className?: string | ((row: T) => string);
+  headerClassName?: string;
   type?: "expand" | "text";
 }
 interface DataTableProps<T> {
@@ -395,6 +396,7 @@ export const DataTable = <T,>(props: DataTableProps<T>) => {
     type: string,
     label: string,
     key: string,
+    headerClassName: string | undefined,
     filterable: boolean | "local" = false,
     sortable: boolean | "local" = true,
   ): JSX.Element => {
@@ -410,7 +412,13 @@ export const DataTable = <T,>(props: DataTableProps<T>) => {
       </span>
     );
     return (
-      <TableHead className="text-nowrap sticky top-0 bg-white" key={key}>
+      <TableHead
+        className={cn(
+          "text-nowrap sticky top-0 bg-white",
+          headerClassName ?? "",
+        )}
+        key={key}
+      >
         {type === "text" && filterable ? addFilter(key, text) : text}
         {type === "text" && sortable && (
           <div
@@ -450,6 +458,7 @@ export const DataTable = <T,>(props: DataTableProps<T>) => {
             col.type ?? "text",
             col.label,
             String(col.key),
+            col.headerClassName,
             col.filterable,
             col.sortable,
           );
