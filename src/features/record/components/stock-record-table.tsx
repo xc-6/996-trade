@@ -2,7 +2,7 @@ import { Column, DataTable } from "@/components/data-table";
 import { Badge } from "@/components/ui/badge";
 import { useConfirm } from "@/hooks/use-confirm";
 import { useGetRecordsByStock } from "../hooks/use-get-records-by-stock";
-import { Loader, PiggyBank } from "lucide-react";
+import { Loader, PiggyBank, Plus } from "lucide-react";
 import { useActiveAccounts } from "@/features/account/hooks/use-active-accounts";
 import { BuyRecordTable } from "./buy-record-table";
 import { cn, numberFormatter } from "@/lib/utils";
@@ -196,6 +196,14 @@ export const StockRecordTable = (props: {
       className: "flex flex-row gap-4",
       render: (item) => (
         <>
+        <Plus
+          size={16}
+          className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"
+          onClick={(e) => {
+            onOpen("createBuyRecord", { buyRecord: { stockCode: item.stockCode } as any });
+            e.stopPropagation();
+          }}
+        />
           <PiggyBank
             size={16}
             className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"

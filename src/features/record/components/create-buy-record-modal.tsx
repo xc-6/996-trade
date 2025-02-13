@@ -81,25 +81,19 @@ export const CreateBuyRecordModal = () => {
   });
 
   useEffect(() => {
-    if (buyRecord) {
-      const [exchange, stockCode] = [
+    let exchange, stockCode
+    if (buyRecord?.stockCode) {
+      [exchange, stockCode] = [
         buyRecord.stockCode.slice(0, 2),
         buyRecord.stockCode.slice(2),
       ];
-      form.setValue("exchange", exchange as (typeof EXCHANGE)[number]);
-      form.setValue("stockCode", stockCode);
-      form.setValue("buyPrice", String(buyRecord.buyPrice));
-      form.setValue("buyAmount", String(buyRecord.buyAmount));
-      form.setValue("buyDate", new Date(buyRecord.buyDate));
-      form.setValue("accountId", buyRecord.accountId);
-    } else {
-      form.setValue("exchange", EXCHANGE[0]);
-      form.setValue("stockCode", "");
-      form.setValue("buyPrice", "");
-      form.setValue("buyAmount", "");
-      form.setValue("buyDate", new Date());
-      form.setValue("accountId", "");
     }
+    form.setValue("exchange", (exchange??EXCHANGE[0]) as (typeof EXCHANGE)[number]);
+    form.setValue("stockCode", stockCode??"");
+    form.setValue("buyPrice", String(buyRecord?.buyPrice??""));
+    form.setValue("buyAmount", String(buyRecord?.buyAmount??""));
+    form.setValue("buyDate", buyRecord?.buyDate ? new Date(buyRecord?.buyDate): new Date());
+    form.setValue("accountId", buyRecord?.accountId??"");
   }, [buyRecord, form]);
 
   const isLoading = form.formState.isSubmitting;
