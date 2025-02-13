@@ -191,9 +191,10 @@ export const SellRecordsTable = (props: { style?: React.CSSProperties }) => {
     <TableFooter>
       <TableRow>
         <TableCell colSpan={6}>Total P&L</TableCell>
-        <TableCell colSpan={7} className="text-left font-bold">
+        <TableCell colSpan={1} className="text-left font-bold">
           {numberFormatter(totalPL)}
         </TableCell>
+        <TableCell colSpan={6} />
       </TableRow>
     </TableFooter>
   );
