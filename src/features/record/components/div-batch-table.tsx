@@ -2,7 +2,7 @@
 import { Column, DataTable } from "@/components/data-table";
 import { format } from "date-fns";
 import { Link } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, numberFormatter } from "@/lib/utils";
 import { useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { usePanel } from "../hooks/use-panel";
@@ -12,6 +12,7 @@ import { ResponseType } from "../hooks/use-get-div-batch";
 import { StockInfo } from "@/lib/types";
 import { useStocksState } from "@/features/stock/store/use-stocks-store";
 import { useRouter } from "next/navigation";
+import { TableCell, TableFooter, TableRow } from "@/components/ui/table";
 
 type DivRecord = ResponseType["data"]["list"][0] &
   ResponseType["data"] &
@@ -69,7 +70,7 @@ export const DivBatchTable = (props: DivBatchTableProps) => {
     },
     {
       key: "total",
-      label: "Total",
+      label: "Dividen Total",
       sortable: false,
       render: (item) => item?.total.toFixed(2) ?? "N/A",
     },
@@ -132,6 +133,22 @@ export const DivBatchTable = (props: DivBatchTableProps) => {
     return [];
   }, [data, isLoading, stocksState, mapping]);
 
+  const totalDiv = useMemo(() => {
+    return list.reduce((acc, cur) => acc + cur.total, 0);
+  }, [list]);
+
+  const renderFooter = () => (
+    <TableFooter>
+      <TableRow>
+        <TableCell colSpan={4}>Total Dividen</TableCell>
+        <TableCell colSpan={1} className="text-left font-bold">
+          {numberFormatter(totalDiv)}
+        </TableCell>
+        <TableCell colSpan={4} />
+      </TableRow>
+    </TableFooter>
+  );
+
   return (
     <Table
       data={list}
@@ -146,6 +163,7 @@ export const DivBatchTable = (props: DivBatchTableProps) => {
             "outline-dashed outline-1 outline-offset-1 outline-blue-500",
         )
       }
+      renderFooter={renderFooter}
       {...props}
     ></Table>
   );

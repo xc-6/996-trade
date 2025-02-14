@@ -196,14 +196,16 @@ export const StockRecordTable = (props: {
       className: "flex flex-row gap-4",
       render: (item) => (
         <>
-        <Plus
-          size={16}
-          className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"
-          onClick={(e) => {
-            onOpen("createBuyRecord", { buyRecord: { stockCode: item.stockCode } as any });
-            e.stopPropagation();
-          }}
-        />
+          <Plus
+            size={16}
+            className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"
+            onClick={(e) => {
+              onOpen("createBuyRecord", {
+                buyRecord: { stockCode: item.stockCode } as any,
+              });
+              e.stopPropagation();
+            }}
+          />
           <PiggyBank
             size={16}
             className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"
