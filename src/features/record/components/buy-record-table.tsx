@@ -3,12 +3,11 @@ import { Column, DataTable } from "@/components/data-table";
 import { Badge } from "@/components/ui/badge";
 import { useGetBuyRecords } from "../hooks/use-get-buy-records";
 import { useDeleteBuyRecord } from "../hooks/use-delete-buy-record";
-import { Pencil } from "lucide-react";
 import { useActiveAccounts } from "@/features/account/hooks/use-active-accounts";
 import { format } from "date-fns";
 import { usePanel } from "../hooks/use-panel";
 import { useMemo, useState, memo } from "react";
-import { Trash2, MoveDown, MoveUp } from "lucide-react";
+import { Trash2, MoveDown, MoveUp, Pencil, PackageMinus } from "lucide-react";
 import { useConfirm } from "@/hooks/use-confirm";
 import { cn, numberFormatter } from "@/lib/utils";
 import { useStocksState } from "@/features/stock/store/use-stocks-store";
@@ -18,6 +17,7 @@ import { useModal } from "@/hooks/use-modal-store";
 import { unsoldAmount } from "../deafult";
 import { StockInfo, Sort, Filter } from "@/lib/types";
 import { useUpdateLayoutEffect } from "ahooks";
+import { useBuyRecordState } from "../store/use-buy-record-store";
 
 type BuyRecord = ResponseType["data"][0] &
   StockInfo & {
@@ -47,6 +47,7 @@ export const BuyRecordTable = ({
   ...props
 }: BuyRecordTableProps = {}) => {
   const { onOpen } = useModal();
+  const { setBuyRecord } = useBuyRecordState();
   const [ConfirmDialog, confirm] = useConfirm(
     "Are you sure?",
     "You are about to delete this record.",
@@ -216,6 +217,11 @@ export const BuyRecordTable = ({
       className: "flex flex-row gap-2 items-center",
       render: (record: BuyRecord) => (
         <>
+          <PackageMinus
+            size={16}
+            className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"
+            onClick={(e) => onSell(e, record)}
+          />
           <Pencil
             size={16}
             className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"
@@ -292,6 +298,12 @@ export const BuyRecordTable = ({
     e.stopPropagation();
     onOpen("editBuyRecord", { buyRecord });
   };
+
+  const onSell = (e: React.MouseEvent, buyRecord: BuyRecord) => {
+    e.stopPropagation();
+    setBuyRecord(buyRecord);
+    onOpen("createSellRecord", { buyRecordId: buyRecord?._id });
+  }
 
   return (
     <Table
