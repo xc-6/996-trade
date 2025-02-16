@@ -62,6 +62,7 @@ export type Filter = Record<
   {
     min?: number | string;
     max?: number | string;
+    values?: Array<string>
   }
 >;
 

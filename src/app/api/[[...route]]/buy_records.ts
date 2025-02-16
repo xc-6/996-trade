@@ -23,7 +23,7 @@ const app = new Hono()
       "json",
       z.object({
         accountIds: z.array(z.string()).optional(),
-        stockCode: z.string().optional(),
+        stockCode: z.array(z.string()).optional(),
         showSold: z.boolean().optional().default(false),
         page: z.number().optional().default(1),
         limit: z.number().optional().default(50),
@@ -79,7 +79,7 @@ const app = new Hono()
         {
           $match: {
             accountId: { $in: accounts ?? user.accounts },
-            stockCode: stockCode ? { $in: [stockCode] } : { $exists: true },
+            stockCode: stockCode ? { $in: stockCode } : { $exists: true },
             ...generateFilter(filter),
           },
         },

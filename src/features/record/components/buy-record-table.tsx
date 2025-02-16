@@ -14,10 +14,11 @@ import { useStocksState } from "@/features/stock/store/use-stocks-store";
 import { ResponseType } from "../hooks/use-get-buy-records";
 
 import { useModal } from "@/hooks/use-modal-store";
-import { unsoldAmount } from "../deafult";
+import { unsoldAmount, stockCode as defaultStockCode } from "../deafult";
 import { StockInfo, Sort, Filter } from "@/lib/types";
 import { useUpdateLayoutEffect } from "ahooks";
 import { useBuyRecordState } from "../store/use-buy-record-store";
+import { useGetStockcodes } from "../../stock/hooks/use-get-stockcodes";
 
 type BuyRecord = ResponseType["data"][0] &
   StockInfo & {
@@ -33,13 +34,13 @@ type BuyRecord = ResponseType["data"][0] &
   };
 interface BuyRecordTableProps {
   showHeader?: boolean;
-  stockCode?: string;
+  stockCode?: Array<string>;
   fetchAll?: boolean;
   style?: React.CSSProperties;
 }
 const Table = memo(DataTable<BuyRecord>);
 
-const _defaultFilter = { unsoldAmount };
+const _defaultFilter = { unsoldAmount, stockCode: defaultStockCode };
 export const BuyRecordTable = ({
   showHeader = true,
   fetchAll = false,
@@ -57,6 +58,7 @@ export const BuyRecordTable = ({
   const { activeIds, mapping } = useActiveAccounts();
   const removeMutation = useDeleteBuyRecord();
   const [filter, setFilter] = useState<Filter>({ ..._defaultFilter });
+  const [filterStockCode, setFilterStockCode] = useState<string[]>([]);
   const [sort, setSort] = useState<Sort>({
     key: "buyDate",
     order: "desc",
@@ -69,11 +71,14 @@ export const BuyRecordTable = ({
     }
     return false;
   }, [fetchAll, filter, recordId]);
+  const {
+    data: stockcodes,
+  } = useGetStockcodes(activeIds ?? []);
   const { data, status, fetchNextPage, hasNextPage } = useGetBuyRecords({
     accountIds: activeIds ?? [],
     filter,
     sort,
-    stockCode,
+    stockCode: filterStockCode.length>0 ? filterStockCode : stockCode,
     showSold: false,
     fetchAll: _fetchAll,
   });
@@ -100,6 +105,8 @@ export const BuyRecordTable = ({
           </>
         );
       },
+      filterable: true,
+      filters: stockcodes?.map((code) => ({ label: `${code} ${stocksState?.get(code)?.name}`, value: code })) ??[],
     },
     {
       key: "name",
@@ -305,6 +312,18 @@ export const BuyRecordTable = ({
     onOpen("createSellRecord", { buyRecordId: buyRecord?._id });
   }
 
+  const handleFilterChange = (_filter: Filter) => {
+    console.log(_filter);
+    if (!!_filter.stockCode?.values?.length) {
+      setFilterStockCode(_filter.stockCode.values);
+    } else {
+      setFilterStockCode([]);
+    }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { stockCode, ...newFilter } = _filter;
+    setFilter(newFilter);
+  }
+
   return (
     <Table
       defaultFilter={{ ..._defaultFilter }}
@@ -326,7 +345,7 @@ export const BuyRecordTable = ({
       onRowClick={(_, item) => onSelect(item._id)}
       hasNextPage={hasNextPage}
       loadMore={fetchNextPage}
-      onFilterChange={(_filter) => setFilter(_filter)}
+      onFilterChange={(_filter) => handleFilterChange(_filter)}
       onSortChange={onSortChangeHandler}
       {...props}
     >

@@ -54,7 +54,7 @@ export const StockRecordTable = (props: {
         return (
           <BuyRecordTable
             showHeader={false}
-            stockCode={item.stockCode}
+            stockCode={[item.stockCode]}
             fetchAll={true}
             key={`${item.stockCode}-table`}
           />

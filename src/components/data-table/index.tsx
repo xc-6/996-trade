@@ -14,14 +14,18 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import { Fragment, JSX, useMemo, useState } from "react";
 import { cn, isValidDate } from "@/lib/utils";
 import {
   ChevronDown,
   ChevronRight,
   ChevronUp,
+  Filter as FilterIcon,
   Loader,
   Package,
+  Check,
 } from "lucide-react";
 import { Filter } from "@/lib/types";
 import { useUpdateEffect } from "ahooks";
@@ -32,6 +36,7 @@ export interface Column<T> {
   label: string;
   render?: (row: T) => React.ReactNode;
   sortable?: boolean | "local";
+  filters?: { label: string; value: any }[];
   filterable?: boolean | "local";
   filterType?: "date" | "number";
   className?: string | ((row: T) => string);
@@ -56,7 +61,7 @@ interface DataTableProps<T> {
   onRowClick?: (e: React.MouseEvent, row: T) => void;
   onSortChange?: (
     sort: { key?: keyof T; order?: "asc" | "desc" },
-    isLocal?: boolean,
+    isLocal?: boolean
   ) => void;
   onFilterChange?: (filter: Filter) => void;
   hasNextPage?: boolean;
@@ -104,7 +109,7 @@ export const DataTable = <T,>(props: DataTableProps<T>) => {
         }
         return acc;
       },
-      {} as Record<string, Column<T>>,
+      {} as Record<string, Column<T>>
     );
   }, [columns]);
 
@@ -118,7 +123,7 @@ export const DataTable = <T,>(props: DataTableProps<T>) => {
     let res = data ?? [];
     const isLocalSort = mapping[sort?.key as string]?.sortable === "local";
     const isLocalFilter = Object.keys(filter).some(
-      (item) => mapping[item]?.filterable === "local",
+      (item) => mapping[item]?.filterable === "local"
     );
 
     if (isLocalFilter) {
@@ -185,7 +190,7 @@ export const DataTable = <T,>(props: DataTableProps<T>) => {
   };
 
   const removeKey = (key: string) => {
-    setFilter((prev) => {
+    setFilter((prev: any) => {
       const _filter = { ...prev };
       delete _filter[key];
       return _filter;
@@ -275,80 +280,129 @@ export const DataTable = <T,>(props: DataTableProps<T>) => {
     </>
   );
 
-  const addFilter = (key: string, children: React.ReactNode) => {
+  const addFilter = (key: string) => {
     const filterType = mapping[key]?.filterType ?? "number";
+    const filters = mapping[key]?.filters ?? [];
     const isNum = filterType === "number";
     const isDate = filterType === "date";
+
+    const handleLebelClick = (value: any) => {
+      if (tmpFilter?.values?.includes(value)) {
+        setTmpFilter((prev) => ({
+          ...prev,
+          values: prev.values?.filter((item) => item !== value) ?? [],
+        }));
+      } else {
+        setTmpFilter((prev) => ({
+          ...prev,
+          values: [...(prev.values ?? []), value],
+        }));
+      }
+    };
+
+    const renderFilters = () => {
+      return (
+        <ScrollArea className="h-72 rounded-md">
+          <div className="flex flex-col">
+            {filters.map((item) => (
+              <Fragment key={item.value}>
+                <div
+                  key={item.value}
+                  onClick={() => handleLebelClick(item.value)}
+                  className="text-sm"
+                >
+                  <Check
+                    size={16}
+                    className={cn(
+                      "inline-block mr-2 visible",
+                      tmpFilter?.values?.includes(item.value)
+                        ? "opacity-100"
+                        : "opacity-0"
+                    )}
+                  />
+                  {item.label}
+                </div>
+                <Separator className="my-2" />
+              </Fragment>
+            ))}
+          </div>
+        </ScrollArea>
+      );
+    };
+
+    const renderOtherFilter = () => (
+      <div className="flex gap-4 flex-col">
+        <Label>Min</Label>
+        {isNum && (
+          <Input
+            placeholder="Min"
+            className="p-2"
+            type="number"
+            value={(tmpFilter.min ?? "") as string}
+            onChange={(e) =>
+              setTmpFilter((prev) => ({
+                ...prev,
+                min: Number(e.target.value),
+              }))
+            }
+          />
+        )}
+        {isDate && (
+          <Input
+            placeholder="MM/dd/yyyy"
+            className="p-2"
+            type="input"
+            value={tmpFilter.min ?? ""}
+            onChange={(e) =>
+              setTmpFilter((prev) => ({
+                ...prev,
+                min: e.target.value,
+              }))
+            }
+          />
+        )}
+        <Label>Max</Label>
+        {isNum && (
+          <Input
+            placeholder="Max"
+            className="p-2"
+            type="number"
+            value={(tmpFilter.max ?? "") as string}
+            onChange={(e) =>
+              setTmpFilter((prev) => ({
+                ...prev,
+                max: Number(e.target.value),
+              }))
+            }
+          />
+        )}
+        {isDate && (
+          <Input
+            placeholder="MM/dd/yyyy"
+            className="p-2"
+            type="input"
+            value={tmpFilter.max ?? ""}
+            onChange={(e) =>
+              setTmpFilter((prev) => ({
+                ...prev,
+                max: e.target.value,
+              }))
+            }
+          />
+        )}
+      </div>
+    );
     return (
       <Popover
         open={filterActive === key}
         onOpenChange={(vis) => onOpenChange(vis, key)}
       >
         <PopoverTrigger asChild className="cursor-pointer">
-          {children}
+          <FilterIcon size={16} className={cn("inline-block", key in filter && JSON.stringify(filter[key])!= JSON.stringify(defaultFilter[key]) ?'fill-current':'')} />
         </PopoverTrigger>
         <PopoverContent>
           <div className="p-1">
-            <div className="flex gap-4 flex-col">
-              <Label>Min</Label>
-              {isNum && (
-                <Input
-                  placeholder="Min"
-                  className="p-2"
-                  type="number"
-                  value={(tmpFilter.min ?? "") as string}
-                  onChange={(e) =>
-                    setTmpFilter((prev) => ({
-                      ...prev,
-                      min: Number(e.target.value),
-                    }))
-                  }
-                />
-              )}
-              {isDate && (
-                <Input
-                  placeholder="MM/dd/yyyy"
-                  className="p-2"
-                  type="input"
-                  value={tmpFilter.min ?? ""}
-                  onChange={(e) =>
-                    setTmpFilter((prev) => ({
-                      ...prev,
-                      min: e.target.value,
-                    }))
-                  }
-                />
-              )}
-              <Label>Max</Label>
-              {isNum && (
-                <Input
-                  placeholder="Max"
-                  className="p-2"
-                  type="number"
-                  value={(tmpFilter.max ?? "") as string}
-                  onChange={(e) =>
-                    setTmpFilter((prev) => ({
-                      ...prev,
-                      max: Number(e.target.value),
-                    }))
-                  }
-                />
-              )}
-              {isDate && (
-                <Input
-                  placeholder="MM/dd/yyyy"
-                  className="p-2"
-                  type="input"
-                  value={tmpFilter.max ?? ""}
-                  onChange={(e) =>
-                    setTmpFilter((prev) => ({
-                      ...prev,
-                      max: e.target.value,
-                    }))
-                  }
-                />
-              )}
-            </div>
+            {filters?.length > 0 ? renderFilters() : renderOtherFilter()}
             <div className="flex justify-end mt-4">
               <Button
                 className="btn"
@@ -398,14 +452,13 @@ export const DataTable = <T,>(props: DataTableProps<T>) => {
     key: string,
     headerClassName: string | undefined,
     filterable: boolean | "local" = false,
-    sortable: boolean | "local" = true,
+    sortable: boolean | "local" = true
   ): JSX.Element => {
     const text = (
       <span
         key={key}
         className={cn(
           sort.key === key && "text-blue-500",
-          key in filter && "font-bold",
         )}
       >
         {label}
@@ -415,11 +468,11 @@ export const DataTable = <T,>(props: DataTableProps<T>) => {
       <TableHead
         className={cn(
           "text-nowrap sticky top-0 bg-white",
-          headerClassName ?? "",
+          headerClassName ?? ""
         )}
         key={key}
       >
-        {type === "text" && filterable ? addFilter(key, text) : text}
+        {text}
         {type === "text" && sortable && (
           <div
             className="inline-flex flex-col align-middle ml-1"
@@ -431,7 +484,7 @@ export const DataTable = <T,>(props: DataTableProps<T>) => {
                 "cursor-pointer",
                 sort.key === key && sort.order === "asc"
                   ? "stroke-blue-500 fill-blue-500"
-                  : "",
+                  : ""
               )}
             />
             <ChevronDown
@@ -440,11 +493,12 @@ export const DataTable = <T,>(props: DataTableProps<T>) => {
                 "cursor-pointer",
                 sort.key === key && sort.order === "desc"
                   ? "stroke-blue-500 fill-blue-500"
-                  : "",
+                  : ""
               )}
             />
           </div>
         )}
+        {type === "text" && filterable ? addFilter(key) : null}
       </TableHead>
     );
   };
@@ -460,7 +514,7 @@ export const DataTable = <T,>(props: DataTableProps<T>) => {
             String(col.key),
             col.headerClassName,
             col.filterable,
-            col.sortable,
+            col.sortable
           );
         })}
       </TableRow>
@@ -481,7 +535,7 @@ export const DataTable = <T,>(props: DataTableProps<T>) => {
                     loadMore?.();
                   }
                 },
-                { threshold: [0.5, 1] },
+                { threshold: [0.5, 1] }
               );
 
               observer.observe(el);

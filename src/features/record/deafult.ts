@@ -14,3 +14,7 @@ export const buyDate: Filter[string] = {
   min: undefined,
   max: undefined,
 };
+
+export const stockCode: Filter[string] = {
+  values: [],
+};

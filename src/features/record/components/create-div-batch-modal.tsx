@@ -74,7 +74,7 @@ export const CreateDivBatchModal = () => {
       Array.from(new Set([...accountIds, ...(activeIds ?? [])])) ?? [],
     filter: {},
     sort: {},
-    stockCode,
+    stockCode: stockCode? [stockCode] : [],
     fetchAll: true,
   });
 

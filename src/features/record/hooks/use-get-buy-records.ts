@@ -12,7 +12,7 @@ interface Params {
   accountIds: Array<string>;
   filter?: Filter;
   sort?: Sort;
-  stockCode?: string;
+  stockCode?: Array<string>;
   showSold?: boolean;
   fetchAll?: boolean;
 }
@@ -53,7 +53,7 @@ export const useGetBuyRecords = ({
 
 interface Options {
   accountIds: Array<string>;
-  stockCode?: string;
+  stockCode?: Array<string>;
   showSold?: boolean;
 }
 
@@ -87,16 +87,19 @@ export const queryFn = async (
   };
   const page = pageParam?.page ?? 1;
   const limit = pageParam?.limit ?? 50;
+  const json: any = {
+    accountIds: accountIds,
+    showSold: showSold ?? false,
+    page,
+    limit,
+    filter,
+    ...sort,
+  }
+  if (stockCode?.length) {
+    json['stockCode'] = stockCode
+  }
   const response = await client.api.records.buy_record.list.$post({
-    json: {
-      accountIds: accountIds,
-      stockCode,
-      showSold: showSold ?? false,
-      page,
-      limit,
-      filter,
-      ...sort,
-    },
+    json
   });
 
   if (!response.ok) {
