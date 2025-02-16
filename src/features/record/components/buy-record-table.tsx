@@ -193,6 +193,7 @@ export const BuyRecordTable = ({
       filterable: true,
       render: (item) =>
         item.unsoldAmount.toLocaleString("en-US", { maximumFractionDigits: 4 }),
+      className: "font-bold text-muted-foreground",
     },
     {
       key: "buyAmount",
@@ -310,7 +311,7 @@ export const BuyRecordTable = ({
     e.stopPropagation();
     setBuyRecord(buyRecord);
     onOpen("createSellRecord", { buyRecordId: buyRecord?._id });
-  }
+  };
 
   const handleFilterChange = (_filter: Filter) => {
     console.log(_filter);

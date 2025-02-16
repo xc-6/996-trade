@@ -163,6 +163,7 @@ export const StockRecordTable = (props: {
         }),
       sortable: "local",
       filterable: "local",
+      className: "font-bold text-muted-foreground",
     },
     {
       key: "buyAmount",
