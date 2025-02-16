@@ -11,6 +11,7 @@ import { ResponseType } from "../hooks/use-get-sell-records";
 import { BuyRecord, Filter, StockInfo } from "@/lib/types";
 import { useActiveAccounts } from "@/features/account/hooks/use-active-accounts";
 import { useGetSellRecords } from "../hooks/use-get-sell-records";
+import { useGetStockcodes } from "../../stock/hooks/use-get-stockcodes";
 import { useRouter } from "next/navigation";
 import { TableCell, TableFooter, TableRow } from "@/components/ui/table";
 
@@ -37,6 +38,7 @@ export const SellRecordsTable = (props: { style?: React.CSSProperties }) => {
   const { activeIds, mapping } = useActiveAccounts();
   const [filter, setFilter] = useState<Filter>({});
   const { data, isLoading } = useGetSellRecords(activeIds ?? [], filter);
+  const { data: stockcodes } = useGetStockcodes(activeIds ?? []);
 
   const columns: Array<Column<SellRecord>> = [
     {
@@ -53,6 +55,20 @@ export const SellRecordsTable = (props: { style?: React.CSSProperties }) => {
         );
       },
       sortable: "local",
+      filterable: "local",
+      filters:
+        stockcodes?.map((code) => ({
+          label: () => (
+            <>
+              <Badge variant="outline" className="mr-2 inline-block">
+                {code.slice(0, 2)}
+              </Badge>
+              <span className="truncate inline-block w-[60%] align-middle">{code.slice(2)} {stocksState?.get(code)?.name}</span>
+            </>
+          ),
+
+          value: code,
+        })) ?? [],
     },
     {
       key: "name",
@@ -111,7 +127,7 @@ export const SellRecordsTable = (props: { style?: React.CSSProperties }) => {
       label: "Sold Date",
       render: (item) => format(new Date(item.sellDate), "PPP"),
       sortable: "local",
-      filterable: true,
+      filterable: "local",
       filterType: "date",
     },
     {

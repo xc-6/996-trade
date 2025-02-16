@@ -36,7 +36,7 @@ export interface Column<T> {
   label: string;
   render?: (row: T) => React.ReactNode;
   sortable?: boolean | "local";
-  filters?: { label: string; value: any }[];
+  filters?: { label: string | (() => React.ReactNode); value: any }[];
   filterable?: boolean | "local";
   filterType?: "date" | "number";
   className?: string | ((row: T) => string);
@@ -135,8 +135,10 @@ export const DataTable = <T,>(props: DataTableProps<T>) => {
               Number(record[key as keyof T]) < filter[key].min) ||
             (filter[key].max !== undefined &&
               typeof filter[key].max === "number" &&
-              Number(record[key as keyof T]) > filter[key].max)
-          ) {
+              Number(record[key as keyof T]) > filter[key].max) || 
+            (filter[key].values !== undefined && 
+              !filter[key].values.includes(String(record[key as keyof T])))
+            ) {
             return false;
           }
         }
@@ -320,7 +322,7 @@ export const DataTable = <T,>(props: DataTableProps<T>) => {
                         : "opacity-0"
                     )}
                   />
-                  {item.label}
+                  {typeof item.label === "string" ? item.label : item?.label()}
                 </div>
                 <Separator className="my-2" />
               </Fragment>
@@ -401,7 +403,7 @@ export const DataTable = <T,>(props: DataTableProps<T>) => {
           <FilterIcon size={16} className={cn("inline-block", key in filter && JSON.stringify(filter[key])!= JSON.stringify(defaultFilter[key]) ?'fill-current':'')} />
         </PopoverTrigger>
         <PopoverContent>
-          <div className="p-1">
+          <div>
             {filters?.length > 0 ? renderFilters() : renderOtherFilter()}
             <div className="flex justify-end mt-4">
               <Button

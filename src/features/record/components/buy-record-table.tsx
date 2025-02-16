@@ -51,7 +51,7 @@ export const BuyRecordTable = ({
   const { setBuyRecord } = useBuyRecordState();
   const [ConfirmDialog, confirm] = useConfirm(
     "Are you sure?",
-    "You are about to delete this record.",
+    "You are about to delete this record."
   );
   const { onSelect, id: recordId } = usePanel();
   const { stocksState } = useStocksState();
@@ -71,14 +71,12 @@ export const BuyRecordTable = ({
     }
     return false;
   }, [fetchAll, filter, recordId]);
-  const {
-    data: stockcodes,
-  } = useGetStockcodes(activeIds ?? []);
+  const { data: stockcodes } = useGetStockcodes(activeIds ?? []);
   const { data, status, fetchNextPage, hasNextPage } = useGetBuyRecords({
     accountIds: activeIds ?? [],
     filter,
     sort,
-    stockCode: filterStockCode.length>0 ? filterStockCode : stockCode,
+    stockCode: filterStockCode.length > 0 ? filterStockCode : stockCode,
     showSold: false,
     fetchAll: _fetchAll,
   });
@@ -106,7 +104,19 @@ export const BuyRecordTable = ({
         );
       },
       filterable: true,
-      filters: stockcodes?.map((code) => ({ label: `${code} ${stocksState?.get(code)?.name}`, value: code })) ??[],
+      filters:
+        stockcodes?.map((code) => ({
+          label: () => (
+            <>
+              <Badge variant="outline" className="mr-2 inline-block">
+                {code.slice(0, 2)}
+              </Badge>
+              <span className="truncate inline-block w-[60%] align-middle">{code.slice(2)} {stocksState?.get(code)?.name}</span>
+            </>
+          ),
+
+          value: code,
+        })) ?? [],
     },
     {
       key: "name",
@@ -259,7 +269,7 @@ export const BuyRecordTable = ({
               record.buyPrice) /
               record.buyPrice) *
             100
-          ).toFixed(2),
+          ).toFixed(2)
         ),
         name: stocksState?.get(record.stockCode)?.name,
         percent: (stocksState?.get(record.stockCode)?.percent ?? 0) * 100,
@@ -323,7 +333,7 @@ export const BuyRecordTable = ({
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { stockCode, ...newFilter } = _filter;
     setFilter(newFilter);
-  }
+  };
 
   return (
     <Table
@@ -340,7 +350,7 @@ export const BuyRecordTable = ({
           !showHeader && "bg-secondary/80 hover:bg-secondary text-sm",
           showHeader && "p-0",
           recordId === item._id &&
-            "outline-dashed outline-1 outline-offset-1 outline-blue-500",
+            "outline-dashed outline-1 outline-offset-1 outline-blue-500"
         )
       }
       onRowClick={(_, item) => onSelect(item._id)}
