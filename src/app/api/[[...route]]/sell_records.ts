@@ -15,6 +15,7 @@ const app = new Hono().post(
     "json",
     z.object({
       accountIds: z.array(z.string()).optional(),
+      stockCode: z.array(z.string()).optional(),
       filter: z
         .record(
           z.string(),
@@ -46,13 +47,14 @@ const app = new Hono().post(
       return c.json({ error: "Something went wrong" }, 400);
     }
 
-    const { accountIds, filter } = c.req.valid("json");
+    const { accountIds , stockCode, filter } = c.req.valid("json");
 
     const accounts = accountIds?.map((id) => new ObjectId(id));
 
     const sellRecords = await buyRecords.aggregate([
       {
         $match: {
+          stockCode: stockCode ? { $in: stockCode } : { $exists: true },
           accountId: { $in: accounts ?? user.accounts },
         },
       },

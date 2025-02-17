@@ -14,6 +14,7 @@ import { useGetSellRecords } from "../hooks/use-get-sell-records";
 import { useGetStockcodes } from "../../stock/hooks/use-get-stockcodes";
 import { useRouter } from "next/navigation";
 import { TableCell, TableFooter, TableRow } from "@/components/ui/table";
+import { stockCode } from "../deafult";
 
 type SellRecord = ResponseType["data"][0] &
   Omit<BuyRecord, "sellRecords"> &
@@ -25,7 +26,7 @@ type SellRecord = ResponseType["data"][0] &
     holdDays: number;
   };
 const Table = DataTable<SellRecord>;
-const _defaultFilter = {};
+const _defaultFilter = { stockCode };
 
 export const SellRecordsTable = (props: { style?: React.CSSProperties }) => {
   const [ConfirmDialog, confirm] = useConfirm(
@@ -36,8 +37,9 @@ export const SellRecordsTable = (props: { style?: React.CSSProperties }) => {
   const router = useRouter();
 
   const { activeIds, mapping } = useActiveAccounts();
-  const [filter, setFilter] = useState<Filter>({});
-  const { data, isLoading } = useGetSellRecords(activeIds ?? [], filter);
+  const [filter, setFilter] = useState<Filter>({ ..._defaultFilter });
+  const [filterStockCode, setFilterStockCode] = useState<string[]>([]);
+  const { data, isLoading } = useGetSellRecords(activeIds ?? [],filterStockCode, filter);
   const { data: stockcodes } = useGetStockcodes(activeIds ?? []);
 
   const columns: Array<Column<SellRecord>> = [
@@ -55,7 +57,7 @@ export const SellRecordsTable = (props: { style?: React.CSSProperties }) => {
         );
       },
       sortable: "local",
-      filterable: "local",
+      filterable: true,
       filters:
         stockcodes?.map((code) => ({
           label: () => (
@@ -127,7 +129,7 @@ export const SellRecordsTable = (props: { style?: React.CSSProperties }) => {
       label: "Sold Date",
       render: (item) => format(new Date(item.sellDate), "PPP"),
       sortable: "local",
-      filterable: "local",
+      filterable: true,
       filterType: "date",
     },
     {
@@ -203,6 +205,18 @@ export const SellRecordsTable = (props: { style?: React.CSSProperties }) => {
     return list.reduce((acc, cur) => acc + cur.profitLoss, 0);
   }, [list]);
 
+
+  const handleFilterChange = (_filter: Filter) => {
+    if (!!_filter.stockCode?.values?.length) {
+      setFilterStockCode(_filter.stockCode.values);
+    } else {
+      setFilterStockCode([]);
+    }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { stockCode, ...newFilter } = _filter;
+    setFilter(newFilter);
+  };
+
   const renderFooter = () => (
     <TableFooter>
       <TableRow>
@@ -224,7 +238,7 @@ export const SellRecordsTable = (props: { style?: React.CSSProperties }) => {
       dataIndex="_id"
       className="mb-2"
       rowClassName="group"
-      onFilterChange={(_filter) => setFilter(_filter)}
+      onFilterChange={(_filter) => handleFilterChange(_filter)}
       renderFooter={renderFooter}
       {...props}
     >

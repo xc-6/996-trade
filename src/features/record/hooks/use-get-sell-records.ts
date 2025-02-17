@@ -10,20 +10,25 @@ export type ResponseType = InferResponseType<
 
 export const useGetSellRecords = (
   accountIds: Array<string>,
+  stockCode: Array<string>,
   filter: Filter,
 ) => {
   const query = useQuery({
     enabled: !!accountIds.length,
-    queryKey: ["sellRecords", accountIds, filter],
+    queryKey: ["sellRecords", accountIds, filter, stockCode],
     queryFn: async () => {
       if (!accountIds.length) {
         return [];
       }
-      const response = await client.api.records.sell_record.$post({
-        json: {
+      const json:any = {
           accountIds,
           filter,
-        },
+      }
+      if (stockCode?.length) {
+        json["stockCode"] = stockCode
+      }
+      const response = await client.api.records.sell_record.$post({
+        json,
       });
 
       if (!response.ok) {

@@ -324,7 +324,6 @@ export const BuyRecordTable = ({
   };
 
   const handleFilterChange = (_filter: Filter) => {
-    console.log(_filter);
     if (!!_filter.stockCode?.values?.length) {
       setFilterStockCode(_filter.stockCode.values);
     } else {
