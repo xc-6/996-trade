@@ -51,7 +51,7 @@ export const BuyRecordTable = ({
   const { setBuyRecord } = useBuyRecordState();
   const [ConfirmDialog, confirm] = useConfirm(
     "Are you sure?",
-    "You are about to delete this record."
+    "You are about to delete this record.",
   );
   const { onSelect, id: recordId } = usePanel();
   const { stocksState } = useStocksState();
@@ -111,7 +111,9 @@ export const BuyRecordTable = ({
               <Badge variant="outline" className="mr-2 inline-block">
                 {code.slice(0, 2)}
               </Badge>
-              <span className="truncate inline-block w-[60%] align-middle">{code.slice(2)} {stocksState?.get(code)?.name}</span>
+              <span className="truncate inline-block w-[60%] align-middle">
+                {code.slice(2)} {stocksState?.get(code)?.name}
+              </span>
             </>
           ),
 
@@ -269,7 +271,7 @@ export const BuyRecordTable = ({
               record.buyPrice) /
               record.buyPrice) *
             100
-          ).toFixed(2)
+          ).toFixed(2),
         ),
         name: stocksState?.get(record.stockCode)?.name,
         percent: (stocksState?.get(record.stockCode)?.percent ?? 0) * 100,
@@ -349,7 +351,7 @@ export const BuyRecordTable = ({
           !showHeader && "bg-secondary/80 hover:bg-secondary text-sm",
           showHeader && "p-0",
           recordId === item._id &&
-            "outline-dashed outline-1 outline-offset-1 outline-blue-500"
+            "outline-dashed outline-1 outline-offset-1 outline-blue-500",
         )
       }
       onRowClick={(_, item) => onSelect(item._id)}

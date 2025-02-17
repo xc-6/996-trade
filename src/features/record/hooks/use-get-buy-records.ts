@@ -94,12 +94,12 @@ export const queryFn = async (
     limit,
     filter,
     ...sort,
-  }
+  };
   if (stockCode?.length) {
-    json['stockCode'] = stockCode
+    json["stockCode"] = stockCode;
   }
   const response = await client.api.records.buy_record.list.$post({
-    json
+    json,
   });
 
   if (!response.ok) {

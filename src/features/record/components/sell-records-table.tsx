@@ -39,7 +39,11 @@ export const SellRecordsTable = (props: { style?: React.CSSProperties }) => {
   const { activeIds, mapping } = useActiveAccounts();
   const [filter, setFilter] = useState<Filter>({ ..._defaultFilter });
   const [filterStockCode, setFilterStockCode] = useState<string[]>([]);
-  const { data, isLoading } = useGetSellRecords(activeIds ?? [],filterStockCode, filter);
+  const { data, isLoading } = useGetSellRecords(
+    activeIds ?? [],
+    filterStockCode,
+    filter,
+  );
   const { data: stockcodes } = useGetStockcodes(activeIds ?? []);
 
   const columns: Array<Column<SellRecord>> = [
@@ -65,7 +69,9 @@ export const SellRecordsTable = (props: { style?: React.CSSProperties }) => {
               <Badge variant="outline" className="mr-2 inline-block">
                 {code.slice(0, 2)}
               </Badge>
-              <span className="truncate inline-block w-[60%] align-middle">{code.slice(2)} {stocksState?.get(code)?.name}</span>
+              <span className="truncate inline-block w-[60%] align-middle">
+                {code.slice(2)} {stocksState?.get(code)?.name}
+              </span>
             </>
           ),
 
@@ -204,7 +210,6 @@ export const SellRecordsTable = (props: { style?: React.CSSProperties }) => {
   const totalPL = useMemo(() => {
     return list.reduce((acc, cur) => acc + cur.profitLoss, 0);
   }, [list]);
-
 
   const handleFilterChange = (_filter: Filter) => {
     if (!!_filter.stockCode?.values?.length) {

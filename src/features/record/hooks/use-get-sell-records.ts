@@ -20,12 +20,12 @@ export const useGetSellRecords = (
       if (!accountIds.length) {
         return [];
       }
-      const json:any = {
-          accountIds,
-          filter,
-      }
+      const json: any = {
+        accountIds,
+        filter,
+      };
       if (stockCode?.length) {
-        json["stockCode"] = stockCode
+        json["stockCode"] = stockCode;
       }
       const response = await client.api.records.sell_record.$post({
         json,

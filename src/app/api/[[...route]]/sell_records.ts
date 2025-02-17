@@ -47,7 +47,7 @@ const app = new Hono().post(
       return c.json({ error: "Something went wrong" }, 400);
     }
 
-    const { accountIds , stockCode, filter } = c.req.valid("json");
+    const { accountIds, stockCode, filter } = c.req.valid("json");
 
     const accounts = accountIds?.map((id) => new ObjectId(id));
 

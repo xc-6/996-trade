@@ -37,7 +37,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label"
+import { Label } from "@/components/ui/label";
 import {
   Popover,
   PopoverContent,
@@ -92,14 +92,14 @@ export const CreateBuyRecordModal = () => {
     }
     form.setValue(
       "exchange",
-      (exchange ?? EXCHANGE[0]) as (typeof EXCHANGE)[number]
+      (exchange ?? EXCHANGE[0]) as (typeof EXCHANGE)[number],
     );
     form.setValue("stockCode", stockCode ?? "");
     form.setValue("buyPrice", String(buyRecord?.buyPrice ?? ""));
     form.setValue("buyAmount", String(buyRecord?.buyAmount ?? ""));
     form.setValue(
       "buyDate",
-      buyRecord?.buyDate ? new Date(buyRecord?.buyDate) : new Date()
+      buyRecord?.buyDate ? new Date(buyRecord?.buyDate) : new Date(),
     );
     form.setValue("accountId", buyRecord?.accountId ?? "");
   }, [buyRecord, form]);
@@ -132,7 +132,7 @@ export const CreateBuyRecordModal = () => {
           onSuccess: () => {
             handleClose();
           },
-        }
+        },
       );
       return;
     } else {
@@ -148,7 +148,7 @@ export const CreateBuyRecordModal = () => {
           onSuccess: () => {
             handleClose();
           },
-        }
+        },
       );
     }
   };
@@ -196,17 +196,22 @@ export const CreateBuyRecordModal = () => {
                         Exchange
                       </FormLabel>
                       <FormControl>
-                      <RadioGroup defaultValue={field.value} className="flex flex-row justify-between pt-2">
-                        {EXCHANGE.map((type) => (
-                          <div className="flex items-center space-x-2" key={type}>
-                            <RadioGroupItem
-                              value={type}
-                              id={type}
-                            />
-                            <Label htmlFor={type} className="capitalize">{type}</Label>
-                          </div>
-                        ))}
-                      </RadioGroup>
+                        <RadioGroup
+                          defaultValue={field.value}
+                          className="flex flex-row justify-between pt-2"
+                        >
+                          {EXCHANGE.map((type) => (
+                            <div
+                              className="flex items-center space-x-2"
+                              key={type}
+                            >
+                              <RadioGroupItem value={type} id={type} />
+                              <Label htmlFor={type} className="capitalize">
+                                {type}
+                              </Label>
+                            </div>
+                          ))}
+                        </RadioGroup>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -287,7 +292,7 @@ export const CreateBuyRecordModal = () => {
                               variant={"outline"}
                               className={cn(
                                 "w-full justify-start text-left font-normal",
-                                !field.value && "text-muted-foreground"
+                                !field.value && "text-muted-foreground",
                               )}
                             >
                               <CalendarIcon className="mr-2 h-4 w-4" />

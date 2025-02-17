@@ -61,7 +61,7 @@ interface DataTableProps<T> {
   onRowClick?: (e: React.MouseEvent, row: T) => void;
   onSortChange?: (
     sort: { key?: keyof T; order?: "asc" | "desc" },
-    isLocal?: boolean
+    isLocal?: boolean,
   ) => void;
   onFilterChange?: (filter: Filter) => void;
   hasNextPage?: boolean;
@@ -109,7 +109,7 @@ export const DataTable = <T,>(props: DataTableProps<T>) => {
         }
         return acc;
       },
-      {} as Record<string, Column<T>>
+      {} as Record<string, Column<T>>,
     );
   }, [columns]);
 
@@ -123,7 +123,7 @@ export const DataTable = <T,>(props: DataTableProps<T>) => {
     let res = data ?? [];
     const isLocalSort = mapping[sort?.key as string]?.sortable === "local";
     const isLocalFilter = Object.keys(filter).some(
-      (item) => mapping[item]?.filterable === "local"
+      (item) => mapping[item]?.filterable === "local",
     );
 
     if (isLocalFilter) {
@@ -135,10 +135,10 @@ export const DataTable = <T,>(props: DataTableProps<T>) => {
               Number(record[key as keyof T]) < filter[key].min) ||
             (filter[key].max !== undefined &&
               typeof filter[key].max === "number" &&
-              Number(record[key as keyof T]) > filter[key].max) || 
-            (filter[key].values !== undefined && 
+              Number(record[key as keyof T]) > filter[key].max) ||
+            (filter[key].values !== undefined &&
               !filter[key].values.includes(String(record[key as keyof T])))
-            ) {
+          ) {
             return false;
           }
         }
@@ -319,7 +319,7 @@ export const DataTable = <T,>(props: DataTableProps<T>) => {
                       "inline-block mr-2 visible",
                       tmpFilter?.values?.includes(item.value)
                         ? "opacity-100"
-                        : "opacity-0"
+                        : "opacity-0",
                     )}
                   />
                   {typeof item.label === "string" ? item.label : item?.label()}
@@ -400,7 +400,17 @@ export const DataTable = <T,>(props: DataTableProps<T>) => {
         onOpenChange={(vis) => onOpenChange(vis, key)}
       >
         <PopoverTrigger asChild className="cursor-pointer">
-          <FilterIcon size={16} className={cn("inline-block", key in filter && JSON.stringify(filter[key])!= JSON.stringify(defaultFilter[key]) ?'fill-current':'')} />
+          <FilterIcon
+            size={16}
+            className={cn(
+              "inline-block",
+              key in filter &&
+                JSON.stringify(filter[key]) !=
+                  JSON.stringify(defaultFilter[key])
+                ? "fill-current"
+                : "",
+            )}
+          />
         </PopoverTrigger>
         <PopoverContent>
           <div>
@@ -454,15 +464,10 @@ export const DataTable = <T,>(props: DataTableProps<T>) => {
     key: string,
     headerClassName: string | undefined,
     filterable: boolean | "local" = false,
-    sortable: boolean | "local" = true
+    sortable: boolean | "local" = true,
   ): JSX.Element => {
     const text = (
-      <span
-        key={key}
-        className={cn(
-          sort.key === key && "text-blue-500",
-        )}
-      >
+      <span key={key} className={cn(sort.key === key && "text-blue-500")}>
         {label}
       </span>
     );
@@ -470,7 +475,7 @@ export const DataTable = <T,>(props: DataTableProps<T>) => {
       <TableHead
         className={cn(
           "text-nowrap sticky top-0 bg-white",
-          headerClassName ?? ""
+          headerClassName ?? "",
         )}
         key={key}
       >
@@ -486,7 +491,7 @@ export const DataTable = <T,>(props: DataTableProps<T>) => {
                 "cursor-pointer",
                 sort.key === key && sort.order === "asc"
                   ? "stroke-blue-500 fill-blue-500"
-                  : ""
+                  : "",
               )}
             />
             <ChevronDown
@@ -495,7 +500,7 @@ export const DataTable = <T,>(props: DataTableProps<T>) => {
                 "cursor-pointer",
                 sort.key === key && sort.order === "desc"
                   ? "stroke-blue-500 fill-blue-500"
-                  : ""
+                  : "",
               )}
             />
           </div>
@@ -516,7 +521,7 @@ export const DataTable = <T,>(props: DataTableProps<T>) => {
             String(col.key),
             col.headerClassName,
             col.filterable,
-            col.sortable
+            col.sortable,
           );
         })}
       </TableRow>
@@ -537,7 +542,7 @@ export const DataTable = <T,>(props: DataTableProps<T>) => {
                     loadMore?.();
                   }
                 },
-                { threshold: [0.5, 1] }
+                { threshold: [0.5, 1] },
               );
 
               observer.observe(el);
