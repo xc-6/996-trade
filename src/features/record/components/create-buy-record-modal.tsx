@@ -210,7 +210,7 @@ export const CreateBuyRecordModal = () => {
                       </FormLabel>
                       <FormControl>
                         <RadioGroup
-                          onValueChange={value => {
+                          onValueChange={(value) => {
                             form.setValue("accountId", "");
                             field.onChange(value);
                           }}
