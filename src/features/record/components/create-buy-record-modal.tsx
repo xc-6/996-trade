@@ -210,7 +210,10 @@ export const CreateBuyRecordModal = () => {
                       </FormLabel>
                       <FormControl>
                         <RadioGroup
-                          onValueChange={field.onChange}
+                          onValueChange={value => {
+                            form.setValue("accountId", "");
+                            field.onChange(value);
+                          }}
                           defaultValue={field.value}
                           className="flex flex-row justify-between pt-2"
                         >
@@ -343,14 +346,14 @@ export const CreateBuyRecordModal = () => {
                       <Select
                         disabled={isLoading}
                         onValueChange={field.onChange}
-                        defaultValue={field.value}
+                        value={field.value}
                       >
                         <FormControl>
                           <SelectTrigger className="bg-zinc-300/50 border-0 focus:ring-0 text-black ring-offset-0 focus:ring-offset-0 capitalize outline-none">
                             <SelectValue placeholder="Select a account" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent key={form.getValues()?.exchange}>
+                        <SelectContent>
                           {accountsMenu?.map((item) =>
                             renderSelectItem(item, watchExchange),
                           )}

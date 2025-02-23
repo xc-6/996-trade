@@ -46,7 +46,7 @@ export const currencyFormatter = (
     maximumFractionDigits: 2,
   });
 
-  let res = formatter.format(num);
+  const res = formatter.format(num);
 
   //   if (res && res.length > 1 && res?.[0] === "-") {
   //     const cur = res[1];
