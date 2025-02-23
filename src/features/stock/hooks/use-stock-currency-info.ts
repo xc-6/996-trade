@@ -49,6 +49,6 @@ export const useStockCurrencyInfo = () => {
 
   return {
     asset,
-    cost
-  } 
+    cost,
+  };
 };

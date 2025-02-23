@@ -41,17 +41,17 @@ export const currencyFormatter = (
     HKD: "zh-TW",
   };
   const formatter = new Intl.NumberFormat(lanuage[currency], {
-    style: "currency",
-    currency,
+    // style: "currency",
+    // currency,
     maximumFractionDigits: 2,
   });
 
   let res = formatter.format(num);
 
-  if (res && res.length > 1 && res?.[0] === "-") {
-    const cur = res[1];
-    res = cur + "-" + res.slice(2);
-  }
+  //   if (res && res.length > 1 && res?.[0] === "-") {
+  //     const cur = res[1];
+  //     res = cur + "-" + res.slice(2);
+  //   }
   return res;
 };
 

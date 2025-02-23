@@ -25,6 +25,7 @@ type BuyRecord = ResponseType["data"][0] &
     price: number;
     unrealized: number;
     total: number;
+    marketValue: number;
     totalCost: number;
     totalAmount: number;
     totalUnrealized: number;
@@ -194,6 +195,12 @@ export const BuyRecordTable = ({
       sortable: "local",
     },
     {
+      key: "marketValue",
+      label: "Market Value",
+      render: (item) => numberFormatter(item.marketValue),
+      sortable: "local",
+    },
+    {
       key: "totalCost",
       label: "Total Cost",
       render: (item) => numberFormatter(item.totalCost),
@@ -279,6 +286,9 @@ export const BuyRecordTable = ({
         high: stocksState?.get(record.stockCode)?.high ?? "N/A",
         low: stocksState?.get(record.stockCode)?.low ?? "N/A",
         yesterday: stocksState?.get(record.stockCode)?.yesterday ?? "N/A",
+        marketValue:
+          (stocksState?.get(record.stockCode)?.now ?? record.buyPrice) *
+          record.unsoldAmount,
         totalCost: record.buyPrice * record.unsoldAmount,
         accountName: mapping[record.accountId]?.name,
         up: (stocksState?.get(record.stockCode)?.percent ?? 0) >= 0,

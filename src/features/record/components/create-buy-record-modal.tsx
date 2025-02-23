@@ -197,6 +197,7 @@ export const CreateBuyRecordModal = () => {
                       </FormLabel>
                       <FormControl>
                         <RadioGroup
+                          onValueChange={field.onChange}
                           defaultValue={field.value}
                           className="flex flex-row justify-between pt-2"
                         >

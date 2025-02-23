@@ -157,9 +157,9 @@ export const StockRecordTable = (props: {
       render: (item) => {
         const totalAsset = asset[exchange2Currency[item.stockCode.slice(0, 2)]];
         if (!totalAsset) {
-          return `${numberFormatter(item.marketValue)}` 
+          return `${numberFormatter(item.marketValue)}`;
         }
-        return `${numberFormatter(item.marketValue)} (${(item.marketValue*100/totalAsset).toFixed(2)}%)` 
+        return `${numberFormatter(item.marketValue)} (${((item.marketValue * 100) / totalAsset).toFixed(2)}%)`;
       },
       sortable: "local",
     },
@@ -169,9 +169,9 @@ export const StockRecordTable = (props: {
       render: (item) => {
         const totalCost = cost[exchange2Currency[item.stockCode.slice(0, 2)]];
         if (!totalCost) {
-          return `${numberFormatter(item.totalCost)}` 
+          return `${numberFormatter(item.totalCost)}`;
         }
-        return `${numberFormatter(item.totalCost)} (${(item.totalCost*100/totalCost).toFixed(2)}%)` 
+        return `${numberFormatter(item.totalCost)} (${((item.totalCost * 100) / totalCost).toFixed(2)}%)`;
       },
       sortable: "local",
     },
