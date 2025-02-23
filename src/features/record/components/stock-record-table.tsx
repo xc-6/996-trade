@@ -21,9 +21,9 @@ type StockRecord = ResponseType["data"][0] &
     unrealized: number;
     unrealizedPLPercent: number;
     total: number;
+    marketValue: number;
     totalCost: number;
     totalAmount: number;
-    totalUnrealized: number;
     totalPercent: number;
     accountName: string;
     up: boolean;
@@ -149,6 +149,12 @@ export const StockRecordTable = (props: {
       sortable: "local",
     },
     {
+      key: "marketValue",
+      label: "Market Value",
+      render: (item) => numberFormatter(item.marketValue),
+      sortable: "local",
+    },
+    {
       key: "totalCost",
       label: "Total Cost",
       render: (item) => numberFormatter(item.totalCost),
@@ -175,7 +181,7 @@ export const StockRecordTable = (props: {
       sortable: "local",
     },
     {
-      key: "totalUnrealized",
+      key: "totalPL",
       label: "Realized P&L",
       render: (item) => numberFormatter(item.totalPL),
       sortable: "local",
@@ -240,6 +246,7 @@ export const StockRecordTable = (props: {
       const high = stocksState?.get(stockCode)?.high ?? "N/A";
       const low = stocksState?.get(stockCode)?.low ?? "N/A";
       const yesterday = stocksState?.get(stockCode)?.yesterday ?? "N/A";
+      const marketValue = price * (record?.totalUnsoldAmount ?? 0);
       const totalCost = buyPrice * (record?.totalUnsoldAmount ?? 0);
       const totalPL = record?.totalPL ?? 0;
       const totalBuyAmount = record?.totalBuyAmount ?? 0;
@@ -262,6 +269,7 @@ export const StockRecordTable = (props: {
         up,
         totalBuyAmount,
         totalUnsoldAmount,
+        marketValue,
         totalCost,
         totalPL,
       };
