@@ -5,7 +5,7 @@ import { useGetRecordsByStock } from "../hooks/use-get-records-by-stock";
 import { Loader, PiggyBank, Plus } from "lucide-react";
 import { useActiveAccounts } from "@/features/account/hooks/use-active-accounts";
 import { BuyRecordTable } from "./buy-record-table";
-import { cn, numberFormatter } from "@/lib/utils";
+import { cn, numberFormatter, reverseMapping } from "@/lib/utils";
 import { useStocksState } from "@/features/stock/store/use-stocks-store";
 import { Fragment, useEffect, useMemo } from "react";
 import { Trash2, MoveDown, MoveUp } from "lucide-react";
@@ -14,6 +14,8 @@ import { useDeleteStockGroups } from "../hooks/use-delete-stock-groups";
 import { totalUnsoldAmount } from "../deafult";
 import { StockInfo } from "@/lib/types";
 import { useModal } from "@/hooks/use-modal-store";
+import { useStockCurrencyInfo } from "@/features/stock/hooks/use-stock-currency-info";
+import { CURRENCY_GROUP } from "@/lib/const";
 
 type StockRecord = ResponseType["data"][0] &
   StockInfo & {
@@ -38,6 +40,7 @@ export const StockRecordTable = (props: {
   const { stocksState } = useStocksState();
   const { activeIds } = useActiveAccounts();
   const { data, isLoading, refetch } = useGetRecordsByStock(activeIds ?? []);
+  const { asset, cost } = useStockCurrencyInfo();
   const removeMutation = useDeleteStockGroups();
   const [ConfirmDialog, confirm] = useConfirm(
     "Are you sure?",
@@ -151,13 +154,25 @@ export const StockRecordTable = (props: {
     {
       key: "marketValue",
       label: "Market Value",
-      render: (item) => numberFormatter(item.marketValue),
+      render: (item) => {
+        const totalAsset = asset[exchange2Currency[item.stockCode.slice(0, 2)]];
+        if (!totalAsset) {
+          return `${numberFormatter(item.marketValue)}` 
+        }
+        return `${numberFormatter(item.marketValue)} (${(item.marketValue*100/totalAsset).toFixed(2)}%)` 
+      },
       sortable: "local",
     },
     {
       key: "totalCost",
       label: "Total Cost",
-      render: (item) => numberFormatter(item.totalCost),
+      render: (item) => {
+        const totalCost = cost[exchange2Currency[item.stockCode.slice(0, 2)]];
+        if (!totalCost) {
+          return `${numberFormatter(item.totalCost)}` 
+        }
+        return `${numberFormatter(item.totalCost)} (${(item.totalCost*100/totalCost).toFixed(2)}%)` 
+      },
       sortable: "local",
     },
     {
@@ -230,6 +245,10 @@ export const StockRecordTable = (props: {
       ),
     },
   ];
+
+  const exchange2Currency = useMemo(() => {
+    return reverseMapping(CURRENCY_GROUP);
+  }, []);
 
   const list = useMemo(() => {
     if (isLoading) {
