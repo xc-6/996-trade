@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 
-import { cn } from "@/lib/utils";
+import { cn, reverseMapping } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 
 import {
@@ -44,7 +44,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useEffect, useMemo } from "react";
-import { EXCHANGE } from "@/lib/const";
+import { CURRENCY_GROUP, EXCHANGE } from "@/lib/const";
 import { ResponseType } from "@/features/account/hooks/use-get-accounts";
 import { ExtractArrayType } from "@/lib/types";
 import { useActiveAccounts } from "@/features/account/hooks/use-active-accounts";
@@ -70,6 +70,10 @@ export const CreateBuyRecordModal = () => {
 
   const edit = useMemo(() => type === "editBuyRecord", [type]);
 
+  const exchange2Currency = useMemo(() => {
+    return reverseMapping(CURRENCY_GROUP);
+  }, []);
+
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -81,6 +85,7 @@ export const CreateBuyRecordModal = () => {
       accountId: "",
     },
   });
+  const watchExchange = form.watch("exchange");
 
   useEffect(() => {
     let exchange, stockCode;
@@ -159,12 +164,20 @@ export const CreateBuyRecordModal = () => {
     onClose();
   };
 
-  const renderSelectItem = (menu: (typeof accountsMenu)[number]) => {
+  const renderSelectItem = (
+    menu: (typeof accountsMenu)[number],
+    exchange: any,
+  ) => {
+    const currency = exchange2Currency[exchange];
     return (
       <SelectGroup key={menu.label}>
         <SelectLabel>{menu.label}</SelectLabel>
         {menu.items.map((account: Account) => (
-          <SelectItem key={account._id} value={account._id}>
+          <SelectItem
+            key={account._id}
+            value={account._id}
+            disabled={!(menu.label === currency)}
+          >
             {account.name}
           </SelectItem>
         ))}
@@ -337,8 +350,10 @@ export const CreateBuyRecordModal = () => {
                             <SelectValue placeholder="Select a account" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent>
-                          {accountsMenu?.map((item) => renderSelectItem(item))}
+                        <SelectContent key={form.getValues()?.exchange}>
+                          {accountsMenu?.map((item) =>
+                            renderSelectItem(item, watchExchange),
+                          )}
                         </SelectContent>
                       </Select>
                       <FormMessage />
