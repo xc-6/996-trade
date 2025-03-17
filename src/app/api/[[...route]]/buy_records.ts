@@ -73,7 +73,7 @@ const app = new Hono()
 
       const accounts = accountIds?.map((id) => new ObjectId(id));
 
-      const selectFields = showSold ? {} : { sellRecords: 0 };
+      const selectFields = showSold ? { placeholder: 0 } : { sellRecords: 0 };
 
       const pipeline: any[] = [
         {

@@ -14,6 +14,9 @@ interface DBFilter {
 }
 
 export const generateFilter = (filter: Filter, path?: string): DBFilter => {
+  if (!filter) {
+    return {};
+  }
   let arr = Object.keys(filter).map((_key) => {
     const query: DBFilter[string] = {};
     const key = path ? `${path}.${_key}` : _key;
