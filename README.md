@@ -4,6 +4,11 @@
 
 Track trades, monitor performance, and analyze profit and loss across stocks, funds, bonds, and more—across multiple accounts and currencies. Supported markets: United States, China, Hong Kong. The stock price refresh interval is 1 second.
 
+Have fun:
+
+https://996-trade.vercel.app/dashboard
+
+
 <img src="./trade-record-demo.gif" alt="demo" width="800" height="600">
 
 ## Getting Started
