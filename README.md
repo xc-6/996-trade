@@ -1,4 +1,7 @@
 # 996 Trade
+
+[![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+
 Track trades, monitor performance, and analyze profit and loss across stocks, funds, bonds, and more—across multiple accounts and currencies. Supported markets: United States, China, Hong Kong. The stock price refresh interval is 1 second.
 
 <img src="./trade-record-demo.gif" alt="demo" width="800" height="600">
@@ -54,3 +57,18 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
 https://www.notion.so/xc-6/How-to-Deploy-996-trade-web-app-to-vercel-244559a8f1718051a62dd09fd449b966?source=copy_link
+
+## License
+
+This work is licensed under a [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-nc-sa/4.0/).
+
+**What this means:**
+- ✅ **Personal use** - Use for personal projects and learning
+- ✅ **Educational use** - Use in schools, universities, and educational content
+- ✅ **Modification** - You can modify and build upon this work
+- ✅ **Sharing** - You can redistribute the code
+- ❌ **Commercial use** - You cannot use this for commercial purposes
+- 📋 **Attribution** - You must give appropriate credit
+- 📋 **ShareAlike** - If you modify this work, you must distribute under the same license
+
+For commercial licensing inquiries, please contact the project maintainer.
