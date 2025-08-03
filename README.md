@@ -1,6 +1,7 @@
-# Trade-Insight
+# 996 Trade
+Track trades, monitor performance, and analyze profit and loss across stocks, funds, bonds, and more—across multiple accounts and currencies. Supported markets: United States, China, Hong Kong. The stock price refresh interval is 1 second.
 
-Track trades, monitor performance, and analyze profit and loss, for stock, fund, bond etc. Supported market: US,SZ,SH,HK
+<img src="./trade-record-demo.gif" alt="demo" width="500" height="300">
 
 ## Getting Started
 
@@ -51,3 +52,5 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+https://www.notion.so/xc-6/How-to-Deploy-996-trade-web-app-to-vercel-244559a8f1718051a62dd09fd449b966?source=copy_link
