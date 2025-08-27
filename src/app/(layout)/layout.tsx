@@ -11,7 +11,7 @@ export default async function Layout({
   await protectServer();
 
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={false}>
       <AppSidebar />
       <SidebarInset>
         <LayoutClient>{children}</LayoutClient>
