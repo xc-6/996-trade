@@ -1,5 +1,13 @@
 "use client";
-import { Download, Frame, Upload, Plus, PackageMinus, PiggyBank, LayoutDashboard } from "lucide-react";
+import {
+  Download,
+  Frame,
+  Upload,
+  Plus,
+  PackageMinus,
+  PiggyBank,
+  LayoutDashboard,
+} from "lucide-react";
 
 import { NavUser } from "./nav-user";
 import { AccontSwitcher } from "./account-switcher";
@@ -146,7 +154,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               if (item.type === "action") {
                 return (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton tooltip={item.title} onClick={item.onClick}>
+                    <SidebarMenuButton
+                      tooltip={item.title}
+                      onClick={item.onClick}
+                    >
                       {item.icon && <item.icon />}
                       <span>{item.title}</span>
                     </SidebarMenuButton>
@@ -165,13 +176,22 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                           <span>{item.title}</span>
                         </SidebarMenuButton>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent side="right" align="start" className="w-48">
+                      <DropdownMenuContent
+                        side="right"
+                        align="start"
+                        className="w-48"
+                      >
                         {item.groups?.map((group, groupIndex) => (
                           <div key={group.label}>
                             {group.label && (
                               <>
-                                <DropdownMenuLabel>{group.label}</DropdownMenuLabel>
-                                {groupIndex < (item.groups?.length || 0) - 1 && <DropdownMenuSeparator />}
+                                <DropdownMenuLabel>
+                                  {group.label}
+                                </DropdownMenuLabel>
+                                {groupIndex <
+                                  (item.groups?.length || 0) - 1 && (
+                                  <DropdownMenuSeparator />
+                                )}
                               </>
                             )}
                             <DropdownMenuGroup>
@@ -185,7 +205,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                 </DropdownMenuItem>
                               ))}
                             </DropdownMenuGroup>
-                            {groupIndex < (item.groups?.length || 0) - 1 && <DropdownMenuSeparator />}
+                            {groupIndex < (item.groups?.length || 0) - 1 && (
+                              <DropdownMenuSeparator />
+                            )}
                           </div>
                         ))}
                       </DropdownMenuContent>
