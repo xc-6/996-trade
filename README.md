@@ -4,7 +4,7 @@
 
 **Language / 语言:**
 [![English](https://img.shields.io/badge/English-blue?style=for-the-badge)](#996-trade)
-[![中文](https://img.shields.io/badge/中文-red?style=for-the-badge)](#996-trade中文版)
+[![中文](https://img.shields.io/badge/中文-red?style=for-the-badge)](#996-交易股票基金跟踪记录)
 
 </div>
 
