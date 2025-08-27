@@ -21,7 +21,6 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  useSidebar,
 } from "@/components/ui/sidebar";
 import { useModal } from "@/hooks/use-modal-store";
 import { useEffect, useMemo, useState } from "react";
@@ -43,7 +42,6 @@ import {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { onOpen } = useModal();
   const { accountsMenu, mapping } = useActiveAccounts();
-  const { state } = useSidebar();
   const [accountId, setAccountId] = useState<string>("");
   const { data, isLoading } = useQuery({
     enabled: !!accountId,
