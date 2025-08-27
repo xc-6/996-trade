@@ -13,9 +13,6 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useModal } from "@/hooks/use-modal-store";
@@ -25,12 +22,6 @@ import { queryFn } from "@/features/record/hooks/use-get-buy-records";
 import { useQuery } from "@tanstack/react-query";
 import { downloadRecords } from "@/lib/utils";
 import Link from "next/link";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { ChevronRight } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -164,81 +155,42 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               }
 
               if (item.type === "submenu") {
-                // When sidebar is collapsed, show dropdown menu
-                if (state === "collapsed") {
-                  return (
-                    <SidebarMenuItem key={item.title}>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <SidebarMenuButton tooltip={item.title}>
-                            {item.icon && <item.icon />}
-                            <span>{item.title}</span>
-                          </SidebarMenuButton>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent side="right" align="start" className="w-48">
-                          {item.groups?.map((group, groupIndex) => (
-                            <div key={group.label}>
-                              {group.label && (
-                                <>
-                                  <DropdownMenuLabel>{group.label}</DropdownMenuLabel>
-                                  {groupIndex < (item.groups?.length || 0) - 1 && <DropdownMenuSeparator />}
-                                </>
-                              )}
-                              <DropdownMenuGroup>
-                                {group.items.map((subItem) => (
-                                  <DropdownMenuItem
-                                    key={subItem.name}
-                                    onClick={subItem.onClick}
-                                    className="cursor-pointer"
-                                  >
-                                    {subItem.name}
-                                  </DropdownMenuItem>
-                                ))}
-                              </DropdownMenuGroup>
-                              {groupIndex < (item.groups?.length || 0) - 1 && <DropdownMenuSeparator />}
-                            </div>
-                          ))}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </SidebarMenuItem>
-                  );
-                }
-
-                // When sidebar is expanded, show collapsible menu
+                // Always show dropdown menu for submenu items (both collapsed and expanded states)
                 return (
-                  <Collapsible key={item.title} asChild className="group/collapsible">
-                    <SidebarMenuItem>
-                      <CollapsibleTrigger asChild>
+                  <SidebarMenuItem key={item.title}>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
                         <SidebarMenuButton tooltip={item.title}>
                           {item.icon && <item.icon />}
                           <span>{item.title}</span>
-                          <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                         </SidebarMenuButton>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
-                        <SidebarMenuSub>
-                          {item.groups?.map((group) => (
-                            <div key={group.label}>
-                              {group.label && (
-                                <div className="px-2 py-1 text-xs font-medium text-sidebar-foreground/70">
-                                  {group.label}
-                                </div>
-                              )}
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent side="right" align="start" className="w-48">
+                        {item.groups?.map((group, groupIndex) => (
+                          <div key={group.label}>
+                            {group.label && (
+                              <>
+                                <DropdownMenuLabel>{group.label}</DropdownMenuLabel>
+                                {groupIndex < (item.groups?.length || 0) - 1 && <DropdownMenuSeparator />}
+                              </>
+                            )}
+                            <DropdownMenuGroup>
                               {group.items.map((subItem) => (
-                                <SidebarMenuSubItem key={subItem.name}>
-                                  <SidebarMenuSubButton asChild>
-                                    <button onClick={subItem.onClick}>
-                                      <span>{subItem.name}</span>
-                                    </button>
-                                  </SidebarMenuSubButton>
-                                </SidebarMenuSubItem>
+                                <DropdownMenuItem
+                                  key={subItem.name}
+                                  onClick={subItem.onClick}
+                                  className="cursor-pointer"
+                                >
+                                  {subItem.name}
+                                </DropdownMenuItem>
                               ))}
-                            </div>
-                          ))}
-                        </SidebarMenuSub>
-                      </CollapsibleContent>
-                    </SidebarMenuItem>
-                  </Collapsible>
+                            </DropdownMenuGroup>
+                            {groupIndex < (item.groups?.length || 0) - 1 && <DropdownMenuSeparator />}
+                          </div>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </SidebarMenuItem>
                 );
               }
 
