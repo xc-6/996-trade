@@ -73,7 +73,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       {
         title: "Buy Record History",
         url: "/buy_record",
-        icon: Plus,
+        icon: Frame,
         type: "link" as const,
       },
       {
@@ -90,7 +90,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       },
       {
         title: "Add Records",
-        icon: Frame,
+        icon: Plus,
         type: "action" as const,
         onClick: () => {
           onOpen("createBuyRecord");
