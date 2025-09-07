@@ -1,8 +1,14 @@
 "use client";
-import { Download, Frame, SquareTerminal, Upload } from "lucide-react";
+import {
+  Download,
+  Frame,
+  Upload,
+  Plus,
+  PackageMinus,
+  PiggyBank,
+  LayoutDashboard,
+} from "lucide-react";
 
-import { NavMain } from "./nav-main";
-import { NavSub } from "./nav-sub";
 import { NavUser } from "./nav-user";
 import { AccontSwitcher } from "./account-switcher";
 import {
@@ -11,6 +17,10 @@ import {
   SidebarFooter,
   SidebarHeader,
   SidebarRail,
+  SidebarGroup,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
 } from "@/components/ui/sidebar";
 import { useModal } from "@/hooks/use-modal-store";
 import { useEffect, useMemo, useState } from "react";
@@ -18,33 +28,16 @@ import { useActiveAccounts } from "@/features/account/hooks/use-active-accounts"
 import { queryFn } from "@/features/record/hooks/use-get-buy-records";
 import { useQuery } from "@tanstack/react-query";
 import { downloadRecords } from "@/lib/utils";
-
-const navMain = [
-  {
-    title: "Playground",
-    url: "#",
-    icon: SquareTerminal,
-    isActive: true,
-    items: [
-      {
-        title: "Dashboard",
-        url: "/dashboard",
-      },
-      {
-        title: "Buy Record History",
-        url: "/buy_record",
-      },
-      {
-        title: "Sell Record History",
-        url: "/sell_record",
-      },
-      {
-        title: "Dividend Record History",
-        url: "/div_record",
-      },
-    ],
-  },
-];
+import Link from "next/link";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { onOpen } = useModal();
@@ -69,18 +62,44 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     setAccountId("");
   }, [accountId, data, isLoading, mapping, setAccountId]);
 
-  const navSub = useMemo(() => {
+  const menuItems = useMemo(() => {
     return [
       {
-        name: "Add Records",
+        title: "Dashboard",
+        url: "/dashboard",
+        icon: LayoutDashboard,
+        type: "link" as const,
+      },
+      {
+        title: "Buy Record History",
+        url: "/buy_record",
         icon: Frame,
+        type: "link" as const,
+      },
+      {
+        title: "Sell Record History",
+        url: "/sell_record",
+        icon: PackageMinus,
+        type: "link" as const,
+      },
+      {
+        title: "Dividend Record History",
+        url: "/div_record",
+        icon: PiggyBank,
+        type: "link" as const,
+      },
+      {
+        title: "Add Records",
+        icon: Plus,
+        type: "action" as const,
         onClick: () => {
           onOpen("createBuyRecord");
         },
       },
       {
-        name: "Upload From File",
+        title: "Upload From File",
         icon: Upload,
+        type: "submenu" as const,
         groups: accountsMenu.map((account) => ({
           label: account.label,
           items: account.items.map((item) => ({
@@ -92,8 +111,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         })),
       },
       {
-        name: "Export To File",
+        title: "Export To File",
         icon: Download,
+        type: "submenu" as const,
         groups: accountsMenu.map((account) => ({
           label: account.label,
           items: account.items.map((item) => ({
@@ -113,8 +133,91 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <AccontSwitcher />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={navMain} />
-        <NavSub items={navSub} />
+        <SidebarGroup>
+          <SidebarMenu>
+            {menuItems.map((item) => {
+              if (item.type === "link") {
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton tooltip={item.title} asChild>
+                      <Link href={item.url}>
+                        {item.icon && <item.icon />}
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              }
+
+              if (item.type === "action") {
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      tooltip={item.title}
+                      onClick={item.onClick}
+                    >
+                      {item.icon && <item.icon />}
+                      <span>{item.title}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              }
+
+              if (item.type === "submenu") {
+                // Always show dropdown menu for submenu items (both collapsed and expanded states)
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <SidebarMenuButton tooltip={item.title}>
+                          {item.icon && <item.icon />}
+                          <span>{item.title}</span>
+                        </SidebarMenuButton>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        side="right"
+                        align="start"
+                        className="w-48"
+                      >
+                        {item.groups?.map((group, groupIndex) => (
+                          <div key={group.label}>
+                            {group.label && (
+                              <>
+                                <DropdownMenuLabel>
+                                  {group.label}
+                                </DropdownMenuLabel>
+                                {groupIndex <
+                                  (item.groups?.length || 0) - 1 && (
+                                  <DropdownMenuSeparator />
+                                )}
+                              </>
+                            )}
+                            <DropdownMenuGroup>
+                              {group.items.map((subItem) => (
+                                <DropdownMenuItem
+                                  key={subItem.name}
+                                  onClick={subItem.onClick}
+                                  className="cursor-pointer"
+                                >
+                                  {subItem.name}
+                                </DropdownMenuItem>
+                              ))}
+                            </DropdownMenuGroup>
+                            {groupIndex < (item.groups?.length || 0) - 1 && (
+                              <DropdownMenuSeparator />
+                            )}
+                          </div>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </SidebarMenuItem>
+                );
+              }
+
+              return null;
+            })}
+          </SidebarMenu>
+        </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
         <NavUser />

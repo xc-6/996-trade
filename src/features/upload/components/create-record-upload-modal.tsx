@@ -29,7 +29,6 @@ export const CreateRecordUploadModal = () => {
     }
     const text = await files[0].text();
     const lines = text.split("\n");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const records: Array<any> = [];
     lines.forEach((line) => {
       line = line.trim();
