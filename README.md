@@ -1,4 +1,4 @@
-# 996 Trade
+# 996 Stock & Fund Trade Tracker
 
 <div align="center">
 
